@@ -1,0 +1,25 @@
+﻿*{touch-action: manipulation;}
+body,.ui-content{overflow-x:hidden;overflow-y:hidden;margin:unset;}
+.wrapper{max-width:500px;margin:0 auto;}
+
+.ui-icon{height:30px;width:30px;}
+.ui-icon.warning{background:url(/images/questionnaire/warning.png);background-repeat:no-repeat;background-size:contain;background-position:center;}
+
+.logo{background:url(/images/questionnaire/logo.png);background-repeat:no-repeat;background-size:contain;background-position:center;width:50%;height:200px;margin:30px auto;}
+.login{margin:0 15% 0 15%;}
+.login .ui-input-text{background-color:unset !important;border:unset;box-shadow:unset;margin-bottom:40px;border-bottom:1px solid !important;border-radius:unset;border-style:none;}
+.login .last .ui-input-text{margin-bottom:10px;}
+.login .textRight{text-align:right;}
+.login .register{cursor:pointer;}
+
+.btn{position:relative;width:40%;min-width:120px;margin:50px auto;}
+.btn button{border:4px solid;border-radius:10px!important;font-weight:normal;}
+
+.my-popup{position:absolute;}
+.my-popup .ui-content{max-width:80%;margin:0 auto;}
+.my-popup .ui-icon.close{position:absolute;top:-20px;right:-15px;box-shadow:unset;z-index:1;border-radius:15px;border:unset;width:30px;}
+.my-popup .ui-content.ui-body-c{background-color:#8fc586;border:4px solid #52734d;color:#52734d;text-shadow:0  1px  0  #52734d;min-width:250px;padding:unset;padding:10px 0 10px 0;}
+.my-popup.alert .ui-content{border-radius:15px;border-top-right-radius:0!important;border-top-left-radius:0!important;}
+.my-popup.alert .ui-content .ui-icon{width:50px;margin:10px auto;}
+.my-popup.alert .ui-content .ui-text{text-align:center;padding:10px;}
+.my-popup.alert .ui-content button{width:50%;margin:10px auto;border:unset;border-radius:20px;font-weight:normal;}
