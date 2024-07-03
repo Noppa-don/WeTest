@@ -1,13 +1,15 @@
-﻿var xobjClick, xobjAlert;
+﻿var xobjClick, xobjAlert, OTPNum;
+
 // ========================= Page Load ======================== //
-$(function () { $('div[data-role=page]').page({ theme: 'c', }); $('#Firstname').focus(); });
+    $(function () { $('div[data-role=page]').page({ theme: 'c', }); $('#Firstname').focus(); });
 
 // ============================================================ //
+
 // ======================= Object Event ======================= //
 $(document)
-
 // ======================= Register ======================= //
     .on('focus', '#Firstname, #Surname, #MobileNo, #EMail, #Username, #Password, #ConfirmPassword', function (e, data) { $(this).removeClass("InvalidData") })
+
     .on('keypress blur', '#Firstname, #Surname, #MobileNo, #EMail, #Username, #Password', function (e, data) {
         $('.sp' + $(this).attr('id')).text($(this).val());
         var xkey = keyA(e);
@@ -26,23 +28,23 @@ $(document)
             //checkLogin();
         }
     })
-    .on('click', '#btnNext', function (e, data) {
+
+    .on('click', '.footerRegister .btnNext', function (e, data) {
         if ($('.spnData').is(':visible')) {
-            $('.otp').css("display", "block");
-            $('.register').css("display", "none");
+            $('.otp').removeClass('ui-hide');
+            $('.register').addClass('ui-hide');
             $('.footerRegister').addClass('ui-hide');
+            sendOTP();
         }else{
             if (checkInvalidRegisterData() == 'true') {
                 $('#captionConfirmPassword, #captionPassword').css("display", "none");
                 $('.spnData').css("display", "block");
                 $('#capType').removeClass('ui-hide');
                 $('.txtData,#btnStudent, #btnOther').css("display", "none");
-
-
             };
         }
     })
-    .on('click', '#btnBack', function (e, data) {
+    .on('click', '.footerRegister .btnBack', function (e, data) {
         if ($('.spnData').is(':visible')) {
             $('#captionConfirmPassword, #captionPassword').css("display", "block");
             $('.spnData').css("display", "none");
@@ -61,6 +63,7 @@ $(document)
         $(this).addClass("btnSelected");
         $('.spType').text($(this).text());
     })
+
     .on('change', '#file', function (e, data){
         var _URL = window.URL || window.webkitURL;
         var image, file;
@@ -78,45 +81,41 @@ $(document)
     })
 
 // ======================= OTP ======================= //
-    .on('keyup', '#txtOTP', function (e, data) {
-     if ($('#txtOTP').val().length == 6) {
-         $('#btnConfirm').removeClass('btnUnActive');
-     }
+    .on('click', '#btnSendAgain', function (e, data) {
+        $('#btnSendAgain').addClass('btnUnActive');
+        sendOTP()
+    })
+    .on('click', '#btnConfirm', function (e, data) {
+        var ttb = $('#txtOTP').val();
+        console.log(ttb);
+        console.log(OTPNum);
+        if (ttb == OTPNum) {
+            $('.otp ,.footerOTP').addClass('ui-hide');
+            $('.payment ,.footerPayment').removeClass('ui-hide');
+        } else {
+            console.log('otp not ok');
+        }
+    })
 
-     var xkey = keyA(e);
-     if (xkey == 8) {
-         if ($('#txtOTP').val().length < 6) {
-             $('#btnConfirm').addClass('btnUnActive');
-         }
-     }
- })
+// ======================= Payment ======================= //
+    .on('click', '#btnCheckKey', function (e, data) {
+        $('.my-popup.alert').attr('action', 'focus');
+        $('.my-popup.alert .ui-text').html('Please wait...<br><br>We are taking you to Placement Test.');
+        popupOpen($('.my-popup.alert'), 99999);
 
-// ============================================================ //
-// =========================== Popup ========================== //
-
-$(document).on('click', '.my-popup .ui-btn.close,.my-popup .ui-header .ui-icon.close', function (e, data) {
-    popupClose($(this).closest('.my-popup'));
-    switch ($(this).closest('.my-popup').attr('action')) {
-        case 'relogin':
-            window.location = '/';
-            break;
-        case 'no permission':
-            window.location = '/global/menu';
-            break;
-        case 'home':
-            break;
-        case 'click':
-            $(xobjAlert).click();
-            break;
-        case 'focus':
-            $(xobjAlert).focus();
-            break;
-    }
-}).on('click', '.ui-popup-screen', function (e, data) {
-    popupClose($('.my-popup[name=' + $(this).attr('name') + ']'));
-});
+        var x = setInterval(function () {
+                clearInterval(x);
+                window.location = '/Wetest/Activity';
+        }, 3000);
+    })
+    .on('click', '#btnPayment', function (e, data) {
+        $(this).addClass("ui-hide");
+        $('#spnPleaseWarning').text('You can use Mobile Banking for scan to pay.');
+        $('.btnQR').removeClass("ui-hide");
+    })
 
 // ============================================================ //
+
 // ========================= Function ========================= //
 
 function checkInvalidRegisterData() {
@@ -143,37 +142,39 @@ function checkInvalidRegisterData() {
 
     return CheckError
 }
-function checkLogin() {
-    var xobj = $('.login input');
-    for (var i = 0; i < xobj.length; i++) {
-        if ($(xobj[i]).val() == '') {
-            $('.my-popup.alert').attr('action', 'focus');
-            $('.my-popup.alert .ui-text').html('กรุณาระบุ' + $(xobj[i]).attr('title'));
-            popupOpen($('.my-popup.alert'), 99999);
-            xobjAlert = $(xobj[i]);
-            return;
-        }
-    }
-    loadPage();
-    var post1 = 'userName=' + $('#userName').val() + '&password=' + $('#userPass').val();
+function sendOTP() {
+    //$('#MobileNo').val('08833449955');
+    //var post1 = 'MobileNo=' + $('#MobileNo').val();
+    OTPNum = Math.floor(100000 + Math.random() * 900000);
+    console.log(OTPNum);
+    var post1 = 'MobileNo=' + '0834955364' + '&OTPNum=' + OTPNum;
     $.ajax({
         type: 'POST',
-        url: '/questionnaire/checkLogin',
+        url: '/weTest/sendOTP',
         data: post1,
         success: function (data) {
-            var xline;
             for (var i = 0; i < data.length; i++) {
                 switch (data[i].dataType) {
                     case 'error':
-                        $('.my-popup.alert .ui-text').html(data[i].errorMsg);
-                        popupOpen($('.my-popup.alert'), 99999);
-                        break;
-                    default:
-                        window.location = '/questionnaire/questionnaire';
+                        console.log(data[i].errorMsg);
+                    case 'success':
+                        console.log(data[i].errorMsg);
+                        var startTime = new Date().getTime()
+                        var countDownDate = new Date();
+                        countDownDate.setSeconds(countDownDate.getSeconds() + 10);
+
+                        var x = setInterval(function () {
+                            var now = new Date().getTime();
+                            var distance = countDownDate - now;
+                           // document.getElementById("demo").innerHTML = Math.floor((distance % (1000 * 60)) / 1000) + "s ";
+                            if (distance < 0) {
+                                clearInterval(x);
+                                $('#btnSendAgain').removeClass('btnUnActive');
+                            }
+                        }, 1000);
                 }
             }
-        }, complete: function () {
-            unloadPage();
         }
     });
 }
+
