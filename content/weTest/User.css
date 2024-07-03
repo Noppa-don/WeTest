@@ -1,0 +1,182 @@
+﻿* {touch-action: manipulation;}
+
+body, .ui-content {overflow-x: hidden;overflow-y: hidden;
+    margin: unset;
+}
+
+.wrapper {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.ui-icon {height: 30px;width: 30px;}
+.ui-page {background-color: #f7eee9;}
+
+.btn {position: relative;width: 40%;min-width: 120px;margin: 50px auto;}
+
+    .btn .btnactive {
+        border: 4px solid;
+        border-radius: 10px !important;
+        font-weight: normal;
+        background-color: #0a3820;
+        border-color: #0a3820;
+        color: #f7eee9;
+    }
+
+.btnconfirm {
+    background: url(/images/questionnaire/warning.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    width: 50px;
+    height: 50px;
+}
+
+.btn {text-align: center;border-style: solid; border-radius: 1em;line-height: 30px;padding: 10px;height: 30px;color: #52734d;border-color: #0a3820;cursor:pointer;background-color: #fffaf7; box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;}
+.btnUnActive {opacity: 0.4;color: #9d9d9d;cursor: not-allowed;}
+.btnSelected {color: #f7eee9;border-color: #0a3820;background-color: #0a3820;}
+.btn.right {margin-left: 5px;}
+.btn.left {margin-right: 5px;}
+
+.banner {
+    width: 100%;
+    height: 100px;
+    margin-bottom: 60px;
+    background-color: #0a3820;
+}
+
+.logo {
+    background: url(/images/Wetest/logo.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: left;
+    width: 100%;
+    height: 100px;
+    position: absolute;
+}
+
+.login {
+    margin: 0 15% 0 15%;
+}
+
+    .login .ui-input-text {
+        border-color: #0a3820;
+        margin-left: 65px;
+        line-height: 35px;
+    }
+
+    .login .last .ui-input-text {
+        margin-bottom: 10px;
+    }
+
+    .login .textRight {
+        text-align: right;
+    }
+
+    .login .registerlink {
+        cursor: pointer;
+    }
+
+    .login .userlogo {
+        background: url(/images/Wetest/User.png);
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-position: left;
+        width: 50px;
+        height: 40px;
+        position: absolute;
+    }
+
+    .login .pswlogo {
+        background: url(/images/Wetest/Psw.png);
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-position: left;
+        width: 50px;
+        height: 40px;
+        position: absolute;
+    }
+
+.textlink {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.register {
+    display: none;
+}
+
+.my-popup {
+    position: absolute;
+}
+
+    .my-popup .ui-content {
+        max-width: 80%;
+        margin: 0 auto;
+    }
+
+    .my-popup .ui-icon.close {
+        position: absolute;
+        top: -20px;
+        right: -15px;
+        box-shadow: unset;
+        z-index: 1;
+        border-radius: 15px;
+        border: unset;
+        width: 30px;
+    }
+
+    .my-popup .ui-content.ui-body-c {
+        background-color: #8fc586;
+        border: 4px solid #52734d;
+        color: #52734d;
+        text-shadow: 0 1px 0 #52734d;
+        min-width: 250px;
+        padding: unset;
+        padding: 10px 0 10px 0;
+    }
+
+    .my-popup.alert .ui-content {
+        border-radius: 15px;
+        border-top-right-radius: 0 !important;
+        border-top-left-radius: 0 !important;
+    }
+
+        .my-popup.alert .ui-content .ui-icon {
+            width: 50px;
+            margin: 10px auto;
+        }
+
+        .my-popup.alert .ui-content .ui-text {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .my-popup.alert .ui-content button {
+            width: 50%;
+            margin: 10px auto;
+            border: unset;
+            border-radius: 20px;
+            font-weight: normal;
+        }
+
+.ForBtnChoice {
+    margin-left: 6px;
+    margin-bottom: 40px;
+    -webkit-border-radius: 10px;
+    border: 2px solid #FAA51A;
+    width: 100px;
+    float: left;
+    height: 110px;
+    position: relative;
+    background-color: #F4F7FF;
+    display: inline-block;
+    text-align: center;
+}
+
+.captionName {
+    float: left;
+    position: relative;
+    display: inline-block;
+    margin-left: 6px;
+}
