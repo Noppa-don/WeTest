@@ -1,28 +1,33 @@
 ﻿* {touch-action: manipulation;}
 
-/*/ ======================= UI ======================= /*/
+.ui-icon {height: 30px;width: 30px;}
 .ui-hide{display:none!important;}
 .ui-page {background-color: #f7eee9;}
-.ui-Left {float: left; }
-.ui-Right {float: right; }
+.ui-Left { float: left; }
+.ui-Right { float: right; }
 
-/*/ ======================= Page ======================= /*/
-.wrapper {max-width: 600px;margin: 0 auto;margin-top: 130px;margin-bottom: 130px;}
+.wrapper {max-width: 600px;margin: 0 auto;}
 .banner {width: 100%;height: 80px;background-color: #0a3820;position: fixed;top: 0;z-index: 999;}
 .footer {position: fixed;bottom: 0;width: 100%;}
-.logo {background-repeat: no-repeat;background-size: contain;background-position: left;width: 183px;height: 80px;position: absolute;}
+.logo {background: url(/images/Wetest/logo.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 183px;height: 80px;position: absolute;}
 .pagename {color: #ffffff;margin-left: 182px;line-height: 110px;font-weight: 500;}
 
-/*/ ======================= Text Input ======================= /*/
-::placeholder {color: #52734d;opacity: 1;}
+.warningText{color:#c50000;font-size: small;}
+.ui-input-text input::placeholder {color: #bbbbbb; text-shadow: none;text-align: center;}
 .InvalidData {border-color: #d21717 !important;border-style: solid !important;border-width: medium !important;}
 
-/*/ ======================= Button ======================= /*/
-.btn {border-style: solid; border-radius: 1em;line-height: 30px;padding: 10px;height: 30px;color: #52734d;border-color: #0a3820;cursor:pointer;background-color: #fffaf7; box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;}
+.btn {border-style: solid; border-radius: 1em;line-height: 30px;padding: 10px;height: 30px;color: #52734d;border-color: #0a3820;cursor:pointer;background-color: #f9f9f9; 
+      box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;width: fit-content; margin: auto; min-width: 20%;}
 .btnUnActive {opacity: 0.4;color: #9d9d9d;cursor: not-allowed;}
 .btnSelected {color: #f7eee9;border-color: #0a3820;background-color: #0a3820;}
 .btn.right {margin-left: 5px;}
 .btn.left {margin-right: 5px;}
 
-/*/ ======================= Image Button ======================= /*/
 .Imagebtn {background-repeat: no-repeat !important;background-size: contain !important;background-position: center !important;width: 50px;height: 50px;cursor: pointer;}
+
+.ui-icon.warning {background: url(/images/Wetest/Wait.png);background-repeat: no-repeat;background-size: contain;background-position: center;}
+
+.my-popup{position:absolute;}
+.my-popup .ui-content{margin:0 auto;height:unset;}
+.my-popup .ui-content .ui-icon{height:2.5em;width:100%;margin-bottom:0.5em;}
+.my-popup .ui-content .ui-text{text-align:center;padding:0.5em;width:100%;}
