@@ -3,12 +3,7 @@
 body, .ui-content {overflow-x: hidden;overflow-y: hidden;
     margin: unset;
 }
-
-.wrapper {
-    max-width: 500px;
-    margin: 0 auto;
-}
-
+.wrapper {margin-top: 170px;}
 .ui-icon {height: 30px;width: 30px;}
 .ui-page {background-color: #f7eee9;}
 
