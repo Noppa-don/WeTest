@@ -1,0 +1,36 @@
+﻿#divActivity {background-color:#f7eee9;height: 100vh;}
+
+#divTopControlBar {width: 100%;height: 100px;background-color: #0a3820;}
+
+#divTestsetIcon {margin-left:15px;width:fit-content;float:left;width: 10%}
+#divIcon {background: url(/images/Wetest/PlacementTest.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 70px;position: relative;}
+#ptLogo {color:white; text-shadow:none;}
+#divRunningBar {margin-left:15px;float:left;width: 80%;display: flex;padding-top: 15px;}
+#divIconRun{background: url(/images/Wetest/Run.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 35px;height: 70px;}
+#divGoal{background: url(/images/Wetest/GoalFlag.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 35px;height: 70px;}
+#divQuestionRun {width:90%;border-style:solid; border-color:white; border-radius:1.2em;margin: 10px 10px 10px 10px;}
+#divBtnReportProblem {margin-right:8px;float:right;background: url(/images/Wetest/QuuestionProblem.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;}
+
+
+#divPlayground {background-color:#f7eee9;display: flex;width: 100%;padding:15px;}
+
+#divQ {width:90%;float:left;}
+
+#divQuestion {background-color:white;width:97%; border-radius:0.5em;padding:20px;}
+.divAnswerRow {display:flex;width:100%;margin-top:15px; border-radius:0.5em;}
+.divAnswerLeft{width:50%;margin-top:5px;background-color:white; border-radius:0.5em;margin-right:5px;padding:20px;}
+.divAnswerRight{width:50%;margin-top:5px;background-color:white; border-radius:0.5em;margin-left:5px;padding:20px;}
+
+#divSideMenuBar {margin: auto;padding-top:25px;} 
+#divPause {background: url(/images/Wetest/Pause.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;} 
+#divAllQuestion {background: url(/images/Wetest/AllQuestion.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;} 
+
+.footer {display: flex;}
+
+.footerButton {display: flex;justify-content:center;float:left;width:90%;padding:20px;}
+.btnBack {background: url(/images/Wetest/Previous.png);padding-left:20px;}
+.btnNext {background: url(/images/Wetest/Next.png);padding-right:20px}
+
+#divSendQuiz {background: url(/images/Wetest/SendQuiz.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 70px;height: 70px;  margin: auto;}
+
+
