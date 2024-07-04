@@ -1,15 +1,13 @@
-﻿var xobjClick, xobjAlert, OTPNum;
+﻿var OTPNum,PackagePrice;
 
 // ========================= Page Load ======================== //
-    $(function () { $('div[data-role=page]').page({ theme: 'c', }); $('#Firstname').focus(); });
-
+$(function () { $('div[data-role=page]').page({ theme: 'c', }); $('#Firstname').focus(); });
 // ============================================================ //
-
+GetPackagePrice()
 // ======================= Object Event ======================= //
 $(document)
 // ======================= Register ======================= //
     .on('focus', '#Firstname, #Surname, #MobileNo, #EMail, #Username, #Password, #ConfirmPassword', function (e, data) { $(this).removeClass("InvalidData") })
-
     .on('keypress blur', '#Firstname, #Surname, #MobileNo, #EMail, #Username, #Password', function (e, data) {
         $('.sp' + $(this).attr('id')).text($(this).val());
         var xkey = keyA(e);
@@ -30,12 +28,16 @@ $(document)
     })
 
     .on('click', '.footerRegister .btnNext', function (e, data) {
+
         if ($('.spnData').is(':visible')) {
-            $('.otp').removeClass('ui-hide');
-            $('.register').addClass('ui-hide');
-            $('.footerRegister').addClass('ui-hide');
-            sendOTP();
-        }else{
+
+            SaveNewUser();
+
+            //$('.otp').removeClass('ui-hide');
+            //$('.register').addClass('ui-hide');
+            //$('.footerRegister').addClass('ui-hide');
+            //sendOTP();
+        } else {
             if (checkInvalidRegisterData() == 'true') {
                 $('#captionConfirmPassword, #captionPassword').css("display", "none");
                 $('.spnData').css("display", "block");
@@ -61,10 +63,11 @@ $(document)
     .on('click', '#btnStudent, #btnOther', function (e, data) {
         $('#btnStudent, #btnOther').removeClass("btnSelected")
         $(this).addClass("btnSelected");
+        $(this).removeClass("InvalidData");
         $('.spType').text($(this).text());
     })
 
-    .on('change', '#file', function (e, data){
+    .on('change', '#file', function (e, data) {
         var _URL = window.URL || window.webkitURL;
         var image, file;
         if ((file = this.files[0])) {
@@ -77,7 +80,7 @@ $(document)
                 e.preventDefault();
             }
         };
-       image.src = _URL.createObjectURL(file);
+        image.src = _URL.createObjectURL(file);
     })
 
 // ======================= OTP ======================= //
@@ -87,31 +90,58 @@ $(document)
     })
     .on('click', '#btnConfirm', function (e, data) {
         var ttb = $('#txtOTP').val();
-        console.log(ttb);
-        console.log(OTPNum);
-        if (ttb == OTPNum) {
-            $('.otp ,.footerOTP').addClass('ui-hide');
-            $('.payment ,.footerPayment').removeClass('ui-hide');
-        } else {
-            console.log('otp not ok');
+        if ($('#txtOTP').val() == '') { $('#txtOTP').addClass("InvalidData"); } else {
+            if (ttb == OTPNum) {
+                $('.otp ,.footerOTP').addClass('ui-hide');
+                $('.payment ,.footerPayment').removeClass('ui-hide');
+            } else {
+                $('#dialogConfirm').attr('action', 'focus');
+                $('#dialogConfirm .ui-text').html('OTP is wrong! Please try again');
+                popupOpen($('#dialogConfirm'), 99999);
+            }
         }
     })
 
 // ======================= Payment ======================= //
-    .on('click', '#btnCheckKey', function (e, data) {
-        $('.my-popup.alert').attr('action', 'focus');
-        $('.my-popup.alert .ui-text').html('Please wait...<br><br>We are taking you to Placement Test.');
-        popupOpen($('.my-popup.alert'), 99999);
+     .on('focus keypress', '#txtDiscountCode', function (e, data) {
+         $(this).removeClass("InvalidData");
+         $('#dialogDiscount .ui-Warning-red').addClass('ui-hide');
+     })
 
-        var x = setInterval(function () {
-                clearInterval(x);
-                window.location = '/Wetest/Activity';
-        }, 3000);
+    .on('click', '#btnCheckKey', function (e, data) {
+        //$('#dialogAlert').attr('action', 'focus');
+        //$('#dialogAlert .ui-text').html('Please wait...<br><br>We are taking you to Placement Test.');
+        //popupOpen($('#dialogAlert'), 99999);
+
+        //var x = setInterval(function () {
+        //    clearInterval(x);
+        //    window.location = '/Wetest/Activity';
+        //}, 3000);
+        CheckKeycode();
     })
     .on('click', '#btnPayment', function (e, data) {
         $(this).addClass("ui-hide");
-        $('#spnPleaseWarning').text('You can use Mobile Banking for scan to pay.');
+        $('#spnWarning').text('You can use Mobile Banking for scan to pay.');
         $('.btnQR').removeClass("ui-hide");
+    })
+    .on('click', '#btnDiscount', function (e, data) {
+        popupOpen($('#dialogDiscount'), 99999);
+     })
+    .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel', function (e, data) {
+        popupClose($(this).closest('.my-popup'));
+    })
+    .on('click','.ui-icon.close ', function (e, data) {
+        $('#txtDiscountCode').val('');
+        $('#dialogDiscount .ui-textWarning').addClass('ui-hide');
+        popupClose($(this).closest('.my-popup'));
+    })
+    .on('click', '#dialogSelect .btnSelected', function (e, data) {
+
+        popupClose($(this).closest('.my-popup'));
+        GotoQuiz();
+    })
+    .on('click', '#dialogDiscount #btnCheckDiscountCode', function (e, data) {
+        CheckDiscount();
     })
 
 // ============================================================ //
@@ -135,19 +165,45 @@ function checkInvalidRegisterData() {
         CheckError = 'false';
     }
 
-    if ($('#btnStudent, #btnOther').hasClass("btnSelected")) {} else {
+    if ($('#btnStudent, #btnOther').hasClass("btnSelected")) { } else {
         $('#btnStudent, #btnOther').addClass("InvalidData");
         CheckError = 'false';
     }
 
     return CheckError
 }
+
+function SaveNewUser() {
+    var post1 = 'FirstName=' + $('.spFirstname').text() + '&Surname=' + $('.spSurname').text() + '&MobileNo=' + $('.spMobileNo').text() +
+        '&EMail=' + $('.spEMail').text() + '&Username=' + $('.spUsername').text() + '&Password=' + $('#Password').val();
+    console.log(post1);
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/SaveUser',
+        data: post1,
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                switch (data[i].dataType) {
+                    case 'error':
+                        console.log(data[i].errorMsg);
+                    case 'success':
+                        console.log(data[i].errorMsg);
+                        $('.otp').removeClass('ui-hide');
+                        $('.register').addClass('ui-hide');
+                        $('.footerRegister').addClass('ui-hide');
+                        sendOTP();
+                }
+            }
+        }
+    });
+}
+
 function sendOTP() {
     //$('#MobileNo').val('08833449955');
     //var post1 = 'MobileNo=' + $('#MobileNo').val();
     OTPNum = Math.floor(100000 + Math.random() * 900000);
     console.log(OTPNum);
-    var post1 = 'MobileNo=' + '0834955364' + '&OTPNum=' + OTPNum;
+    var post1 = 'MobileNo=' + $('.spMobileNo').text() + '&OTPNum=' + OTPNum;
     $.ajax({
         type: 'POST',
         url: '/weTest/sendOTP',
@@ -166,7 +222,7 @@ function sendOTP() {
                         var x = setInterval(function () {
                             var now = new Date().getTime();
                             var distance = countDownDate - now;
-                           // document.getElementById("demo").innerHTML = Math.floor((distance % (1000 * 60)) / 1000) + "s ";
+                            // document.getElementById("demo").innerHTML = Math.floor((distance % (1000 * 60)) / 1000) + "s ";
                             if (distance < 0) {
                                 clearInterval(x);
                                 $('#btnSendAgain').removeClass('btnUnActive');
@@ -178,3 +234,80 @@ function sendOTP() {
     });
 }
 
+function CheckKeycode() {
+    if ($('#txtKeyCode').val() == '') { $('#txtKeyCode').addClass("InvalidData");} else {
+        var post1 = 'KeyCode=' + $('#txtKeyCode').val();
+        $.ajax({
+            type: 'POST',
+            url: '/weTest/CheckKeyCode',
+            data: post1,
+            success: function (data) {
+                for (var i = 0; i < data.length; i++) {
+
+                    if (data[i].dataType == 'success') {
+                        $('#dialogSelect').attr('action', 'focus');
+                        $('#dialogSelect .ui-text').html(data[i].errorMsg);
+                        popupOpen($('#dialogSelect'), 99999);
+                    } else {
+                        $('#dialogConfirm').attr('action', 'focus');
+                        $('#dialogConfirm .ui-text').html(data[i].errorMsg);
+                        popupOpen($('#dialogConfirm'), 99999);
+                    }
+                }
+            }
+        });
+    }
+}
+
+function GotoQuiz() {
+    popupOpen($('#dialogGotoQuiz'), 99999);
+
+    var x = setInterval(function () {
+        clearInterval(x);
+        window.location = '/Wetest/Activity';
+    }, 3000);
+}
+
+function CheckDiscount() {
+    if ($('#txtDiscountCode').val() == '') { $('#txtDiscountCode').addClass("InvalidData"); } else {
+        var post1 = 'DiscountCode=' + $('#txtDiscountCode').val();
+        $.ajax({
+            type: 'POST',
+            url: '/weTest/CheckDiscount',
+            data: post1,
+            success: function (data) {
+                for (var i = 0; i < data.length; i++) {
+
+                    if (data[i].dataType == 'Success') {0
+                        $('#txtDiscountCode').val('');
+                        $('#dialogDiscount .ui-Warning-red').addClass('ui-hide');
+                        $('#spnWarningDiscount').removeClass('ui-hide')
+                        $('#PackagePrice').html(data[i].errorMsg);
+                        popupClose($('#dialogDiscount'), 99999);
+
+                    } else {
+                        $('#dialogDiscount .ui-Warning-red').html(data[i].errorMsg);
+                        $('#dialogDiscount .ui-Warning-red').removeClass('ui-hide');
+                    
+                    }
+
+                }
+            }
+        });
+    }
+  
+}
+
+function GetPackagePrice() {
+    console.log('PackagePrice');
+        $.ajax({
+            type: 'POST',
+            url: '/weTest/GetPackagePrice',
+            success: function (data) {
+                for (var i = 0; i < data.length; i++) {
+                    PackagePrice = data[i].dataType
+                    $('#PackagePrice').text(PackagePrice);
+                }
+            }
+        });
+}
