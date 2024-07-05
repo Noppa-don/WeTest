@@ -307,10 +307,22 @@ function CheckKeycode() {
 function GotoQuiz() {
     popupOpen($('#dialogGotoQuiz'), 99999);
 
-    var x = setInterval(function () {
-        clearInterval(x);
-        window.location = '/Wetest/Activity';
-    }, 3000);
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/SaveFirstPlacementTest',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].dataType == 'success') {
+                    var x = setInterval(function () {
+                        clearInterval(x);
+                        window.location = '/Wetest/Activity';
+                    }, 3000);
+                }
+            }
+        }
+    });
+
+
 }
 function CheckDiscount() {
     if ($('#txtDiscountCode').val() == '') { $('#txtDiscountCode').addClass("InvalidData"); } else {
@@ -342,5 +354,3 @@ function CheckDiscount() {
     }
 
 }
-
-
