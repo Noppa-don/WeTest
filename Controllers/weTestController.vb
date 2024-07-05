@@ -8,14 +8,95 @@ Imports System.Net
 Namespace Controllers
     Public Class weTestController
         Inherits mUtility
-        Function weTest() As ActionResult
-            Return View()
-        End Function
 
 #Region "Registration"
         Function Registration() As ActionResult
             Return View()
         End Function
+
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function SaveUser()
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim StdId As String = Guid.NewGuid.ToString
+            Dim objList As New clsMain(), fileName As String, fiInfo As FileInfo, filePath As String, oriImage As Image, reImage As Image
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+                cmdMsSql = cmdSQL(cn, "Insert into tblStudent(StudentID,FirstName,Surname,MobileNo,Email,Username,Password,StudentType) 
+                                        values(@StudentID,@FirstName,@Surname,@MobileNo,@Email,@Username,@Password,@StudentType)")
+                With cmdMsSql
+                    .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = StdId
+                    .Parameters.Add("@FirstName", SqlDbType.VarChar).Value = Request.Form("FirstName")
+                    .Parameters.Add("@Surname", SqlDbType.VarChar).Value = Request.Form("Surname")
+                    .Parameters.Add("@MobileNo", SqlDbType.VarChar).Value = Request.Form("MobileNo")
+                    .Parameters.Add("@Email", SqlDbType.VarChar).Value = Request.Form("Email")
+                    .Parameters.Add("@Username", SqlDbType.VarChar).Value = Request.Form("Username")
+                    .Parameters.Add("@Password", SqlDbType.VarChar).Value = oneWayKN(Request.Form("Password"))
+                    .Parameters.Add("@StudentType", SqlDbType.VarChar).Value = Request.Form("StudentType")
+                    .ExecuteNonQuery()
+                End With
+
+                objList.dataType = "success"
+                objList.errorMsg = ""
+                L1.Add(objList)
+                objList = Nothing
+
+                Session("StudentId") = StdId
+
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function UploadStudentPhoto()
+            Dim L1 As New List(Of clsMain)
+            Dim objList As New clsMain()
+            Dim fileName As String, fiInfo As FileInfo, filePath As String, oriImage As Image, reImage As Image
+            Try
+                For i = 0 To Request.Files.Count - 1
+                    Dim file As HttpPostedFileBase = Request.Files(i)
+                    If Not file Is Nothing Then
+                        fileName = Path.GetFileName(file.FileName)
+                        fiInfo = New IO.FileInfo(fileName)
+                        If Not Directory.Exists(Server.MapPath("~/WetestPhoto/UserPhoto/")) Then
+                            Directory.CreateDirectory(Server.MapPath("~/WetestPhoto/UserPhoto/"))
+                        End If
+                        filePath = Server.MapPath("~/WetestPhoto/UserPhoto/" & Session("StudentId").ToString.ToLower & fiInfo.Extension)
+                        If file.ContentLength < 200000 Then
+                            file.SaveAs(filePath)
+                        Else
+                            oriImage = Image.FromStream(file.InputStream)
+                            reImage = resizeImage(oriImage, New Size(1280, 1024))
+                            imageCompression(reImage, filePath, 65, file.ContentType)
+                        End If
+                    End If
+                Next
+
+                objList.dataType = "success"
+                objList.errorMsg = ""
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
         <AcceptVerbs(HttpVerbs.Post)>
         Function SendOTP()
             Dim L1 As New List(Of clsMain)
@@ -82,26 +163,19 @@ Namespace Controllers
 
         End Function
         <AcceptVerbs(HttpVerbs.Post)>
-        Function SaveUser()
+        Function UpdateOTPStatus()
             Dim L1 As New List(Of clsMain)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
-            Dim StdId As String = Guid.NewGuid.ToString
             Dim objList As New clsMain()
             Try
                 ' ================ Check Permission ================
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-                cmdMsSql = cmdSQL(cn, "Insert into tblStudent(StudentID,FirstName,Surname,MobileNo,Email,Username,Password) 
-                                        values(@StudentID,@FirstName,@Surname,@MobileNo,@Email,@Username,@Password)")
+                cmdMsSql = cmdSQL(cn, "Update tblStudent set OTPConfirm = @OTPStatus where studentId = @StudentID")
                 With cmdMsSql
-                    .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = StdId
-                    .Parameters.Add("@FirstName", SqlDbType.VarChar).Value = Request.Form("FirstName")
-                    .Parameters.Add("@Surname", SqlDbType.VarChar).Value = Request.Form("Surname")
-                    .Parameters.Add("@MobileNo", SqlDbType.VarChar).Value = Request.Form("MobileNo")
-                    .Parameters.Add("@Email", SqlDbType.VarChar).Value = Request.Form("Email")
-                    .Parameters.Add("@Username", SqlDbType.VarChar).Value = Request.Form("Username")
-                    .Parameters.Add("@Password", SqlDbType.VarChar).Value = oneWayKN(Request.Form("Password"))
+                    .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = Session("StudentID")
+                    .Parameters.Add("@OTPStatus", SqlDbType.VarChar).Value = Request.Form("OTPStatus")
                     .ExecuteNonQuery()
                 End With
 
@@ -109,7 +183,6 @@ Namespace Controllers
                 objList.errorMsg = ""
                 L1.Add(objList)
                 objList = Nothing
-
             Catch ex As Exception
                 objList.dataType = "error"
                 objList.errorMsg = ex.Message
@@ -120,6 +193,18 @@ Namespace Controllers
                 If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
                 If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
             End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function GetPackagePrice()
+            Dim L1 As New List(Of clsMain)
+            Dim objList As New clsMain()
+            Dim PackagePrice = ConfigurationManager.AppSettings("PackagePrice")
+            objList.dataType = PackagePrice
+            L1.Add(objList)
+            objList = Nothing
+
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
         <AcceptVerbs(HttpVerbs.Post)>
@@ -200,7 +285,7 @@ Namespace Controllers
 
                     objList.errorMsg = NetPrice
                 End If
-                    L1.Add(objList)
+                L1.Add(objList)
                 objList = Nothing
 
             Catch ex As Exception
@@ -215,19 +300,6 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-        <AcceptVerbs(HttpVerbs.Post)>
-        Function GetPackagePrice()
-            Dim L1 As New List(Of clsMain)
-            Dim objList As New clsMain()
-            Dim PackagePrice = ConfigurationManager.AppSettings("PackagePrice")
-            objList.dataType = PackagePrice
-            L1.Add(objList)
-            objList = Nothing
-
-            Return Json(L1, JsonRequestBehavior.AllowGet)
-        End Function
-
-
 #End Region
 
 #Region "Activity"
@@ -280,7 +352,6 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-
 #End Region
 
 
