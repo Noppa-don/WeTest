@@ -1,78 +1,75 @@
-﻿var xobjClick,xobjAlert;
+﻿var xobjClick, xobjAlert, OTPNum;
+
 // ========================= Page Load ======================== //
 $(function () { $('div[data-role=page]').page({ theme: 'c', }); $('#userName').focus(); });
 
 // ============================================================ //
+
 // ======================= Object Event ======================= //
-$(document).on('keypress','#userName',function(e,data){
-	keyEnterNextItem(e);
-}).on('keypress','#userPass',function(e,data){
-	var xkey = keyA(e);
-	if(xkey==13){$(this).blur();checkLogin();}
-}).on('click','.login button',function(e,data){
-	$(this).blur();
-	checkLogin();
-}).on('click', '.login .registerlink', function (e, data) {
-    $('.login').css('display', 'none');
-    window.location = '/Wetest/Registration';
-})
+$(document)
+// ======================= Login ======================= //
+
+    .on('focus', '#userName, #userPass', function (e, data) { $(this).removeClass("InvalidData") })
+
+    .on('keypress blur', '#userName, #userPass', function (e, data) {
+        var xkey = keyA(e);
+        if (xkey == 13) { keyEnterNextItem(e); }
+    })
+    .on('keypress blur', '#ConfirmPassword', function (e, data) {
+        var xkey = keyA(e);
+        if (xkey == 13) { checkLogin(); }
+    })
+
+    .on('click', '#btnLogin', function (e, data) {
+        if (checkInvalidLoginData() == 'true') {
+            CheckUserLogin();
+        }
+    })
+    .on('click', '#dialogAlert #btnOK', function (e, data) {
+        popupClose($(this).closest('.my-popup'));
+        $('#userName').focus();
+    })
+    .on('click', '.registerlink', function (e, data) {
+        window.location = '/Wetest/Registration';
+    })
+
+
+
+
 // ============================================================ //
-// =========================== Popup ========================== //
-$(document).on('click','.my-popup .ui-btn.close,.my-popup .ui-header .ui-icon.close',function(e,data){
-	popupClose($(this).closest('.my-popup'));
-	switch($(this).closest('.my-popup').attr('action')){
-	case'relogin':
-		window.location = '/';
-	break;
-	case'no permission':
-		window.location = '/global/menu';
-	break;
-	case'home':
-	break;
-	case'click':
-		$(xobjAlert).click();
-	break;
-	case'focus':
-		$(xobjAlert).focus();
-	break;
-	}
-}).on('click','.ui-popup-screen',function(e,data){
-	popupClose($('.my-popup[name='+$(this).attr('name')+']'));
-});
-// ============================================================ //
+
 // ========================= Function ========================= //
-function checkLogin(){
-	var xobj=$('.login input');
-	for(var i=0;i<xobj.length;i++){
-		if($(xobj[i]).val()==''){
-			$('.my-popup.alert').attr('action','focus');
-			$('.my-popup.alert .ui-text').html('กรุณาระบุ'+$(xobj[i]).attr('title'));
-			popupOpen($('.my-popup.alert'),99999);
-			xobjAlert=$(xobj[i]);
-			return;
-		}
-	}
-	loadPage();
-	var post1='userName='+$('#userName').val()+'&password='+$('#userPass').val();
-	$.ajax({
-		type:'POST',
-		url:'/questionnaire/checkLogin',
-		data:post1,
-		success:function(data){
-			var xline;
-			for(var i=0;i<data.length;i++){
-				switch(data[i].dataType){
-				case'error':
-					$('.my-popup.alert .ui-text').html(data[i].errorMsg);
-					popupOpen($('.my-popup.alert'),99999);
-				break;
-				default:
-					window.location = '/questionnaire/questionnaire';
-				}
-			}
-		},complete:function(){
-			unloadPage();
-		}
-	});
+
+function checkInvalidLoginData() {
+
+    var CheckError = 'true';
+
+    if ($('#userName').val() == '') { $('#userName').addClass("InvalidData"); CheckError = 'false'; }
+    if ($('#userPass').val() == '') { $('#userPass').addClass("InvalidData"); CheckError = 'false'; }
+
+    return CheckError
 }
-// ============================================================ //
+
+function CheckUserLogin() {
+    var post1 = 'Username=' + $('#userName').val() + '&Password=' + $('#userPass').val();
+    console.log(post1);
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/CheckUserLogin',
+        data: post1,
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].dataType == 'success') {
+                    $('.login').addClass('ui-hide');
+                    $('.MainMenu').removeClass('ui-hide');
+                } else {
+                    $('#dialogAlert').attr('action', 'focus');
+                    $('#dialogAlert .ui-text').html(data[i].errorMsg);
+                    popupOpen($('#dialogAlert'), 99999);
+                }
+
+            }
+        }
+    });
+}
+
