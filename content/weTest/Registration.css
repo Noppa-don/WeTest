@@ -12,7 +12,6 @@
 
 .txtData, .spnData {margin-left: 150px;}
 
-
 .registerDetail {float: left;width: 80%;min-height: 320px;}
 
 .spnData {display: none;line-height: 50px;}
@@ -30,3 +29,4 @@
 .footerButton {display: flex;justify-content: space-between;padding: 10px 10% 20px 10%;}
 
 #btnDiscount {min-width: fit-content!important;margin: unset;}
+
