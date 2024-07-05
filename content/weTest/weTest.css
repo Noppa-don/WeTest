@@ -24,8 +24,8 @@
 .InvalidData {border-color: #d21717 !important;border-style: solid !important;border-width: medium !important;}
 
 .btn {border-style: solid; border-radius: 1em;line-height: 30px;padding: 10px;height: 30px;color: #52734d;border-color: #0a3820;
-      cursor:pointer;background-color: #f9f9f9; 
-      box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;width: fit-content; margin: auto; min-width: 20%;text-align:center;}
+      cursor:pointer;background-color: #f9f9f9; box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;width: fit-content; 
+      margin: auto; min-width: 20%;text-align:center;}
 .btnUnActive {opacity: 0.4;color: #9d9d9d;cursor: not-allowed;}
 .btnSelected {color: #f7eee9;border-color: #0a3820;background-color: #0a3820;}
 .btnCancel {color: #f7eee9;border-color: #bf2525;background-color: #bf2525}
