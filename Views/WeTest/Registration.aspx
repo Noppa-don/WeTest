@@ -3,9 +3,9 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
-    <link href="/content/Wetest/Wetest.css?ver=1.1.1" rel="stylesheet" type="text/css" />
-    <link href="/content/Wetest/Registration.css?ver=1.1.1" rel="stylesheet" type="text/css" />
-    <script src="/scripts/Wetest/Registration.js?ver=1.1.1" type="text/javascript"></script>
+    <link href="../content/Wetest/Wetest.css?ver=1.1.1" rel="stylesheet" type="text/css" />
+    <link href="../content/Wetest/Registration.css?ver=1.1.1" rel="stylesheet" type="text/css" />
+    <script src="../scripts/Wetest/Registration.js?ver=1.1.1" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="MainContent" runat="server">
@@ -17,12 +17,12 @@
 
     <div class='wrapper'>
 
-        <div class='register  ui-hide'>
+        <div class='register'>
             <div class="registerData">
                 <div class="registerDetail">
                     <div class="userType">
-                        <div class="btn left" id="btnStudent">Student / School</div>
-                        <div class="btn right" id="btnOther">Officer / Other</div>
+                        <div class="btn left" id="btnStudent" stdType="1">Student / School</div>
+                        <div class="btn right" id="btnOther" stdType="2">Officer / Other</div>
                     </div>
                     <br />
                     <br />
@@ -89,7 +89,7 @@
             </div>
         </div>
 
-        <div class="otp  ui-hide">
+        <div class="otp ui-hide">
             <span>Send OTP to your mobile now,<br />
                 <br />
                 Please type OTP and click confirm.</span>
@@ -109,7 +109,7 @@
             </div>
         </div>
 
-        <div class="payment">
+        <div class="payment ui-hide">
             <span>You must have a Wetest Key for register<br />
                 <br />
                 ** Price per Account is <span id="PackagePrice"></span> Bath / 1 Year **<br />
@@ -139,15 +139,15 @@
     </div>
 
     <div class="footer">
-        <div class='footerButton footerRegister  ui-hide'>
+        <div class='footerButton footerRegister'>
             <div class="Imagebtn btnBack"></div>
             <div class="Imagebtn btnNext"></div>
         </div>
-        <div class='footerButton footerOTP  ui-hide'>
+        <div class='footerButton footerOTP ui-hide'>
             <div class="Imagebtn btnBack"></div>
             <div class="Imagebtn btnNext"></div>
         </div>
-        <div class='footerButton footerPayment'>
+        <div class='footerButton footerPayment  ui-hide'>
             <div class="Imagebtn btnBack"></div>
             <div class="btn btnSelected" id="btnDiscount">Have discount?</div>
         </div>
