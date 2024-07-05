@@ -3,9 +3,9 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
-    <link href="/content/Wetest/Wetest.css?ver=1.1.1" rel="stylesheet" type="text/css" />
-    <link href="/content/Wetest/Activity.css?ver=1.1.1" rel="stylesheet" type="text/css" />
-    <script src="/scripts/Wetest/Activity.js?ver=1.1.1" type="text/javascript"></script>
+    <link href="../content/Wetest/Wetest.css?ver=1.1.1" rel="stylesheet" type="text/css" />
+    <link href="../content/Wetest/Activity.css?ver=1.1.1" rel="stylesheet" type="text/css" />
+    <script src="../scripts/Wetest/Activity.js?ver=1.1.1" type="text/javascript"></script>
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="MainContent" runat="server">
     <div id="divActivity">
@@ -47,6 +47,7 @@
                 <div id="divAllQuestion"></div>
             </div>
         </div>
+
         <div class='footer'>
             <div class="footerButton">
                 <div class="Imagebtn btnBack"></div>
