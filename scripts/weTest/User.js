@@ -30,11 +30,8 @@ $(document)
         $('#userName').focus();
     })
     .on('click', '.registerlink', function (e, data) {
-        window.location = '/Wetest/Registration';
+        window.location = '/Wetest/Activity';
     })
-
-
-
 
 // ============================================================ //
 
@@ -59,12 +56,16 @@ function CheckUserLogin() {
         data: post1,
         success: function (data) {
             for (var i = 0; i < data.length; i++) {
-                if (data[i].dataType == 'success') {
+                if (data[i].Result == 'success') {
                     $('.login').addClass('ui-hide');
+                    $('.UserNameandLevel').html(data[i].Firstname + '<br />' + data[i].Firstname);
+
+                    $('.UserData').removeClass('ui-hide');
                     $('.MainMenu').removeClass('ui-hide');
+
                 } else {
                     $('#dialogAlert').attr('action', 'focus');
-                    $('#dialogAlert .ui-text').html(data[i].errorMsg);
+                    $('#dialogAlert .ui-text').html(data[i].Msg);
                     popupOpen($('#dialogAlert'), 99999);
                 }
 
