@@ -31,6 +31,9 @@
 .btnBack {background: url(/images/Wetest/Previous.png);padding-left:20px;}
 .btnNext {background: url(/images/Wetest/Next.png);padding-right:20px}
 
+.btnBack.UnActive {background: url(/images/Wetest/PreviousUnactive.png);padding-left:20px;cursor:not-allowed;}
+.btnNext.UnActive {background: url(/images/Wetest/NextUnactive.png);padding-right:20px;cursor:not-allowed;}
+
 #divSendQuiz {background: url(/images/Wetest/SendQuiz.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 70px;height: 70px;  margin: auto;}
 
 
