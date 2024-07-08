@@ -26,3 +26,5 @@
 .txtMenu {font-size:1.4em;}
 
 .menuButton {display:flex;}
+
+.UserPhoto {background-repeat: no-repeat;background-size: contain;background-position: center;width: 100%;height: 60px;margin-bottom:10px;}
