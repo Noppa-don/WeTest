@@ -30,7 +30,7 @@ $(document)
         $('#userName').focus();
     })
     .on('click', '.registerlink', function (e, data) {
-        window.location = '/Wetest/Activity';
+        window.location = '/Wetest/Registration';
     })
 
 // ============================================================ //
