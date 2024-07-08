@@ -300,43 +300,71 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-#End Region
 
-#Region "Activity"
-        Function Activity() As ActionResult
-            Return View()
-        End Function
-#End Region
-
-#Region "User"
-        Function User() As ActionResult
-            Return View()
-        End Function
         <AcceptVerbs(HttpVerbs.Post)>
-        Function CheckUserLogin()
+        Function SaveFirstPlacementTest()
             Dim L1 As New List(Of clsMain)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim NewQuizId As String = Guid.NewGuid.ToString
             Dim objList As New clsMain()
             Try
                 ' ================ Check Permission ================
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-                cmdMsSql = cmdSQL(cn, "select StudentID from tblStudent where Username = @Username and Password = @Password and IsActive = 1")
-                With cmdMsSql
-                    .Parameters.Add("@Username", SqlDbType.VarChar).Value = Request.Form("Username")
-                    .Parameters.Add("@Password", SqlDbType.VarChar).Value = oneWayKN(Request.Form("Password"))
-                    .ExecuteNonQuery()
-                End With
-                dt = getDataTable(cmdMsSql)
-                If dt.Rows.Count = 0 Then
-                    objList.dataType = "error"
-                    objList.errorMsg = "Username or Password is wrong !<br><br>Please try again or contact @Italt."
-                Else
-                    objList.dataType = "success"
-                    objList.errorMsg = ""
+                cmdMsSql = cmdSQL(cn, "Select top 1 testsetId from tbltestset where isPlacementTest = 1 And levelid = 'E5DBFA06-C4CE-4CE2-9F47-60E9CB99A38C' order by newid()")
 
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows.Count = 0 Then
+                    objList.dataType = "not"
+                    objList.errorMsg = "Dont have testset from placementtest!"
+                Else
+
+                    Dim TestsetId As String = dt(0)(0).ToString
+
+                    cmdMsSql = cmdSQL(cn, "select sum(a.answerScore) as fullscore from tblanswer a 
+                                            inner join tblquestion q on a.questionid = q.questionid 
+                                            inner join tbltestsetquestionDetail tsqd on q.questionId = tsqd.questionId
+                                            inner join tbltestsetquestionSet tsqs on tsqs.tsqsid = tsqd.tsqsid
+                                            where a.isactive = 1 and q.isactive = 1 and tsqd.isactive = 1 and tsqs.isactive = 1 
+                                            and tsqs.testsetid = @TestsetId")
+                    With cmdMsSql
+                        .Parameters.Add("@TestsetId", SqlDbType.VarChar).Value = TestsetId
+                        .ExecuteNonQuery()
+                    End With
+
+                    dt = getDataTable(cmdMsSql)
+
+                    If dt.Rows.Count = 0 Then
+                        objList.dataType = "not"
+                        objList.errorMsg = "Dont have Question from placementtest!"
+                    Else
+
+                        Dim Fullscore As String = dt(0)(0).ToString
+
+                        cmdMsSql = cmdSQL(cn, "insert into tblPlacementTest(quizid,pmtnum,levelid,fullscore)values (@QuizId,1,'E5DBFA06-C4CE-4CE2-9F47-60E9CB99A38C',@FullScore);
+                                               insert into tblquiz(quizId,testsetid,starttime,QuizMode) values(@QuizId,@TestsetId,getdate(),1);
+                                               insert into tblquizSession(quizid, studentid)values(@QuizId,@stdId);
+                                               insert into tblquizQuestion select newid(),@QuizId,questionId,ROW_NUMBER() over (order by newid()),1,getdate() from tbltestsetquestiondetail tsqd
+                                               inner join tbltestsetquestionset tsqs on tsqd.tsqsid = tsqs.tsqsid
+                                               where tsqd.isactive = 1 and tsqs.isactive = 1 and tsqs.testsetid = @TestsetId order by newid();"
+                                          )
+
+                        With cmdMsSql
+                            .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = NewQuizId
+                            .Parameters.Add("@FullScore", SqlDbType.VarChar).Value = Fullscore
+                            .Parameters.Add("@TestsetId", SqlDbType.VarChar).Value = TestsetId
+                            .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
+                            .ExecuteNonQuery()
+                        End With
+
+                    End If
                 End If
+
+                Session("QuizId") = NewQuizId
+
+                objList.dataType = "success"
                 L1.Add(objList)
                 objList = Nothing
 
@@ -352,10 +380,156 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+
 #End Region
 
+#Region "Activity"
+        Function Activity() As ActionResult
+            Return View()
+        End Function
 
+        Function SaveNextAnswerAndGetQuestion()
+            'Dim QuizId As String = Session("QuizId")
+            Dim QuizId As String = "82E42855-BCCB-48A1-B6B7-568A094DBD27"
+            Dim QuestionNo As String = "1"
 
+            If Session("QuestionNo") IsNot Nothing Then
+                Session("QuestionNo") = CInt(Session("QuestionNo")) + 1
+                QuestionNo = Session("QuestionNo")
+            Else
+                Session("QuestionNo") = 1
+            End If
+
+            Dim L1 As New List(Of clsItemQAndA)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dtQuestion As DataTable, dtAnswer As DataTable
+
+            Dim objList As New clsItemQAndA()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                cmdMsSql = cmdSQL(cn, "select qq.QQNo,qq.QuestionId,q.QuestionName_Quiz from tblQuestion q inner join tblQuizQuestion qq on q.QuestionId = qq.QuestionId 
+                                        where quizid = @QuizId and QQNo = @QuestionNo")
+                With cmdMsSql
+                    .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = QuizId
+                    .Parameters.Add("@QuestionNo", SqlDbType.VarChar).Value = QuestionNo
+                    .ExecuteNonQuery()
+                End With
+
+                dtQuestion = getDataTable(cmdMsSql)
+
+                objList.ItemType = "1"
+                objList.ItemNo = dtQuestion(0)("QQNo").ToString
+                objList.ItemId = dtQuestion(0)("QuestionId").ToString
+                objList.Itemtxt = dtQuestion(0)("QuestionName_Quiz").ToString
+                L1.Add(objList)
+
+                objList = Nothing
+
+                Dim QuestionId As String = dtQuestion(0)("QuestionId").ToString
+
+                cmdMsSql = cmdSQL(cn, "insert into tblQuizAnswer select newid(),@QuizId,@QuestionId,AnswerId,ROW_NUMBER() over (order by newid()),1,getdate() 
+                                        from tblAnswer where QuestionId = @QuestionId and IsActive = 1;
+                                        select qa.qano,qa.AnswerId,a.AnswerNameQuiz from tblQuizAnswer QA inner join tblAnswer A on qa.AnswerId = a.AnswerId  
+                                        where qa.QuestionId = @QuestionId order by QANo")
+                With cmdMsSql
+                    .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = QuizId
+                    .Parameters.Add("@QuestionId", SqlDbType.VarChar).Value = QuestionId
+                End With
+
+                dtAnswer = getDataTable(cmdMsSql)
+
+                Dim objList2 As New clsItemQAndA()
+                Dim AnsHtml As String = ""
+
+                For i = 0 To dtAnswer.Rows.Count - 1
+
+                    If i Mod 2 = 0 Then
+                        AnsHtml &= "<div Class=""divAnswerRow""><div Class=""divAnswerLeft"" AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" & dtAnswer(i)("qano").ToString & ". " & dtAnswer(i)("AnswerNameQuiz").ToString & "</div>"
+                    Else
+                        AnsHtml &= "<div Class=""divAnswerRight"" AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" & dtAnswer(i)("qano").ToString & ". " & dtAnswer(i)("AnswerNameQuiz").ToString & "</div></div>"
+                    End If
+
+                    objList2.ItemType = "2"
+                    objList2.ItemNo = ""
+                    objList2.ItemId = ""
+                    objList2.Itemtxt = AnsHtml
+                    L1.Add(objList2)
+                Next
+
+                objList2 = Nothing
+
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dtQuestion IsNot Nothing Then dtQuestion.Dispose() : dtQuestion = Nothing
+                If dtAnswer IsNot Nothing Then dtAnswer.Dispose() : dtAnswer = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+
+        End Function
+
+#End Region
+
+#Region "User"
+        Function User() As ActionResult
+            Return View()
+        End Function
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function CheckUserLogin()
+            Dim L1 As New List(Of clsStudentData)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsStudentData()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+                cmdMsSql = cmdSQL(cn, "select StudentId,Firstname from tblStudent where Username = @Username and Password = @Password and IsActive = 1")
+                With cmdMsSql
+                    .Parameters.Add("@Username", SqlDbType.VarChar).Value = Request.Form("Username")
+                    .Parameters.Add("@Password", SqlDbType.VarChar).Value = oneWayKN(Request.Form("Password"))
+                    .ExecuteNonQuery()
+                End With
+                dt = getDataTable(cmdMsSql)
+                If dt.Rows.Count = 0 Then
+                    objList.Result = "error"
+                    objList.Msg = "Username or Password is wrong !<br><br>Please try again or contact @Italt."
+                Else
+                    objList.Result = "success"
+                    objList.UsrPhoto = "<div class=""UserPhoto"" style=""background: url(/WetestPhoto/UserPhoto/" & dt(0)("StudentId").ToString & ".png);"">"
+                    objList.Firstname = dt(0)("Firstname")
+                End If
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.Result = "error"
+                objList.Msg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+#End Region
+        Private Class clsStudentData
+            Inherits clsMain
+            Public Firstname As String, UsrPhoto As String, Result As String, Msg As String
+        End Class
+        Private Class clsItemQAndA
+            Inherits clsMain
+            Public ItemType As String, ItemNo As String, ItemId As String, Itemtxt As String
+        End Class
     End Class
-
 End Namespace

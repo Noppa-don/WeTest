@@ -11,11 +11,15 @@
 
     <div class="banner">
         <div class='logo'></div>
+        <div class='UserData  ui-hide'>
+            <div class="UserNameandLevel"></div>
+            <div class='UserPhoto'></div>
+        </div>
     </div>
 
     <div class='wrapper'>
 
-        <div class="login ui-hide">
+        <div class="login">
             <div>
                 <div class="smallLogo userlogo"></div>
                 <input type='text' id='userName' title='Username' placeholder='Username' />
@@ -25,13 +29,13 @@
                 <div class="smallLogo pswlogo"></div>
                 <input type='password' id='userPass' title='Password' placeholder='Password' />
             </div>
-            u
             <div id="btnLogin" class='btn btnSelected'>Log-in</div>
 
             <div class='textRight registerlink'>Register ?</div>
         </div>
 
-        <div class="MainMenu">
+        <div class="MainMenu ui-hide">
+
             <div class="menuButton">
                 <div class="btn btnMainMenu" id="btnPracticeMenu">
                     <div class='practiceIcon'></div>
@@ -42,16 +46,16 @@
                     <span class="txtMenu">Goal</span>
                 </div>
             </div>
-        </div>
-        <br />
-        <div class="menuButton">
-            <div class="btn btnMainMenu" id="btnMockUpExam">
-                <div class='mockUpExamMenuIcon'></div>
-                <span class="txtMenu">Mock-up Exam</span>
-            </div>
-            <div class="btn btnMainMenu" id="btnReport">
-                <div class='reportIcon'></div>
-                <span class="txtMenu">Report</span>
+            <br />
+            <div class="menuButton">
+                <div class="btn btnMainMenu" id="btnMockUpExam">
+                    <div class='mockUpExamMenuIcon'></div>
+                    <span class="txtMenu">Mock-up Exam</span>
+                </div>
+                <div class="btn btnMainMenu" id="btnReport">
+                    <div class='reportIcon'></div>
+                    <span class="txtMenu">Report</span>
+                </div>
             </div>
         </div>
     </div>
