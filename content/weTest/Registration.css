@@ -30,3 +30,6 @@
 
 #btnDiscount {min-width: fit-content!important;margin: unset;}
 
+.otp .ui-input-text {width:100px!important;text-align:center;margin:auto;}
+
+#txtOTP,#txtKeyCode {text-align:center;}
