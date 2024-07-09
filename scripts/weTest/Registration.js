@@ -105,14 +105,6 @@ $(document)
      })
 
     .on('click', '#btnCheckKey', function (e, data) {
-        //$('#dialogAlert').attr('action', 'focus');
-        //$('#dialogAlert .ui-text').html('Please wait...<br><br>We are taking you to Placement Test.');
-        //popupOpen($('#dialogAlert'), 99999);
-
-        //var x = setInterval(function () {
-        //    clearInterval(x);
-        //    window.location = '/Wetest/Activity';
-        //}, 3000);
         CheckKeycode();
     })
     .on('click', '#btnPayment', function (e, data) {
@@ -168,7 +160,6 @@ function checkInvalidRegisterData() {
 
     return CheckError
 }
-
 function SaveNewUser() {
     var post1 = 'FirstName=' + $('.spFirstname').text() + '&Surname=' + $('.spSurname').text() + '&MobileNo=' + $('.spMobileNo').text() +
         '&EMail=' + $('.spEMail').text() + '&Username=' + $('.spUsername').text() + '&Password=' + $('#Password').val() + '&StudentType=' + StudentType;
@@ -243,10 +234,9 @@ function UploadStudentPhoto() {
         });
     }
 }
-
 function sendOTP() {
     OTPNum = Math.floor(100000 + Math.random() * 900000);
-    console.log(OTPNum);
+   // console.log(OTPNum);
 
     var post1 = 'MobileNo=' + $('.spMobileNo').text() + '&OTPNum=' + OTPNum;
     $.ajax({
@@ -288,7 +278,6 @@ function UpdateOTPStatus(OTPStatus) {
         }
     });
 }
-
 function GetPackagePrice() {
     console.log('PackagePrice');
     $.ajax({
