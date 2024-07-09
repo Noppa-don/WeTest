@@ -195,7 +195,7 @@ function UploadStudentPhoto() {
     var files = $("#file").get(0).files;
 
     if (files.length > 0) {
-
+        console.log(0);
         data.append("UploadedImage", files[0]);
 
         $.ajax({
@@ -204,6 +204,28 @@ function UploadStudentPhoto() {
             contentType: false,
             processData: false,
             data: data,
+            success: function (data) {
+                for (var i = 0; i < data.length; i++) {
+                    switch (data[i].dataType) {
+                        case 'error':
+                            console.log(data[i].errorMsg);
+                        case 'success':
+                            console.log(data[i].errorMsg);
+                            $('.otp').removeClass('ui-hide');
+                            $('.register').addClass('ui-hide');
+                            $('.footerRegister').addClass('ui-hide');
+                            sendOTP();
+                    }
+                }
+            }
+        });
+    } else {
+        console.log(1);
+        $.ajax({
+            type: 'POST',
+            url: '/weTest/UploadDummyStudentPhoto',
+            contentType: false,
+            processData: false,
             success: function (data) {
                 for (var i = 0; i < data.length; i++) {
                     switch (data[i].dataType) {
