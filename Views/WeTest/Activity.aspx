@@ -25,19 +25,8 @@
         <div id="divPlayground">
             <div id="divQ">
                 <div id="divQuestionAndAnswer">
-                    <div id="divQuestion">
-                        1. Mike is a good boy _____________ is eigth years old.
-                    </div>
-                    <div id="divAnswer">
-                        <div class="divAnswerRow">
-                            <div class="divAnswerLeft">A. She</div>
-                            <div class="divAnswerRight">B. He</div>
-                        </div>
-                        <div class="divAnswerRow">
-                            <div class="divAnswerLeft">C. I</div>
-                            <div class="divAnswerRight">D. We</div>
-                        </div>
-                    </div>
+                    <div id="divQuestion"></div>
+                    <div id="divAnswer"></div>
                 </div>
             </div>
 
