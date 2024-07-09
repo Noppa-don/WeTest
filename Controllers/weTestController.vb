@@ -60,6 +60,7 @@ Namespace Controllers
         End Function
         <AcceptVerbs(HttpVerbs.Post)>
         Function UploadStudentPhoto()
+
             Dim L1 As New List(Of clsMain)
             Dim objList As New clsMain()
             Dim fileName As String, fiInfo As FileInfo, filePath As String, oriImage As Image, reImage As Image
@@ -80,8 +81,38 @@ Namespace Controllers
                             reImage = resizeImage(oriImage, New Size(1280, 1024))
                             imageCompression(reImage, filePath, 65, file.ContentType)
                         End If
+                    Else
+                        Dim copyToPath = Server.MapPath("~/WetestPhoto/UserPhoto/" & Session("StudentId").ToString.ToLower & ".png")
+                        Dim fullFilePath = Server.MapPath("~/WetestPhoto/UserPhoto/dummyUser.png")
+
+                        System.IO.File.Copy(fullFilePath, copyToPath)
                     End If
                 Next
+
+                objList.dataType = "success"
+                objList.errorMsg = ""
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function UploadDummyStudentPhoto()
+            Dim L1 As New List(Of clsMain)
+            Dim objList As New clsMain()
+            Try
+
+                Dim copyToPath = Server.MapPath("~/WetestPhoto/UserPhoto/" & Session("StudentId").ToString.ToLower & ".png")
+                Dim fullFilePath = Server.MapPath("~/WetestPhoto/UserPhoto/dummyUser.png")
+
+                System.IO.File.Copy(fullFilePath, copyToPath)
 
                 objList.dataType = "success"
                 objList.errorMsg = ""
@@ -125,7 +156,7 @@ Namespace Controllers
 
             'Dim clientID As String = "6ee932cc-aba1-46b2-9b1e-e2f60dd239de"
 
-            'url = "https://api.send-sms.in.th/api/v2/SendSMS?SenderID=WeTell&Message=" & "OTP code for Wetest : " & OTPNum & "&MobileNumbers=" + MobileNo + "&ApiKey=" & apiKey & "&ClientId=" & clientID & "&is_unicode=true"
+            'url = "https: //api.send-sms.in.th/api/v2/SendSMS?SenderID=WeTell&Message=" & "OTP code for Wetest : " & OTPNum & "&MobileNumbers=" + MobileNo + "&ApiKey=" & apiKey & "&ClientId=" & clientID & "&is_unicode=true"
 
             'MyReq = WebRequest.Create(url)
 
@@ -304,79 +335,28 @@ Namespace Controllers
         <AcceptVerbs(HttpVerbs.Post)>
         Function SaveFirstPlacementTest()
             Dim L1 As New List(Of clsMain)
-            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
-            Dim NewQuizId As String = Guid.NewGuid.ToString
             Dim objList As New clsMain()
+
             Try
-                ' ================ Check Permission ================
-                cn = New SqlConnection(sqlCon("Wetest"))
-                If cn.State = 0 Then cn.Open()
-                ' ==================================================
-                cmdMsSql = cmdSQL(cn, "Select top 1 testsetId from tbltestset where isPlacementTest = 1 And levelid = 'E5DBFA06-C4CE-4CE2-9F47-60E9CB99A38C' order by newid()")
+                Dim Result As String = CheckAndCreatePlacementTest()
 
-                dt = getDataTable(cmdMsSql)
-
-                If dt.Rows.Count = 0 Then
-                    objList.dataType = "not"
-                    objList.errorMsg = "Dont have testset from placementtest!"
+                If Result = "success1" Then
+                    objList.dataType = "success"
+                    L1.Add(objList)
+                    objList = Nothing
                 Else
-
-                    Dim TestsetId As String = dt(0)(0).ToString
-
-                    cmdMsSql = cmdSQL(cn, "select sum(a.answerScore) as fullscore from tblanswer a 
-                                            inner join tblquestion q on a.questionid = q.questionid 
-                                            inner join tbltestsetquestionDetail tsqd on q.questionId = tsqd.questionId
-                                            inner join tbltestsetquestionSet tsqs on tsqs.tsqsid = tsqd.tsqsid
-                                            where a.isactive = 1 and q.isactive = 1 and tsqd.isactive = 1 and tsqs.isactive = 1 
-                                            and tsqs.testsetid = @TestsetId")
-                    With cmdMsSql
-                        .Parameters.Add("@TestsetId", SqlDbType.VarChar).Value = TestsetId
-                        .ExecuteNonQuery()
-                    End With
-
-                    dt = getDataTable(cmdMsSql)
-
-                    If dt.Rows.Count = 0 Then
-                        objList.dataType = "not"
-                        objList.errorMsg = "Dont have Question from placementtest!"
-                    Else
-
-                        Dim Fullscore As String = dt(0)(0).ToString
-
-                        cmdMsSql = cmdSQL(cn, "insert into tblPlacementTest(quizid,pmtnum,levelid,fullscore)values (@QuizId,1,'E5DBFA06-C4CE-4CE2-9F47-60E9CB99A38C',@FullScore);
-                                               insert into tblquiz(quizId,testsetid,starttime,QuizMode) values(@QuizId,@TestsetId,getdate(),1);
-                                               insert into tblquizSession(quizid, studentid)values(@QuizId,@stdId);
-                                               insert into tblquizQuestion select newid(),@QuizId,questionId,ROW_NUMBER() over (order by newid()),1,getdate() from tbltestsetquestiondetail tsqd
-                                               inner join tbltestsetquestionset tsqs on tsqd.tsqsid = tsqs.tsqsid
-                                               where tsqd.isactive = 1 and tsqs.isactive = 1 and tsqs.testsetid = @TestsetId order by newid();"
-                                          )
-
-                        With cmdMsSql
-                            .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = NewQuizId
-                            .Parameters.Add("@FullScore", SqlDbType.VarChar).Value = Fullscore
-                            .Parameters.Add("@TestsetId", SqlDbType.VarChar).Value = TestsetId
-                            .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
-                            .ExecuteNonQuery()
-                        End With
-
-                    End If
+                    objList.dataType = "error"
+                    objList.errorMsg = Result
+                    L1.Add(objList)
+                    objList = Nothing
                 End If
 
-                Session("QuizId") = NewQuizId
-
-                objList.dataType = "success"
-                L1.Add(objList)
-                objList = Nothing
 
             Catch ex As Exception
                 objList.dataType = "error"
                 objList.errorMsg = ex.Message
                 L1.Add(objList)
                 objList = Nothing
-            Finally
-                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
-                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
-                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
@@ -387,53 +367,149 @@ Namespace Controllers
         Function Activity() As ActionResult
             Return View()
         End Function
+        Function CreateNewQuiz(QuizData As clsQuizData) As clsQuizData
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim L1 As New List(Of clsMain)
+            Dim objList As New clsMain()
 
-        Function SaveNextAnswerAndGetQuestion()
-            'Dim QuizId As String = Session("QuizId")
-            Dim QuizId As String = "82E42855-BCCB-48A1-B6B7-568A094DBD27"
-            Dim QuestionNo As String = "1"
+            Dim NewQuizId As String = Guid.NewGuid.ToString
+
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+                cmdMsSql = cmdSQL(cn, "select sum(a.answerScore) as fullscore from tblanswer a 
+                                            inner join tblquestion q on a.questionid = q.questionid 
+                                            inner join tbltestsetquestionDetail tsqd on q.questionId = tsqd.questionId
+                                            inner join tbltestsetquestionSet tsqs on tsqs.tsqsid = tsqd.tsqsid
+                                            where a.isactive = 1 and q.isactive = 1 and tsqd.isactive = 1 and tsqs.isactive = 1 
+                                            and tsqs.testsetid = @TestsetId;")
+                With cmdMsSql
+                    .Parameters.Add("@TestsetId", SqlDbType.VarChar).Value = QuizData.TestsetId
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows.Count = 0 Then
+                    QuizData.resultType = "error"
+                    QuizData.resultMsg = "Not have Question for PlacementTest"
+                Else
+
+                    Dim Fullscore As String = dt(0)(0).ToString
+
+                    cmdMsSql = cmdSQL(cn, "insert into tblquiz(quizId,testsetid,starttime,QuizMode,FullScore) values(@QuizId,@TestsetId,getdate(),@QuizMode,@FullScore);
+                                           insert into tblquizSession(quizid, studentid)values(@QuizId,@stdId);
+                                           insert into tblquizQuestion select newid(),@QuizId,questionId,ROW_NUMBER() over (order by newid()),1,getdate() 
+                                           from tbltestsetquestiondetail tsqd inner join tbltestsetquestionset tsqs on tsqd.tsqsid = tsqs.tsqsid
+                                           where tsqd.isactive = 1 and tsqs.isactive = 1 and tsqs.testsetid = @TestsetId;
+                                           insert into tblQuizAnswer select newid(),@QuizId,qq.QuestionId,AnswerId,
+                                           ROW_NUMBER() OVER(PARTITION BY qq.questionId ORDER BY newid()),1,getdate() 
+                                           from tblAnswer a inner join tblQuizQuestion qq on a.QuestionId = qq.QuestionId where a.IsActive = 1 and qq.quizid = @QuizId;
+                                           select count(QuestionId) as QuestionAmount from tblQuizQuestion where QuizId = @QuizId"
+                                      )
+
+                    With cmdMsSql
+                        .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = NewQuizId.ToLower
+                        .Parameters.Add("@FullScore", SqlDbType.VarChar).Value = Fullscore
+                        .Parameters.Add("@TestsetId", SqlDbType.VarChar).Value = QuizData.TestsetId.ToLower
+                        .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString.ToLower
+                        .Parameters.Add("@QuizMode", SqlDbType.VarChar).Value = QuizData.QuizMode
+                    End With
+
+                    dt = getDataTable(cmdMsSql)
+
+                    QuizData.QuizId = NewQuizId.ToLower
+                    QuizData.FullScore = Fullscore
+                    QuizData.QuestionAmount = dt(0)(0)
+                    QuizData.resultType = "success"
+
+                    Session("QuizId") = NewQuizId
+                    Session("QuestionAmount") = dt(0)(0)
+                End If
+            Catch ex As Exception
+                QuizData.resultType = "error"
+                QuizData.resultMsg = ex.Message
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return QuizData
+        End Function
+        Function GetQuestionAndAnswer()
+            Dim objList As New clsItemQAndA()
+            Dim L1 As New List(Of clsItemQAndA)
+
+            If Session("QuizId") Is Nothing Then
+                objList.ItemStatus = "sessionExpired"
+                L1.Add(objList)
+                objList = Nothing
+                Return Json(L1, JsonRequestBehavior.AllowGet)
+            End If
+
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dtQuestion As DataTable, dtAnswer As DataTable
+            Dim QuizId As String = Session("QuizId")
+
+            'Dim QuizId As String = "E40DD92D-3C67-43FA-8FD6-AC0EFD1D1A00"
+            Dim QuestionNo As String = 1
+
+            Dim ActionType = Request.Form("ActionType")
 
             If Session("QuestionNo") IsNot Nothing Then
-                Session("QuestionNo") = CInt(Session("QuestionNo")) + 1
-                QuestionNo = Session("QuestionNo")
+                If ActionType <> "undefined" Then
+                    If ActionType = "next" Then
+                        Session("QuestionNo") = CInt(Session("QuestionNo")) + 1
+                    Else
+                        Session("QuestionNo") = CInt(Session("QuestionNo")) - 1
+                    End If
+                End If
             Else
                 Session("QuestionNo") = 1
             End If
 
-            Dim L1 As New List(Of clsItemQAndA)
-            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dtQuestion As DataTable, dtAnswer As DataTable
+            QuestionNo = Session("QuestionNo")
 
-            Dim objList As New clsItemQAndA()
+
             Try
                 ' ================ Check Permission ================
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
 
-                cmdMsSql = cmdSQL(cn, "select qq.QQNo,qq.QuestionId,q.QuestionName_Quiz from tblQuestion q inner join tblQuizQuestion qq on q.QuestionId = qq.QuestionId 
-                                        where quizid = @QuizId and QQNo = @QuestionNo")
+                cmdMsSql = cmdSQL(cn, "select qq.QQNo,qq.QuestionId,q.QuestionName_Quiz from tblQuestion q inner join tblQuizQuestion qq 
+                                        on q.QuestionId = qq.QuestionId where quizid = @QuizId and QQNo = @QuestionNo")
                 With cmdMsSql
                     .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = QuizId
                     .Parameters.Add("@QuestionNo", SqlDbType.VarChar).Value = QuestionNo
-                    .ExecuteNonQuery()
                 End With
 
                 dtQuestion = getDataTable(cmdMsSql)
 
-                objList.ItemType = "1"
-                objList.ItemNo = dtQuestion(0)("QQNo").ToString
-                objList.ItemId = dtQuestion(0)("QuestionId").ToString
-                objList.Itemtxt = dtQuestion(0)("QuestionName_Quiz").ToString
-                L1.Add(objList)
+                Dim objListQuestion As New clsItemQAndA()
+                objListQuestion.ItemType = "1"
+                objListQuestion.ItemId = dtQuestion(0)("QuestionId").ToString
+                objListQuestion.Itemtxt = dtQuestion(0)("QQNo").ToString & ". " & dtQuestion(0)("QuestionName_Quiz").ToString
 
-                objList = Nothing
+                If QuestionNo = 1 Then
+                    objListQuestion.ItemStatus = "first"
+                ElseIf QuestionNo = 2 Then
+                    objListQuestion.ItemStatus = "second"
+                ElseIf QuestionNo = Session("QuestionAmount") Then
+                    objListQuestion.ItemStatus = "last"
+                ElseIf QuestionNo = CInt(Session("QuestionAmount")) - 1 Then
+                    objListQuestion.ItemStatus = "beforelast"
+                End If
+
+                L1.Add(objListQuestion)
+
+                objListQuestion = Nothing
 
                 Dim QuestionId As String = dtQuestion(0)("QuestionId").ToString
 
-                cmdMsSql = cmdSQL(cn, "insert into tblQuizAnswer select newid(),@QuizId,@QuestionId,AnswerId,ROW_NUMBER() over (order by newid()),1,getdate() 
-                                        from tblAnswer where QuestionId = @QuestionId and IsActive = 1;
-                                        select qa.qano,qa.AnswerId,a.AnswerNameQuiz from tblQuizAnswer QA inner join tblAnswer A on qa.AnswerId = a.AnswerId  
-                                        where qa.QuestionId = @QuestionId order by QANo")
+                cmdMsSql = cmdSQL(cn, "Select qa.qano,qa.AnswerId,a.AnswerNameQuiz,qs.AnswerId as UserAnswered from tblQuizAnswer QA inner join tblAnswer A on qa.AnswerId = a.AnswerId  
+                                        left join tblQuizScore qs on qa.quizid = qs.quizid and qa.QuestionId = qs.QuestionId where qa.QuestionId = @QuestionId and Qa.QuizId = @QuizId order by QANo")
                 With cmdMsSql
                     .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = QuizId
                     .Parameters.Add("@QuestionId", SqlDbType.VarChar).Value = QuestionId
@@ -444,17 +520,23 @@ Namespace Controllers
                 Dim objList2 As New clsItemQAndA()
                 Dim AnsHtml As String = ""
 
+                Dim ArrChoicetxt() As String = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"}
+
                 For i = 0 To dtAnswer.Rows.Count - 1
+                    Dim IsAnswered As String = ""
+                    If dtAnswer(i)("AnswerId").ToString = dtAnswer(i)("UserAnswered").ToString Then
+                        IsAnswered = "Answered"
+                    End If
 
                     If i Mod 2 = 0 Then
-                        AnsHtml &= "<div Class=""divAnswerRow""><div Class=""divAnswerLeft"" AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" & dtAnswer(i)("qano").ToString & ". " & dtAnswer(i)("AnswerNameQuiz").ToString & "</div>"
+                        AnsHtml &= "<div Class=""divAnswerRow""><div Class=""divAnswerbar Left " & IsAnswered & """ QId=""" & QuestionId & """AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
+                            ArrChoicetxt(i) & ". " & dtAnswer(i)("AnswerNameQuiz").ToString & "</div>"
                     Else
-                        AnsHtml &= "<div Class=""divAnswerRight"" AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" & dtAnswer(i)("qano").ToString & ". " & dtAnswer(i)("AnswerNameQuiz").ToString & "</div></div>"
+                        AnsHtml &= "<div Class=""divAnswerbar Right " & IsAnswered & """ QId=""" & QuestionId & """AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
+                            ArrChoicetxt(i) & ". " & dtAnswer(i)("AnswerNameQuiz").ToString & "</div></div>"
                     End If
 
                     objList2.ItemType = "2"
-                    objList2.ItemNo = ""
-                    objList2.ItemId = ""
                     objList2.Itemtxt = AnsHtml
                     L1.Add(objList2)
                 Next
@@ -472,8 +554,208 @@ Namespace Controllers
                 If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
                 If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
             End Try
+
             Return Json(L1, JsonRequestBehavior.AllowGet)
 
+        End Function
+
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function SaveAnswed()
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsMain()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+                cmdMsSql = cmdSQL(cn, " Select QuizScoreId from tblQuizScore  where QuizId = @QuizId and QuestionId = @QuestionId;")
+
+                With cmdMsSql
+                    .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
+                    .Parameters.Add("@QuestionId", SqlDbType.VarChar).Value = Request.Form("QuestionId")
+                    .ExecuteNonQuery()
+                End With
+
+                Dim dtScore As DataTable = getDataTable(cmdMsSql)
+
+                If dtScore.Rows.Count <> 0 Then
+                    cmdMsSql = cmdSQL(cn, "update tblQuizScore set AnswerId = @AnsweredId,ResponseAmount = ResponseAmount + 1,Score = a.AnswerScore,LastUpdate = GETDATE()
+                                            from tblQuizScore qs inner join tblAnswer a on qs.QuestionId = a.QuestionId and a.QuestionId = @QuestionId and a.AnswerId = @AnsweredId
+                                            where qs.QuizScoreId = @QuizScoreId;")
+                    With cmdMsSql
+                        .Parameters.Add("@QuizScoreId", SqlDbType.VarChar).Value = dtScore(0)("QuizScoreId").ToString
+                        .Parameters.Add("@QuestionId", SqlDbType.VarChar).Value = Request.Form("QuestionId")
+                        .Parameters.Add("@AnsweredId", SqlDbType.VarChar).Value = Request.Form("AnsweredId")
+                        .ExecuteNonQuery()
+                    End With
+                Else
+                    cmdMsSql = cmdSQL(cn, "insert into tblQuizScore select newid(),@QuizId,@QuestionId,@AnsweredId,1,getdate(),a.AnswerScore,1,getdate()
+                                            from tblQuizAnswer qa inner join tblAnswer a on qa.AnswerId = a.AnswerId where qa.quizid = @QuizId and qa.AnswerId = @AnsweredId;")
+                    With cmdMsSql
+                        .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
+                        .Parameters.Add("@QuestionId", SqlDbType.VarChar).Value = Request.Form("QuestionId")
+                        .Parameters.Add("@AnsweredId", SqlDbType.VarChar).Value = Request.Form("AnsweredId")
+                        .ExecuteNonQuery()
+                    End With
+                End If
+
+                objList.dataType = "success"
+                objList.errorMsg = " "
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function EndQuiz()
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As New DataTable
+            Dim objList As New clsMain()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+
+                cmdMsSql = cmdSQL(cn, "Select sum(score) As TotalScore,cast((sum(score)*100)/FullScore As Decimal(18,2)) As PercentScore from tblQuizScore qs inner join tblquiz q On q.quizid = qs.quizid 
+                                        where qs.QuizId = @QuizId Group by FullScore;")
+                With cmdMsSql
+                    .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                cmdMsSql = cmdSQL(cn, "Update tblquiz set TotalScore = @TotalScore, PercentScore = @PercentScore, EndTime = getdate(),lastupdate = getdate() where quizId = @QuizId;
+                                       Select QuizMode from tblquiz where QuizId = @QuizId;")
+
+                With cmdMsSql
+                    .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId")
+                    .Parameters.Add("@TotalScore", SqlDbType.VarChar).Value = dt(0)("TotalScore")
+                    .Parameters.Add("@PercentScore", SqlDbType.VarChar).Value = dt(0)("PercentScore")
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                Session("QuizId") = Nothing
+                Session("QuestionNo") = Nothing
+
+                If dt(0)(0).ToString = "1" Then
+                    Dim Result As String = CheckAndCreatePlacementTest()
+                    If Result = "success2" Then
+                        objList.dataType = "success2"
+                        L1.Add(objList)
+                        objList = Nothing
+                    Else
+                        'Update ระดับชั้น
+
+                    End If
+                End If
+
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
+        Function CheckAndCreatePlacementTest()
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim LevelId As String, PMTNum As String = "", ResultMsg As String = ""
+
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                'check PMTNum
+
+                cmdMsSql = cmdSQL(cn, "Select q.PercentScore from tblQuizSession qss inner join tblquiz q On q.QuizId = qss.QuizId 
+                                        where qss.StudentId = @StudentId and q.QuizMode = 1")
+                With cmdMsSql
+                    .Parameters.Add("@StudentId", SqlDbType.VarChar).Value = Session("StudentId")
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows.Count = 0 Then
+                    LevelId = "14A28F3D-1AFF-429D-B7A1-927A28E010BD"
+                    PMTNum = 1
+                ElseIf dt.Rows.Count = 1 Then
+                    If dt(0)("PercentScore") >= 80 Then
+                        'test Advanced
+                        LevelId = "6736D029-6B78-4570-9DBB-991217DA8FEE"
+                    Else
+                        'test Foundation
+                        LevelId = "E5DBFA06-C4CE-4CE2-9F47-60E9CB99A38C"
+                        PMTNum = 2
+                    End If
+                Else
+                    ResultMsg = "success3"
+                    Return ResultMsg
+                End If
+
+                cmdMsSql = cmdSQL(cn, "Select top 1 testsetId from tbltestset where isPlacementTest = 1 And levelid = @LevelId order by newid()")
+
+                With cmdMsSql
+                    .Parameters.Add("@LevelId", SqlDbType.VarChar).Value = LevelId
+                    .ExecuteNonQuery()
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows.Count = 0 Then
+                    ResultMsg = "Dont have testset from placementtest!"
+                Else
+                    Dim QuizData As New clsQuizData
+
+                    QuizData.QuizMode = "1"
+                    QuizData.TestsetId = dt(0)(0).ToString
+
+                    CreateNewQuiz(QuizData)
+
+                    If QuizData.resultType = "success" Then
+                        cmdMsSql = cmdSQL(cn, "Insert into tblPlacementTest(quizid,pmtnum,levelid)values (@QuizId,@PMTNum,@LevelId);")
+                        With cmdMsSql
+                            .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
+                            .Parameters.Add("@LevelId", SqlDbType.VarChar).Value = LevelId
+                            .Parameters.Add("@PMTNum", SqlDbType.VarChar).Value = PMTNum
+                            .ExecuteNonQuery()
+                        End With
+
+                    End If
+
+                    ResultMsg = "success" & PMTNum
+
+                End If
+            Catch ex As Exception
+                ResultMsg = ex.Message
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return ResultMsg
         End Function
 
 #End Region
@@ -529,7 +811,12 @@ Namespace Controllers
         End Class
         Private Class clsItemQAndA
             Inherits clsMain
-            Public ItemType As String, ItemNo As String, ItemId As String, Itemtxt As String
+            Public ItemType As String, ItemNo As String, ItemId As String, Itemtxt As String, ItemStatus As String
+        End Class
+
+        Public Class clsQuizData
+            Inherits clsMain
+            Public QuizId As String, QuizMode As String, TestsetId As String, FullScore As String, QuestionAmount As String, resultType As String, resultMsg As String
         End Class
     End Class
 End Namespace
