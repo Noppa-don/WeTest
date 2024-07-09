@@ -18,8 +18,10 @@
 
 #divQuestion {background-color:white;width:97%; border-radius:0.5em;padding:20px;}
 .divAnswerRow {display:flex;width:100%;margin-top:15px; border-radius:0.5em;}
-.divAnswerLeft{width:50%;margin-top:5px;background-color:white; border-radius:0.5em;margin-right:5px;padding:20px;}
-.divAnswerRight{width:50%;margin-top:5px;background-color:white; border-radius:0.5em;margin-left:5px;padding:20px;}
+.divAnswerbar {width:50%;margin-top:5px;background-color:white; border-radius:0.5em;padding:20px;cursor:pointer;}
+.divAnswerbar.Left{margin-right:5px;}
+.divAnswerbar.Right{margin-left:5px;}
+.divAnswerbar.Answered{background-color:moccasin;}
 
 #divSideMenuBar {margin: auto;padding-top:25px;} 
 #divPause {background: url(/images/Wetest/Pause.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;} 
@@ -30,6 +32,9 @@
 .footerButton {display: flex;justify-content:center;float:left;width:90%;padding:20px;}
 .btnBack {background: url(/images/Wetest/Previous.png);padding-left:20px;}
 .btnNext {background: url(/images/Wetest/Next.png);padding-right:20px}
+
+.btnBack.UnActive {background: url(/images/Wetest/PreviousUnactive.png);padding-left:20px;cursor:not-allowed;}
+.btnNext.UnActive {background: url(/images/Wetest/NextUnactive.png);padding-right:20px;cursor:not-allowed;}
 
 #divSendQuiz {background: url(/images/Wetest/SendQuiz.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 70px;height: 70px;  margin: auto;}
 
