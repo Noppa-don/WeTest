@@ -4,6 +4,8 @@
 .ui-icon.wait {background: url(/images/Wetest/Wait.png)}
 .ui-icon.wrong {background: url(/images/Wetest/Wrong.png);}
 .ui-icon.done {background: url(/images/Wetest/Done.png);}
+.ui-icon.send {background: url(/images/Wetest/SendQuiz.png);}
+.ui-iconbig.play {background: url(/images/Wetest/play.png);width:80px;height:80px;}
 .ui-icon.close{background: url(/images/Wetest/Wrong.png);z-index: 999;float: right;margin-top: -10px;margin-left: -10px;background-repeat: no-repeat;background-size: contain;background-position: left;cursor:pointer;}
 
 .ui-hide{display:none!important;}
@@ -32,12 +34,13 @@
 .ui-input-text input::placeholder {color: #bbbbbb; text-shadow: none;text-align: center;}
 .InvalidData {border-color: #d21717 !important;border-style: solid !important;border-width: medium !important;}
 
-.btn {border-style: solid; border-radius: 1em;line-height: 30px;padding: 10px;height: 30px;color: #52734d;border-color: #0a3820;
+.btn {border-style: solid; border-radius: 1em;line-height: 30px;padding: 10px;height: 30px;color: #0a3820;border-color: #0a3820;
       cursor:pointer;background-color: #f9f9f9; box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;width: fit-content; 
       margin: auto; min-width: 20%;text-align:center;}
 .btnUnActive {opacity: 0.4;color: #9d9d9d;cursor: not-allowed;}
 .btnSelected {color: #f7eee9;border-color: #0a3820;background-color: #0a3820;}
-.btnCancel {color: #f7eee9;border-color: #bf2525;background-color: #bf2525}
+.btnCancel {color: #f7eee9;border-color: #bf2525;background-color: #bf2525;}
+.btnOrange {color: #0a3820;border-color: #ef9f73;background-color: #ef9f73;}
 .btn.right {margin-left: 5px;}
 .btn.left {margin-right: 5px;}
 
@@ -46,5 +49,7 @@
 .my-popup{position:absolute;}
 .my-popup .ui-content{margin:0 auto;height:unset;}
 .my-popup .ui-content .ui-icon{height:2.5em;width:100%;margin-bottom:0.5em;background-repeat: no-repeat;background-size: contain;background-position: center;}
+.my-popup .ui-content .ui-iconbig{height:18em;width:50em;margin-bottom:0.5em;background-repeat: no-repeat;background-size: contain;background-position: center;cursor:pointer;}
 .my-popup .ui-content .ui-text{text-align:center;margin-top:15px;margin-bottom:20px;}
 .my-popup .ui-twoButton {display:flex;}
+.my-popup .ui-body-cbig {border: none;background: none;}
