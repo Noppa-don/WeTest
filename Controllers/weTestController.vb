@@ -340,6 +340,7 @@ Namespace Controllers
             Try
                 Dim Result As String = CheckAndCreatePlacementTest()
 
+<<<<<<< HEAD
                 If Result = "success1" Then
                     objList.dataType = "success"
                     L1.Add(objList)
@@ -352,6 +353,35 @@ Namespace Controllers
                 End If
 
 
+=======
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows.Count = 0 Then
+                    objList.dataType = "error"
+                    objList.errorMsg = "Dont have testset from placementtest!"
+                Else
+                    Dim QuizData As New clsQuizData
+
+                    QuizData.QuizType = "1"
+                    QuizData.TestsetId = dt(0)(0).ToString
+
+                    CreateNewQuiz(QuizData)
+
+                    If QuizData.resultType = "success" Then
+                        cmdMsSql = cmdSQL(cn, "Insert into tblPlacementTest(quizid,pmtnum,levelid,fullscore)values (@QuizId,1,'E5DBFA06-C4CE-4CE2-9F47-60E9CB99A38C',@FullScore);")
+                        With cmdMsSql
+                            .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = QuizData.QuizId
+                            .Parameters.Add("@FullScore", SqlDbType.VarChar).Value = QuizData.FullScore
+                            .ExecuteNonQuery()
+                        End With
+
+                    End If
+
+                    objList.dataType = "success"
+                    L1.Add(objList)
+                    objList = Nothing
+                End If
+>>>>>>> eff8a4b6f0e0a1b468cf44d1e0cb047bdc368839
             Catch ex As Exception
                 objList.dataType = "error"
                 objList.errorMsg = ex.Message
@@ -372,6 +402,14 @@ Namespace Controllers
             Dim L1 As New List(Of clsMain)
             Dim objList As New clsMain()
 
+<<<<<<< HEAD
+=======
+        Function CreateNewQuiz(QuizData As clsQuizData) As clsQuizData
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim L1 As New List(Of clsMain)
+            Dim objList As New clsMain()
+
+>>>>>>> eff8a4b6f0e0a1b468cf44d1e0cb047bdc368839
             Dim NewQuizId As String = Guid.NewGuid.ToString
 
             Try
@@ -398,14 +436,22 @@ Namespace Controllers
 
                     Dim Fullscore As String = dt(0)(0).ToString
 
+<<<<<<< HEAD
                     cmdMsSql = cmdSQL(cn, "insert into tblquiz(quizId,testsetid,starttime,QuizMode,FullScore) values(@QuizId,@TestsetId,getdate(),@QuizMode,@FullScore);
+=======
+                    cmdMsSql = cmdSQL(cn, "insert into tblquiz(quizId,testsetid,starttime,QuizMode) values(@QuizId,@TestsetId,getdate(),1);
+>>>>>>> eff8a4b6f0e0a1b468cf44d1e0cb047bdc368839
                                            insert into tblquizSession(quizid, studentid)values(@QuizId,@stdId);
                                            insert into tblquizQuestion select newid(),@QuizId,questionId,ROW_NUMBER() over (order by newid()),1,getdate() 
                                            from tbltestsetquestiondetail tsqd inner join tbltestsetquestionset tsqs on tsqd.tsqsid = tsqs.tsqsid
                                            where tsqd.isactive = 1 and tsqs.isactive = 1 and tsqs.testsetid = @TestsetId;
                                            insert into tblQuizAnswer select newid(),@QuizId,qq.QuestionId,AnswerId,
                                            ROW_NUMBER() OVER(PARTITION BY qq.questionId ORDER BY newid()),1,getdate() 
+<<<<<<< HEAD
                                            from tblAnswer a inner join tblQuizQuestion qq on a.QuestionId = qq.QuestionId where a.IsActive = 1 and qq.quizid = @QuizId;
+=======
+                                           from tblAnswer a inner join tblQuizQuestion qq on a.QuestionId = qq.QuestionId where a.IsActive = 1;
+>>>>>>> eff8a4b6f0e0a1b468cf44d1e0cb047bdc368839
                                            select count(QuestionId) as QuestionAmount from tblQuizQuestion where QuizId = @QuizId"
                                       )
 
@@ -414,7 +460,10 @@ Namespace Controllers
                         .Parameters.Add("@FullScore", SqlDbType.VarChar).Value = Fullscore
                         .Parameters.Add("@TestsetId", SqlDbType.VarChar).Value = QuizData.TestsetId.ToLower
                         .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString.ToLower
+<<<<<<< HEAD
                         .Parameters.Add("@QuizMode", SqlDbType.VarChar).Value = QuizData.QuizMode
+=======
+>>>>>>> eff8a4b6f0e0a1b468cf44d1e0cb047bdc368839
                     End With
 
                     dt = getDataTable(cmdMsSql)
@@ -438,6 +487,7 @@ Namespace Controllers
             End Try
             Return QuizData
         End Function
+<<<<<<< HEAD
         Function GetQuestionAndAnswer()
             Dim objList As New clsItemQAndA()
             Dim L1 As New List(Of clsItemQAndA)
@@ -452,18 +502,30 @@ Namespace Controllers
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dtQuestion As DataTable, dtAnswer As DataTable
             Dim QuizId As String = Session("QuizId")
 
+=======
+
+        Function GetQuestionAndAnswer()
+            Dim QuizId As String = Session("QuizId")
+>>>>>>> eff8a4b6f0e0a1b468cf44d1e0cb047bdc368839
             'Dim QuizId As String = "E40DD92D-3C67-43FA-8FD6-AC0EFD1D1A00"
             Dim QuestionNo As String = 1
 
             Dim ActionType = Request.Form("ActionType")
 
             If Session("QuestionNo") IsNot Nothing Then
+<<<<<<< HEAD
                 If ActionType <> "undefined" Then
                     If ActionType = "next" Then
                         Session("QuestionNo") = CInt(Session("QuestionNo")) + 1
                     Else
                         Session("QuestionNo") = CInt(Session("QuestionNo")) - 1
                     End If
+=======
+                If ActionType = "next" Then
+                    Session("QuestionNo") = CInt(Session("QuestionNo")) + 1
+                Else
+                    Session("QuestionNo") = CInt(Session("QuestionNo")) - 1
+>>>>>>> eff8a4b6f0e0a1b468cf44d1e0cb047bdc368839
                 End If
             Else
                 Session("QuestionNo") = 1
@@ -471,6 +533,11 @@ Namespace Controllers
 
             QuestionNo = Session("QuestionNo")
 
+<<<<<<< HEAD
+=======
+            Dim L1 As New List(Of clsItemQAndA)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dtQuestion As DataTable, dtAnswer As DataTable
+>>>>>>> eff8a4b6f0e0a1b468cf44d1e0cb047bdc368839
 
             Try
                 ' ================ Check Permission ================
@@ -508,8 +575,13 @@ Namespace Controllers
 
                 Dim QuestionId As String = dtQuestion(0)("QuestionId").ToString
 
+<<<<<<< HEAD
                 cmdMsSql = cmdSQL(cn, "Select qa.qano,qa.AnswerId,a.AnswerNameQuiz,qs.AnswerId as UserAnswered from tblQuizAnswer QA inner join tblAnswer A on qa.AnswerId = a.AnswerId  
                                         left join tblQuizScore qs on qa.quizid = qs.quizid and qa.QuestionId = qs.QuestionId where qa.QuestionId = @QuestionId and Qa.QuizId = @QuizId order by QANo")
+=======
+                cmdMsSql = cmdSQL(cn, "Select distinct qa.qano,qa.AnswerId,a.AnswerNameQuiz from tblQuizAnswer QA inner join tblAnswer A on qa.AnswerId = a.AnswerId  
+                                        where qa.QuestionId = @QuestionId and Qa.QuizId = @QuizId order by QANo")
+>>>>>>> eff8a4b6f0e0a1b468cf44d1e0cb047bdc368839
                 With cmdMsSql
                     .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = QuizId
                     .Parameters.Add("@QuestionId", SqlDbType.VarChar).Value = QuestionId
@@ -529,11 +601,17 @@ Namespace Controllers
                     End If
 
                     If i Mod 2 = 0 Then
+<<<<<<< HEAD
                         AnsHtml &= "<div Class=""divAnswerRow""><div Class=""divAnswerbar Left " & IsAnswered & """ QId=""" & QuestionId & """AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
                             ArrChoicetxt(i) & ". " & dtAnswer(i)("AnswerNameQuiz").ToString & "</div>"
                     Else
                         AnsHtml &= "<div Class=""divAnswerbar Right " & IsAnswered & """ QId=""" & QuestionId & """AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
                             ArrChoicetxt(i) & ". " & dtAnswer(i)("AnswerNameQuiz").ToString & "</div></div>"
+=======
+                        AnsHtml &= "<div Class=""divAnswerRow""><div Class=""divAnswerLeft"" AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" & ArrChoicetxt(i) & ". " & dtAnswer(i)("AnswerNameQuiz").ToString & "</div>"
+                    Else
+                        AnsHtml &= "<div Class=""divAnswerRight"" AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" & ArrChoicetxt(i) & ". " & dtAnswer(i)("AnswerNameQuiz").ToString & "</div></div>"
+>>>>>>> eff8a4b6f0e0a1b468cf44d1e0cb047bdc368839
                     End If
 
                     objList2.ItemType = "2"
@@ -544,6 +622,7 @@ Namespace Controllers
                 objList2 = Nothing
 
             Catch ex As Exception
+                Dim objList As New clsItemQAndA()
                 objList.dataType = "error"
                 objList.errorMsg = ex.Message
                 L1.Add(objList)
@@ -816,7 +895,11 @@ Namespace Controllers
 
         Public Class clsQuizData
             Inherits clsMain
+<<<<<<< HEAD
             Public QuizId As String, QuizMode As String, TestsetId As String, FullScore As String, QuestionAmount As String, resultType As String, resultMsg As String
+=======
+            Public QuizId As String, QuizType As String, TestsetId As String, FullScore As String, QuestionAmount As String, resultType As String, resultMsg As String
+>>>>>>> eff8a4b6f0e0a1b468cf44d1e0cb047bdc368839
         End Class
     End Class
 End Namespace
