@@ -53,3 +53,5 @@
 .my-popup .ui-content .ui-text{text-align:center;margin-top:15px;margin-bottom:20px;}
 .my-popup .ui-twoButton {display:flex;}
 .my-popup .ui-body-cbig {border: none;background: none;}
+
+.flexDiv {display: flex;}
