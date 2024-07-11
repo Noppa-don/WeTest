@@ -20,13 +20,13 @@ $(document)
 
  .on('click', '.btnNext', function (e, data) {
      if ($('.btnNext').hasClass('UnActive') == false) {
-         GetQuestionAndAnswer('next','');
+         GetQuestionAndAnswer('next', '');
          setProgressbar();
      }
  })
  .on('click', '.btnBack', function (e, data) {
      if ($('.btnBack').hasClass('UnActive') == false) {
-         GetQuestionAndAnswer('back','');
+         GetQuestionAndAnswer('back', '');
          setProgressbar();
      }
  })
@@ -51,17 +51,12 @@ $(document)
          url: '/weTest/CheckSendDialog',
          success: function (data) {
              for (var i = 0; i < data.length; i++) {
-                 if (data[i].dataType == 'pmt') {
-                     $('#dialogSelect').attr('action', 'focus');
-                     $('#dialogSelect .ui-text').html('Do yo want to send Placement Test');
-                     popupOpen($('#dialogSelect'), 99999);
-
-                 }
+                 $('#dialogSelect').attr('action', 'focus');
+                 $('#dialogSelect .ui-text').html(data[i].errorMsg);
+                 popupOpen($('#dialogSelect'), 99999);
              }
          }
      });
-
-
  })
  .on('click', '#divGotoLogin', function (e, data) {
      window.location = '/Wetest/User';
@@ -75,14 +70,41 @@ $(document)
          url: '/weTest/EndQuiz',
          success: function (data) {
              for (var i = 0; i < data.length; i++) {
+
+
+
                  if (data[i].dataType == 'success2') {
                      window.location = '/Wetest/Activity';
-
                  } else if (data[i].dataType == 'success3') {
                      $('#divActivity').addClass("ui-hide");
                      $('#divShowLevel').removeClass("ui-hide");
                      $('.wrapper').removeClass("ui-hide");
                      $('.banner').removeClass("ui-hide");
+                     $('#spnLevel').html('<b>Congratulations !</b> Your Level is ' + data[i].errorMsg + '<br /><br />You can go to Log-in for practice and exam more.');
+                     $('#divGotoLogin').removeClass("ui-hide");
+                     $('#divGotoMainMenu').addClass("ui-hide");
+
+                     $('#lr' + data[i].errorMsg).removeClass("LR" + data[i].errorMsg);
+                     $('#lr' + data[i].errorMsg).addClass("LR" + data[i].errorMsg + "Selected");
+                 } else if (data[i].dataType == 'pass') {
+                     $('#divActivity').addClass("ui-hide");
+                     $('#divShowLevel').removeClass("ui-hide");
+                     $('.wrapper').removeClass("ui-hide");
+                     $('.banner').removeClass("ui-hide");
+                     $('#spnLevel').html('<b>Congratulations !</b> Your Level up to ' + data[i].errorMsg);
+                     $('#divGotoLogin').addClass("ui-hide");
+                     $('#divGotoMainMenu').removeClass("ui-hide");
+
+                     $('#lr' + data[i].errorMsg).removeClass("LR" + data[i].errorMsg);
+                     $('#lr' + data[i].errorMsg).addClass("LR" + data[i].errorMsg + "Selected");
+                 } else if (data[i].dataType == 'notpass') {
+                     $('#divActivity').addClass("ui-hide");
+                     $('#divShowLevel').removeClass("ui-hide");
+                     $('.wrapper').removeClass("ui-hide");
+                     $('.banner').removeClass("ui-hide");
+                     $('#spnLevel').html('<b>Sorry, You dont passed</b>');
+                     $('#divGotoLogin').addClass("ui-hide");
+                     $('#divGotoMainMenu').removeClass("ui-hide");
 
                      $('#lr' + data[i].errorMsg).removeClass("LR" + data[i].errorMsg);
                      $('#lr' + data[i].errorMsg).addClass("LR" + data[i].errorMsg + "Selected");
@@ -183,12 +205,23 @@ $(document)
      GetQuestionAndAnswer('select', QuestionNo);
      popupClose($(this).closest('.my-popup'));
  })
+ .on('click', '#divShowExplain', function (e, data) {
+     console.log($('.ExplainQ').hasClass('ui-hide'));
+     if ($('.ExplainQ').hasClass('ui-hide') == false) {
+         $('.ExplainQ').addClass("ui-hide");
+     } else {
+         $('.ExplainQ').removeClass("ui-hide");
+     }
+ })
+ .on('click', '#divGotoMainMenu', function (e, data) {
+     window.location = '/Wetest/User';
+ })
 
 // ============================================================ //
 
 // ========================= Function ========================= //
 
-function GetQuestionAndAnswer(ActionType,QuestionNo) {
+function GetQuestionAndAnswer(ActionType, QuestionNo) {
     var post1 = 'ActionType=' + ActionType + '&QuestionNo=' + QuestionNo;
     console.log(post1);
     $.ajax({
@@ -207,7 +240,10 @@ function GetQuestionAndAnswer(ActionType,QuestionNo) {
                     $('#divQuestion').html(data[i].Itemtxt);
                     $('#divQuestion').attr('Qid', data[i].ItemId);
 
-                    console.log(data[i].ItemStatus);
+                    if (data[i].multiname != null) {
+                        $('#divQuestion').append("<br><br><div id='" + data[i].multiname + "'></div>");
+                        setbuttonAudioPlayer(data[i].multiname, data[i].multipath);
+                    }
 
                     if (data[i].ItemStatus == 'first') { $('.btnBack').addClass("UnActive"); }
                     if (data[i].ItemStatus == 'last') { $('.btnNext').addClass("UnActive"); }
@@ -215,7 +251,9 @@ function GetQuestionAndAnswer(ActionType,QuestionNo) {
                     if (data[i].ItemStatus == 'second') { $('.btnBack').removeClass("UnActive"); }
                     if (data[i].ItemStatus == 'beforelast') { $('.btnNext').removeClass("UnActive"); }
                 } else {
+
                     $('#divAnswer').html(data[i].Itemtxt);
+
                 }
             }
         }
@@ -265,5 +303,13 @@ function GetLeapChoicePanel() {
         }
     });
 
+
+}
+function setbuttonAudioPlayer(divname, FilePath) {
+    console.log('setbuttonAudioPlayer');
+    $('#' + divname).buttonAudioPlayer({
+        type: 'default',
+        src: FilePath
+    });
 
 }
