@@ -435,11 +435,13 @@ Namespace Controllers
 
                 If Session("QuizMode").ToString = 1 Then
                     objList.dataType = "pmt"
-                    objList.errorMsg = "Do you want to send placement test"
-                    L1.Add(objList)
-                    objList = Nothing
+                    objList.errorMsg = "Do you want to send placement test ?"
+                ElseIf Session("QuizMode").ToString = 3 Then
+                    objList.dataType = "exam"
+                    objList.errorMsg = "Do you want to send Exam ?"
                 End If
-
+                L1.Add(objList)
+                objList = Nothing
 
             Catch ex As Exception
                 objList.dataType = "error"
@@ -483,27 +485,26 @@ Namespace Controllers
 
                 dt = getDataTable(cmdMsSql)
 
-                Session("QuizId") = Nothing
-                Session("QuestionNo") = Nothing
-
                 If Session("QuizMode") = "1" Then
                     Dim Result As String = CheckAndCreatePlacementTest()
                     If Result = "success2" Then
                         objList.dataType = "success2"
-                        L1.Add(objList)
-                        objList = Nothing
                     Else
                         'Update ระดับชั้น
                         Dim ResultTxt As String = UpdateStudentLevel(CInt(dtScore(0)("PercentScore")))
                         If ResultTxt <> "error" Then
                             objList.dataType = "success3"
                             objList.errorMsg = ResultTxt
-                            L1.Add(objList)
-                            objList = Nothing
                         End If
                     End If
+                ElseIf Session("QuizMode") = "3" Then
+                    objList = CheckAndUplevel()
                 End If
 
+                L1.Add(objList)
+                objList = Nothing
+                Session("QuizId") = Nothing
+                Session("QuestionNo") = Nothing
             Catch ex As Exception
                 objList.dataType = "error"
                 objList.errorMsg = ex.Message
@@ -674,6 +675,7 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+
         Function CreateNewQuiz(QuizData As clsQuizData) As clsQuizData
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim L1 As New List(Of clsMain)
@@ -765,31 +767,32 @@ Namespace Controllers
 
             Dim ActionType = Request.Form("ActionType")
 
-            If ActionType = "select" Then
-                Session("QuestionNo") = Request.Form("QuestionNo")
-            Else
-                If Session("QuestionNo") IsNot Nothing Then
-                    If ActionType <> "undefined" Then
-                        If ActionType = "next" Then
-                            Session("QuestionNo") = CInt(Session("QuestionNo")) + 1
-                        Else
-                            Session("QuestionNo") = CInt(Session("QuestionNo")) - 1
-                        End If
-                    End If
-                Else
-                    Session("QuestionNo") = 1
-                End If
-            End If
-
-            QuestionNo = Session("QuestionNo")
-
             Try
+                If ActionType = "select" Then
+                    Session("QuestionNo") = Request.Form("QuestionNo")
+                Else
+                    If Session("QuestionNo") IsNot Nothing Then
+                        If ActionType <> "undefined" Then
+                            If ActionType = "next" Then
+                                Session("QuestionNo") = CInt(Session("QuestionNo")) + 1
+                            Else
+                                Session("QuestionNo") = CInt(Session("QuestionNo")) - 1
+                            End If
+                        End If
+                    Else
+                        Session("QuestionNo") = 1
+                    End If
+                End If
+
+                QuestionNo = Session("QuestionNo")
+
+
                 ' ================ Check Permission ================
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
 
-                cmdMsSql = cmdSQL(cn, "select qq.QQNo,qq.QuestionId,q.QuestionName_Quiz from tblQuestion q inner join tblQuizQuestion qq 
+                cmdMsSql = cmdSQL(cn, "select qq.QQNo,qq.QuestionId,q.QuestionName_Quiz,q.QSetId,q.QuestionExpain_Quiz from tblQuestion q inner join tblQuizQuestion qq 
                                         on q.QuestionId = qq.QuestionId where quizid = @QuizId and QQNo = @QuestionNo")
                 With cmdMsSql
                     .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = QuizId
@@ -798,10 +801,42 @@ Namespace Controllers
 
                 dtQuestion = getDataTable(cmdMsSql)
 
+                Dim QuestionId As String = dtQuestion(0)("QuestionId").ToString
+                Dim QSetId As String = dtQuestion(0)("QSetId").ToString
+
+                Dim QName As String = dtQuestion(0)("QuestionName_Quiz").ToString
+                QName = QName.Replace("___MODULE_URL___", GenFilePath(QSetId))
+
+                Dim QExplain As String = dtQuestion(0)("QuestionExpain_Quiz").ToString
+                QExplain = QExplain.Replace("___MODULE_URL___", GenFilePath(QSetId))
+
+                QExplain = "<br><div class=""ExplainQ ui-hide"">" & QExplain & "</div>"
+
                 Dim objListQuestion As New clsItemQAndA()
                 objListQuestion.ItemType = "1"
                 objListQuestion.ItemId = dtQuestion(0)("QuestionId").ToString
-                objListQuestion.Itemtxt = dtQuestion(0)("QQNo").ToString & ". " & dtQuestion(0)("QuestionName_Quiz").ToString
+                objListQuestion.Itemtxt = dtQuestion(0)("QQNo").ToString & ". " & QName & QExplain
+
+                cmdMsSql = cmdSQL(cn, "select MultimediaObjId,MfileName from tblMultimediaObject where ReferenceId = @QuestionId and ReferenceType = 1 and isactive = 1;")
+
+                With cmdMsSql
+                    .Parameters.Add("@QuestionId", SqlDbType.VarChar).Value = QuestionId
+                End With
+
+                Dim dtmulti As DataTable = getDataTable(cmdMsSql)
+
+                If dtmulti.Rows.Count <> 0 Then
+
+                    Dim FullPath As String
+
+                    FullPath = GetFullPath(QSetId).Replace("\", "/")
+
+                    Dim FPath As String = "../file" & FullPath & "/" & dtmulti(0)("MfileName").ToString
+
+                    objListQuestion.multiname = dtmulti(0)("MultimediaObjId").ToString
+                    objListQuestion.multipath = FPath
+                End If
+
 
                 If QuestionNo = 1 Then
                     objListQuestion.ItemStatus = "first"
@@ -817,9 +852,9 @@ Namespace Controllers
 
                 objListQuestion = Nothing
 
-                Dim QuestionId As String = dtQuestion(0)("QuestionId").ToString
+                '----Answer----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-                cmdMsSql = cmdSQL(cn, "Select qa.qano,qa.AnswerId,a.AnswerNameQuiz,qs.AnswerId as UserAnswered from tblQuizAnswer QA inner join tblAnswer A on qa.AnswerId = a.AnswerId  
+                cmdMsSql = cmdSQL(cn, "Select qa.qano,qa.AnswerId,a.AnswerNameQuiz,qs.AnswerId as UserAnswered,a.AnswerExpainQuiz from tblQuizAnswer QA inner join tblAnswer A on qa.AnswerId = a.AnswerId  
                                         left join tblQuizScore qs on qa.quizid = qs.quizid and qa.QuestionId = qs.QuestionId where qa.QuestionId = @QuestionId and Qa.QuizId = @QuizId order by QANo")
                 With cmdMsSql
                     .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = QuizId
@@ -839,16 +874,47 @@ Namespace Controllers
                         IsAnswered = "Answered"
                     End If
 
+                    Dim Aname As String = dtAnswer(i)("AnswerNameQuiz").ToString
+                    Aname = Aname.Replace("___MODULE_URL___", GenFilePath(QSetId))
+
+                    Dim AExplain As String = dtAnswer(i)("AnswerExpainQuiz").ToString
+                    AExplain = AExplain.Replace("___MODULE_URL___", GenFilePath(QSetId))
+                    AExplain = "<br><div class=""ExplainQ ui-hide"">" & AExplain & "</div>"
+
+                    Aname = Aname & AExplain
+
                     If i Mod 2 = 0 Then
                         AnsHtml &= "<div Class=""divAnswerRow""><div Class=""divAnswerbar Left " & IsAnswered & """ QId=""" & QuestionId & """AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
-                            ArrChoicetxt(i) & ". " & dtAnswer(i)("AnswerNameQuiz").ToString & "</div>"
+                            ArrChoicetxt(i) & ". " & Aname & "</div>"
                     Else
                         AnsHtml &= "<div Class=""divAnswerbar Right " & IsAnswered & """ QId=""" & QuestionId & """AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
-                            ArrChoicetxt(i) & ". " & dtAnswer(i)("AnswerNameQuiz").ToString & "</div></div>"
+                            ArrChoicetxt(i) & ". " & Aname & "</div></div>"
                     End If
 
                     objList2.ItemType = "2"
                     objList2.Itemtxt = AnsHtml
+
+                    cmdMsSql = cmdSQL(cn, "select MultimediaObjId,MfileName from tblMultimediaObject where ReferenceId = @AnswerId and ReferenceType = 1 and isactive = 1;")
+
+                    With cmdMsSql
+                        .Parameters.Add("@AnswerId", SqlDbType.VarChar).Value = dtAnswer(i)("AnswerId").ToString
+                    End With
+
+                    Dim dtAmulti As DataTable = getDataTable(cmdMsSql)
+
+                    If dtAmulti.Rows.Count <> 0 Then
+
+                        Dim FullPath As String
+
+                        FullPath = GetFullPath(QSetId).Replace("\", "/")
+
+                        Dim FPath As String = "../file" & FullPath & "/" & dtmulti(0)("MfileName").ToString
+
+                        objList2.multiname = dtmulti(0)("MultimediaObjId").ToString
+                        objList2.multipath = FPath
+                    End If
+
+
                     L1.Add(objList2)
                 Next
 
@@ -1055,6 +1121,142 @@ Namespace Controllers
             End Try
             Return Result
         End Function
+        Function GenFilePath(ByVal QSetId As String) As String
+            Dim rootPath As String = "../file/"
+            Dim filePath As String
+            filePath = QSetId.Substring(0, 1) + "/" + QSetId.Substring(1, 1) + "/" + QSetId.Substring(2, 1) +
+            "/" + QSetId.Substring(3, 1) + "/" + QSetId.Substring(4, 1) + "/" + QSetId.Substring(5, 1) +
+            "/" + QSetId.Substring(6, 1) + "/" + QSetId.Substring(7, 1) + "/"
+            filePath = filePath + "{" + QSetId + "}/"
+            Return rootPath + filePath
+        End Function
+        Private Function GetMultiControl(QSetId As String, QuestionId As String)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim L1 As New List(Of clsMain)
+            Dim objList As New clsMain()
+
+            ' ================ Check Permission ================
+            cn = New SqlConnection(sqlCon("Wetest"))
+            If cn.State = 0 Then cn.Open()
+            ' ==================================================
+
+            Dim FullPath As String
+
+            FullPath = GetFullPath(QSetId).Replace("\", "/")
+
+            cmdMsSql = cmdSQL(cn, "select MultimediaObjId,MfileName from tblMultimediaObject where ReferenceId = @QuestionId and ReferenceType = 1 and isactive = 1;")
+
+            With cmdMsSql
+                .Parameters.Add("@QuestionId", SqlDbType.VarChar).Value = QuestionId
+            End With
+
+            dt = getDataTable(cmdMsSql)
+            Return dt
+
+        End Function
+        Private Function GetFullPath(qsetId As String) As String
+
+            Dim FullPath As String
+            Dim QuestionSetId As String = qsetId
+            Dim PathProJect As String = Server.MapPath("../")  '"D:\Development\QuickTest\Source\QuickTest\QuickTest" + "\"
+            'ทำการสร้าง Array เพื่อมาเก็บ QsetId ที่ตัดมาทีละหลักจำนวนทั้งหมด 8 หลัก แล้วต่อด้วย QsetId เต็มๆอีกทีนึง
+            Dim ArrayCreateFolder As New ArrayList
+            ArrayCreateFolder.Add(QuestionSetId.Substring(0, 1))
+            ArrayCreateFolder.Add(QuestionSetId.Substring(1, 1))
+            ArrayCreateFolder.Add(QuestionSetId.Substring(2, 1))
+            ArrayCreateFolder.Add(QuestionSetId.Substring(3, 1))
+            ArrayCreateFolder.Add(QuestionSetId.Substring(4, 1))
+            ArrayCreateFolder.Add(QuestionSetId.Substring(5, 1))
+            ArrayCreateFolder.Add(QuestionSetId.Substring(6, 1))
+            ArrayCreateFolder.Add(QuestionSetId.Substring(7, 1))
+            ArrayCreateFolder.Add("{" & QuestionSetId & "}")
+            Dim path As String = PathProJect
+            'loop เพื่อทำการต่อสตริง "\" เข้าไปหลังจาก QsetId ที่ตัดมาทีละหลัก , เงื่อนไขการจบ loop วนจนครบ Array คือ 9 รอบ
+            For Each i In ArrayCreateFolder
+                path &= i & "\"
+            Next
+            'Dim BackSlash As String = "\"
+            'Dim Slash As String = "/"
+            'Dim ReplaceSlash As String = Replace(path, BackSlash, Slash)
+            Dim ReplaceSlash As String = path
+            Dim RootUrl As String = "\"
+            'ดึง Path ปัจจุบันขึ้นมา เช่น "D:/Development/QuickTest/Source/QuickTest/QuickTest/"
+            Dim PathNotUse As String = Server.MapPath("../")
+            'ทำการนำมา Replace โดยตัดส่วนหน้าทั้งหมดทิ้งให้เหลือแต่ QsetId ที่เริ่มจากหลักแรกมา เช่น \9\5\6\8\f\6\3\7\{9568f637-3230-47b4-81e1-a04e45b75132}\
+            Dim CompleteFullPath As String = Replace(ReplaceSlash, PathNotUse, RootUrl)
+            'สุดท้ายตัด \ ตัวสุดท้ายออกไป
+            FullPath = CompleteFullPath.Remove(CompleteFullPath.Length - 1, 1)
+            Return FullPath
+        End Function
+        Function CheckAndUplevel()
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As New DataTable
+            Dim objList As New clsMain()
+            Dim ResultStatus As String = ""
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                Dim PassExamScore As Integer = CInt(ConfigurationManager.AppSettings("PassExamScore"))
+
+                cmdMsSql = cmdSQL(cn, "Select q.PercentScore,t.LevelId from tblquiz q inner join tbltestset t on q.TestSetId = t.TestsetId  where q.quizid = @QuizId")
+
+                With cmdMsSql
+                    .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId")
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows.Count <> 0 Then
+
+                    If CInt(dt(0)("PercentScore")) >= PassExamScore Then
+                        cmdMsSql = cmdSQL(cn, "Insert Into tblStudentLevel(StudentId,LevelId) values(@StudentId,@LevelUp);
+                                                select levelno from tbllevel where levelId = @LevelUp;")
+
+                        With cmdMsSql
+                            .Parameters.Add("@StudentId", SqlDbType.VarChar).Value = Session("StudentId").ToString
+                            .Parameters.Add("@LevelUp", SqlDbType.VarChar).Value = dt(0)("LevelId").ToString
+
+                        End With
+
+                        dt = getDataTable(cmdMsSql)
+
+                        objList.dataType = "pass"
+                        objList.errorMsg = dt.Rows(0)("levelno")
+                    Else
+                        cmdMsSql = cmdSQL(cn, "select levelno - 1 as levelno from tbllevel where levelId = @LevelUp;")
+
+                        With cmdMsSql
+                            .Parameters.Add("@LevelUp", SqlDbType.VarChar).Value = dt(0)("LevelId").ToString
+
+                        End With
+
+                        dt = getDataTable(cmdMsSql)
+
+                        objList.dataType = "notpass"
+                        objList.errorMsg = dt.Rows(0)("levelno")
+                    End If
+
+
+                End If
+
+            Catch ex As Exception
+                ResultStatus = ""
+                objList.dataType = "error"
+                objList.errorMsg = ex.ToString
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return objList
+        End Function
+
+
 #End Region
 
 #Region "User"
@@ -1078,7 +1280,9 @@ Namespace Controllers
                     .Parameters.Add("@Password", SqlDbType.VarChar).Value = oneWayKN(Request.Form("Password"))
                     .ExecuteNonQuery()
                 End With
+
                 dt = getDataTable(cmdMsSql)
+
                 If dt.Rows.Count = 0 Then
                     objList.Result = "error"
                     objList.Msg = "Username or Password is wrong !<br><br>Please try again or contact @Italt."
@@ -1086,6 +1290,8 @@ Namespace Controllers
                     objList.Result = "success"
                     objList.UsrPhoto = "<div class=""UserPhoto"" style=""background: url(/WetestPhoto/UserPhoto/" & dt(0)("StudentId").ToString & ".png);"">"
                     objList.Firstname = dt(0)("Firstname")
+
+                    Session("studentId") = dt(0)("StudentId").ToString
                 End If
                 L1.Add(objList)
                 objList = Nothing
@@ -1102,6 +1308,122 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function CheckLoginStatus()
+            Dim L1 As New List(Of clsStudentData)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsStudentData()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                If Session("studentId") IsNot Nothing Then
+                    cmdMsSql = cmdSQL(cn, "select StudentId,Firstname from tblStudent where StudentId = @stdId;")
+                    With cmdMsSql
+                        .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("studentId")
+                        .ExecuteNonQuery()
+                    End With
+
+                    dt = getDataTable(cmdMsSql)
+
+                    If dt.Rows.Count = 0 Then
+                        objList.Result = "error"
+                    Else
+                        objList.Result = "success"
+                        objList.UsrPhoto = "<div class=""UserPhoto"" style=""background: url(/WetestPhoto/UserPhoto/" & dt(0)("StudentId").ToString & ".png);"">"
+                        objList.Firstname = dt(0)("Firstname")
+                        Session("studentId") = dt(0)("StudentId").ToString
+                    End If
+                Else
+                    objList.Result = "error"
+                    objList.Msg = "sessionlost"
+                End If
+
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.Result = "error"
+                objList.Msg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function CreateMockUpExam()
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsMain()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                Dim StdId As String = Session("StudentId").ToString
+
+                cmdMsSql = cmdSQL(cn, "select top 1 l.levelno + 1 as LevelNuum from tblstudentlevel sl inner join tbllevel l on sl.LevelId = l.LevelId where StudentId = @StdId order by sl.lastupdate desc;")
+                With cmdMsSql
+                    .Parameters.Add("@StdId", SqlDbType.VarChar).Value = StdId
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                cmdMsSql = cmdSQL(cn, "select top 1 t.TestsetId,t.levelId from tbltestset t inner join tblLevel l on t.LevelId = l.LevelId where IsExam = 1 and t.IsActive = 1 and Levelno = @LevelNuum order by newid();")
+                With cmdMsSql
+                    .Parameters.Add("@LevelNuum", SqlDbType.VarChar).Value = dt(0)("LevelNuum").ToString
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                Dim QuizData As New clsQuizData
+
+                QuizData.QuizMode = "3"
+                QuizData.TestsetId = dt(0)("TestsetId").ToString
+
+                CreateNewQuiz(QuizData)
+
+                If QuizData.resultType = "success" Then
+                    cmdMsSql = cmdSQL(cn, "insert into tblMockupExam(QuizId,LevelId)values(@QuizId,@LevelId);")
+                    With cmdMsSql
+                        .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
+                        .Parameters.Add("@LevelId", SqlDbType.VarChar).Value = dt(0)("levelId").ToString
+                        .ExecuteNonQuery()
+                    End With
+
+                End If
+
+                objList.dataType = "success"
+                objList.errorMsg = ""
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+#End Region
+
+#Region "Practice"
+        Function Practice() As ActionResult
+            Return View()
+        End Function
 #End Region
 
 #Region "Class"
@@ -1111,7 +1433,7 @@ Namespace Controllers
         End Class
         Private Class clsItemQAndA
             Inherits clsMain
-            Public ItemType As String, ItemNo As String, ItemId As String, Itemtxt As String, ItemStatus As String
+            Public ItemType As String, ItemNo As String, ItemId As String, Itemtxt As String, ItemStatus As String, multiname As String, multipath As String
         End Class
         Public Class clsQuizData
             Inherits clsMain
