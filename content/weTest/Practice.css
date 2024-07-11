@@ -1,0 +1,22 @@
+﻿.ui-page {background-color: #f7eee9;}
+.wrapper {margin-top: 130px;}
+
+#iconReading {background: url(/images/Wetest/reading.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
+#iconListen {background: url(/images/Wetest/listening.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
+#iconVocab {background: url(/images/Wetest/vocab.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
+#iconGramma {background: url(/images/Wetest/gramma.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
+#iconSituation {background: url(/images/Wetest/situation.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
+
+.Lessondiv{float:left;width:80px;height:50px;background-color:#82d1f5;line-height:50px;text-align:center;margin-left:23px;border-radius:1em;}
+
+.LessonR{background-color:#82d1f5;}
+.LessonL{background-color:#d98c8a;}
+.LessonV{background-color:#64c087;}
+.LessonG{background-color:#d3c2df;}
+.LessonS{background-color:#e5b99e;}
+
+.skilldiv {margin-top:15px;}
+
+.otherButton{background: url(/images/Wetest/other.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:25px;height:25px;margin:auto;}
+
+#LessonType {margin-top:40px;}
