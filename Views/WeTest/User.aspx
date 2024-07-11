@@ -2,9 +2,9 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server"></asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
-    <link href="../content/Wetest/Wetest.css?ver=1.1.1" rel="stylesheet" type="text/css" />
-    <link href="../content/Wetest/User.css?ver=1.1.1" rel="stylesheet" type="text/css" />
-    <script src="../scripts/Wetest/User.js?ver=1.1.1" type="text/javascript"></script>
+    <link href="../content/Wetest/Wetest.css?ver=1.1.2" rel="stylesheet" type="text/css" />
+    <link href="../content/Wetest/User.css?ver=1.1.2" rel="stylesheet" type="text/css" />
+    <script src="../scripts/Wetest/User.js?ver=1.1.2" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="MainContent" runat="server">
@@ -58,11 +58,23 @@
             </div>
         </div>
     </div>
+
     <div name='alert' id="dialogAlert" class='my-popup alert ui-popup-container ui-popup-hidden'>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
             <div class='ui-icon wrong'></div>
             <div class='ui-text'></div>
             <div id="btnOK" class='btn btnSelected'>OK</div>
+        </div>
+    </div>
+
+    <div name='select' id="dialogSelect" class='my-popup confirm ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon done'></div>
+            <div class='ui-text'></div>
+            <div class="ui-twoButton">
+                <div class='btn btnCancel'>No</div>
+                <div class='btn btnSelected'>Yes</div>
+            </div>
         </div>
     </div>
 
