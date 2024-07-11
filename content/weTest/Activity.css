@@ -27,7 +27,7 @@
 #divSideMenuBar { margin-right: auto; margin-left: auto;padding-top: 20px;} 
 #divPause {background: url(/images/Wetest/Pause.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;cursor:pointer;margin: auto;} 
 #divAllQuestion {background: url(/images/Wetest/AllQuestion.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;margin: auto;cursor:pointer;} 
-
+#divShowExplain {background: url(/images/Wetest/key.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;margin: auto;cursor:pointer;} 
 .footer {display: flex;}
 
 .footerButton {display: flex;justify-content:center;float:left;width:90%;padding:20px;}
@@ -59,6 +59,7 @@
 .LR5Selected {background: url(/images/Wetest/LR5Selected.png)!important;background-repeat: no-repeat!important;background-size: contain!important}
 
 #divGotoLogin{background: url(/images/Wetest/Login.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 70px;height: 70px;float: right;}
+#divGotoMainMenu{background: url(/images/Wetest/Previous.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 70px;height: 70px;float: right;}
 
 .runningStatus {background-color:white;height: 100%;width:0;border-radius: 1em 0 0 1em;}
 
@@ -78,4 +79,5 @@
 #PanelLeapChoice {display:flex;margin-bottom: 30px;}
 .pageLeapchoice {float:left;}
 #divTime {font-size: 2em;}
-.flexDiv {display: flex;}
+
+.ExplainQ {background-color: #f1d196;padding: 20px;margin: 20px;border-radius: 0.5em;}
