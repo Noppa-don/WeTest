@@ -1,13 +1,16 @@
 ﻿<%@ Page Title="" Language="VB" MasterPageFile="~/Views/Shared/ms2018.Master" Inherits="System.Web.Mvc.ViewPage" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
+  
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
-    <link href="../content/Wetest/Wetest.css?ver=1.1.1" rel="stylesheet" type="text/css" />
-    <link href="../content/Wetest/Activity.css?ver=1.1.1" rel="stylesheet" type="text/css" />
-    <script src="../scripts/Wetest/Activity.js?ver=1.1.1" type="text/javascript"></script>
+    <link href="../content/Wetest/Wetest.css?ver=1.1.2" rel="stylesheet" type="text/css" />
+    <link href="../content/Wetest/Activity.css?ver=1.1.2" rel="stylesheet" type="text/css" />
+    <script src="../scripts/Wetest/Activity.js?ver=1.1.2" type="text/javascript"></script>
+    <script src="../scripts/Wetest/jquery.button-audio-player.js" type="text/javascript"></script>
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="MainContent" runat="server">
+
     <div id="divActivity">
         <div id="divTopControlBar">
             <div id="divTestsetIcon">
@@ -36,6 +39,7 @@
                 <div id="divTime"><span id="minutes"></span>:<span id="seconds"></span></div>
                 <div id="divPause"></div>
                 <div id="divAllQuestion"></div>
+                <div id="divShowExplain"></div>
             </div>
         </div>
 
@@ -55,9 +59,9 @@
 
     <div class='wrapper ui-hide'>
         <div id="divShowLevel">
-            <b>Congratulations !</b> Your Level is<span id="spnLevel"></span><br />
+           <span id="spnLevel"> <b>Congratulations !</b> Your Level is<br />
             <br />
-            You can go to Log-in for practice and exam more. 
+            You can go to Log-in for practice and exam more. </span>
             <br />
             <br />
             <br />
@@ -73,13 +77,14 @@
             <br />
             <div>
                 <div id="divGotoLogin"></div>
+                <div id="divGotoMainMenu"></div>
             </div>
 
 
         </div>
 
     </div>
-    *
+
     <div name='select' id="dialogSelect" class='my-popup confirm ui-popup-container ui-popup-hidden'>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
             <div class='ui-icon send'></div>
