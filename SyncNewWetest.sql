@@ -56,3 +56,9 @@ TRUNCATE TABLE WeTest_dev.dbo.tblTestsetQuestionDetail
 INSERT INTO WeTest_dev.dbo.tblTestsetQuestionDetail(TSQDId,TSQSId,TSQDNo,QuestionId,IsActive,LastUpdate)
 SELECT TSQd_id,TSQS_Id,q.Question_No,td.Question_Id,td.IsActive,td.LastUpdate
 FROM WeTest.dbo.tblTestsetQuestionDetail td inner join WeTest.dbo.tblquestion q on td.Question_Id = q.Question_Id
+
+-- tblMultimediaObject
+TRUNCATE TABLE WeTest_dev.dbo.tblMultimediaObject
+INSERT INTO WeTest_dev.dbo.tblMultimediaObject(MultimediaObjId,QSetId,MFileName,MFileType,ReferenceId,ReferenceType,IsActive,LastUpdate)
+SELECT MultimediaObjId,QSetId,MFileName,MFileType,ReferenceId,ReferenceType,IsActive,LastUpdate
+FROM WeTest.dbo.tblMultimediaObject
