@@ -2,13 +2,12 @@
 
 // ========================= Page Load ======================== //
 $(function () { $('div[data-role=page]').page({ theme: 'c', }); $('#userName').focus(); });
-
+CheckLoginStatus();
 // ============================================================ //
 
 // ======================= Object Event ======================= //
 $(document)
 // ======================= Login ======================= //
-
     .on('focus', '#userName, #userPass', function (e, data) { $(this).removeClass("InvalidData") })
     .on('keypress blur', '#userName, #userPass', function (e, data) {
         var xkey = keyA(e);
@@ -31,6 +30,23 @@ $(document)
         window.location = '/Wetest/Registration';
     })
 
+// ======================= MainMenu ======================= //
+    .on('click', '#btnMockUpExam', function (e, data) {
+  
+        $('#dialogSelect').attr('action', 'focus');
+        $('#dialogSelect .ui-text').html('Do you want to start exam for up level ?');
+        popupOpen($('#dialogSelect'), 99999);
+    })
+    .on('click', '#btnPracticeMenu', function (e, data) {
+         window.location = '/Wetest/Practice';
+     })
+    .on('click', '#dialogSelect .btnSelected', function (e, data) {
+        popupClose($(this).closest('.my-popup'));
+        GotoExam();
+    })
+    .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel', function (e, data) {
+        popupClose($(this).closest('.my-popup'));
+    })
 // ============================================================ //
 
 // ========================= Function ========================= //
@@ -47,7 +63,7 @@ function checkInvalidLoginData() {
 
 function CheckUserLogin() {
     var post1 = 'Username=' + $('#userName').val() + '&Password=' + $('#userPass').val();
-    console.log(post1);
+   
     $.ajax({
         type: 'POST',
         url: '/weTest/CheckUserLogin',
@@ -65,6 +81,42 @@ function CheckUserLogin() {
                     $('#dialogAlert').attr('action', 'focus');
                     $('#dialogAlert .ui-text').html(data[i].Msg);
                     popupOpen($('#dialogAlert'), 99999);
+                }
+
+            }
+        }
+    });
+}
+
+function GotoExam() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/CreateMockUpExam',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].dataType == 'success') {
+                    var x = setInterval(function () {
+                        clearInterval(x);
+                        window.location = '/Wetest/Activity';
+                    }, 2000);
+                }
+            }
+        }
+    });
+}
+
+function CheckLoginStatus() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/CheckLoginStatus',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].Result == 'success') {
+                    $('.login').addClass('ui-hide');
+                    $('.UserNameandLevel').html(data[i].Firstname + '<br />' + data[i].Firstname);
+
+                    $('.UserData').removeClass('ui-hide');
+                    $('.MainMenu').removeClass('ui-hide');
                 }
 
             }
