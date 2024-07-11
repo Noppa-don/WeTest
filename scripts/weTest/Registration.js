@@ -327,7 +327,7 @@ function GotoQuiz() {
                     var x = setInterval(function () {
                         clearInterval(x);
                         window.location = '/Wetest/Activity';
-                    }, 3000);
+                    }, 2000);
                 }
             }
         }
