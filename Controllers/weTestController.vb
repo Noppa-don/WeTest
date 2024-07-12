@@ -1424,6 +1424,77 @@ Namespace Controllers
         Function Practice() As ActionResult
             Return View()
         End Function
+
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function GetLesson()
+            Dim L1 As New List(Of clsPracticeSet)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                'Get Reading
+                Dim skillName() As String = {"Reading", "Listening", "Grammar", "Situation", "Vocabulary"}
+
+                For i = 0 To skillName.Count() - 1
+
+                    Dim Skn As String = skillName(i)
+
+                    cmdMsSql = cmdSQL(cn, "select row_number() over(order by testsetid)as TestsetNo,TestsetId from tblTestset where testsetname like '%' + @skillName + '%' and isactive = 1 order by TestsetId")
+
+                    With cmdMsSql
+                        .Parameters.Add("@skillName", SqlDbType.VarChar).Value = Skn
+                        .ExecuteNonQuery()
+                    End With
+
+                    dt = getDataTable(cmdMsSql)
+
+                    Dim skilltxt As String
+                    Dim skilltxtShort As String
+
+                    If dt.Rows.Count() <> 0 Then
+                        skilltxt = ""
+                        skilltxtShort = ""
+                        For j = 0 To dt.Rows.Count() - 1
+                            skilltxt &= "<div id=" & dt.Rows(j)("TestsetId").ToString & " class=""Lessondiv Lesson" & Skn & """>" & dt.Rows(j)("TestsetNo").ToString & "</div>"
+                            If j = 4 Then
+                                skilltxtShort = skilltxt
+                            End If
+                        Next
+                        Dim objList As New clsPracticeSet()
+                        objList.skillSet = Skn
+                        objList.skillTxtAll = skilltxt
+                        objList.skillTxtShort = skilltxtShort
+                        objList.skillAmount = dt.Rows.Count()
+                        L1.Add(objList)
+                        objList = Nothing
+                    Else
+                        Dim objList As New clsPracticeSet()
+                        objList.skillSet = Skn
+                        objList.skillTxtAll = ""
+                        objList.skillTxtShort = ""
+                        objList.skillAmount = dt.Rows.Count()
+                        L1.Add(objList)
+                        objList = Nothing
+                    End If
+                Next
+
+            Catch ex As Exception
+                Dim objList As New clsPracticeSet()
+                objList.skillSet = "error"
+                objList.skillTxtAll = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
 #End Region
 
 #Region "Class"
@@ -1438,6 +1509,10 @@ Namespace Controllers
         Public Class clsQuizData
             Inherits clsMain
             Public QuizId As String, QuizMode As String, TestsetId As String, FullScore As String, QuestionAmount As String, resultType As String, resultMsg As String
+        End Class
+        Public Class clsPracticeSet
+            Inherits clsMain
+            Public skillSet As String, skillTxtShort As String, skillTxtAll As String, skillAmount As String
         End Class
 #End Region
 
