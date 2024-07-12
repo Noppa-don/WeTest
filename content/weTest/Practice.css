@@ -1,22 +1,36 @@
 ﻿.ui-page {background-color: #f7eee9;}
 .wrapper {margin-top: 130px;}
+.btnBack {background: url(/images/Wetest/Previous.png);}
+.footerButton {display: flex;justify-content: space-between;padding: 10px 10% 20px 10%;}
 
-#iconReading {background: url(/images/Wetest/reading.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
-#iconListen {background: url(/images/Wetest/listening.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
-#iconVocab {background: url(/images/Wetest/vocab.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
-#iconGramma {background: url(/images/Wetest/gramma.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
-#iconSituation {background: url(/images/Wetest/situation.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
+#iconReading ,#btnRandomReading {background: url(/images/Wetest/reading.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
+#iconListen,#btnRandomListening {background: url(/images/Wetest/listening.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
+#iconVocab,#btnRandomVocab {background: url(/images/Wetest/vocab.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
+#iconGrammar ,#btnRandomGrammar{background: url(/images/Wetest/gramma.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
+#iconSituation,#btnRandomSituation {background: url(/images/Wetest/situation.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
 
 .Lessondiv{float:left;width:80px;height:50px;background-color:#82d1f5;line-height:50px;text-align:center;margin-left:23px;border-radius:1em;}
 
-.LessonR{background-color:#82d1f5;}
-.LessonL{background-color:#d98c8a;}
-.LessonV{background-color:#64c087;}
-.LessonG{background-color:#d3c2df;}
-.LessonS{background-color:#e5b99e;}
+.LessonReading{background-color:#82d1f5;cursor:pointer;}
+.LessonListening{background-color:#d98c8a;cursor:pointer;}
+.LessonVocabulary{background-color:#64c087;cursor:pointer;}
+.LessonGrammar{background-color:#d3c2df;cursor:pointer;}
+.LessonSituation{background-color:#e5b99e;cursor:pointer;}
 
 .skilldiv {margin-top:15px;}
 
-.otherButton{background: url(/images/Wetest/other.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:25px;height:25px;margin:auto;}
+.otherButton{background: url(/images/Wetest/other.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:25px;height:25px;margin:auto;cursor:pointer;}
 
 #LessonType {margin-top:40px;}
+
+#AllReading .Lessondiv{margin-bottom:10px;}
+#AllListening .Lessondiv{margin-bottom:10px;}
+#AllGrammar .Lessondiv{margin-bottom:10px;}
+#AllSituation .Lessondiv{margin-bottom:10px;}
+#AllVocabulary .Lessondiv{margin-bottom:10px;}
+
+#RandomType .btn,#skillRandom .btn {width:60px; min-width: 60px;margin-right: 15px;margin-left: 15px;}
+#RandomType,#skillRandom{margin-top: 50px;}
+
+#btnRandomReading,#btnRandomListening,#btnRandomVocab,#btnRandomGrammar,#btnRandomSituation {line-height: 30px;cursor: pointer;margin: auto;min-width: 20%;}
+    
