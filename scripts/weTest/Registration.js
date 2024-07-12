@@ -211,7 +211,7 @@ function UploadStudentPhoto() {
             }
         });
     } else {
-        console.log(1);
+       
         $.ajax({
             type: 'POST',
             url: '/weTest/UploadDummyStudentPhoto',
