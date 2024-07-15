@@ -1,5 +1,4 @@
-﻿var OTPNum
-// ========================= Page Load ======================== //
+﻿// ========================= Page Load ======================== //
 $(function () { $('div[data-role=page]').page({ theme: 'c', }); });
 // ============================================================ //
 // ======================= Object Event ======================= //
@@ -17,14 +16,13 @@ $(document)
                  if (data[i].skillSet == 'error') {
                      //console.log(data[i].skillTxtAll);
                  } else {
-                     console.log($('#' + data[i].skillSet + 'Lesson'));
 
                      $('#' + data[i].skillSet + 'Lesson').html(data[i].skillTxtShort);
 
                      if (data[i].skillAmount < 6) {
                          $('#' + data[i].skillSet + 'Other').addClass('ui-hide');
                      } else {
-                         console.log('#All');
+                         $('#' + data[i].skillSet + 'Other').removeClass('ui-hide');
                          $('#All' + data[i].skillSet).html(data[i].skillTxtAll);
                      }
                  }
@@ -75,11 +73,16 @@ $(document)
      $('#AllReading,#AllListening,#AllGrammar,#AllSituation,#AllVocabulary,.footer').addClass('ui-hide');
  })
  .on('click', '.Lessondiv', function (e, data) {
-
+        var TestsetName = $(this).text();
+        var TestsetId = $(this).attr('id');
         $('#dialogSelect').attr('action', 'focus');
-        $('#dialogSelect .ui-text').html('Do you want to start practice now!');
-        popupOpen($('#dialogSelect'), 99999);
+        $('#dialogSelect').attr('TestsetName', TestsetName);
+        $('#dialogSelect').attr('TestsetId', TestsetId);
 
+        $('#dialogSelect .ui-text').html('Do you want to start practice ' + TestsetName + ' now!');
+        $('#dialogSelect .btnSelected').attr('TestsetId', TestsetId);
+
+        popupOpen($('#dialogSelect'), 99999);
     })
  .on('click', '.ui-icon.close ', function (e, data) {
       popupClose($(this).closest('.my-popup'));
@@ -87,7 +90,7 @@ $(document)
  .on('click', '#dialogSelect .btnSelected', function (e, data) {
 
       popupClose($(this).closest('.my-popup'));
-      GotoQuiz();
+      GotoPractice($(this).attr('testsetid'));
  })
  .on('click', '#dialogSelect .btnCancel', function (e, data) {
 
@@ -95,10 +98,14 @@ $(document)
 
  })
 
-function GotoQuiz() {
+function GotoPractice(TestsetId) {
+
+    var post1 = 'TestsetId=' + TestsetId;
+
     $.ajax({
         type: 'POST',
-        url: '/weTest/SavePractice',
+        url: '/weTest/CreatePractice',
+        data: post1,
         success: function (data) {
             for (var i = 0; i < data.length; i++) {
                 if (data[i].dataType == 'success') {
