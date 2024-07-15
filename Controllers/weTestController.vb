@@ -432,10 +432,13 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-
+                '20240712 -- เพิ่ม dialog กดจบการทำฝึกฝน
                 If Session("QuizMode").ToString = 1 Then
                     objList.dataType = "pmt"
                     objList.errorMsg = "Do you want to send placement test ?"
+                ElseIf Session("QuizMode").ToString = 2 Then
+                    objList.dataType = "practice"
+                    objList.errorMsg = "Do you want to send Practice ?"
                 ElseIf Session("QuizMode").ToString = 3 Then
                     objList.dataType = "exam"
                     objList.errorMsg = "Do you want to send Exam ?"
@@ -466,6 +469,7 @@ Namespace Controllers
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
 
+                'Update Score
 
                 cmdMsSql = cmdSQL(cn, "Select sum(score) As TotalScore,cast((sum(score)*100)/FullScore As Decimal(18,2)) As PercentScore from tblQuizScore qs inner join tblquiz q On q.quizid = qs.quizid 
                                         where qs.QuizId = @QuizId Group by FullScore;")
@@ -485,26 +489,48 @@ Namespace Controllers
 
                 dt = getDataTable(cmdMsSql)
 
+                'Next Step
+
                 If Session("QuizMode") = "1" Then
+                    'QuizMode 1 : PlacementTest
                     Dim Result As String = CheckAndCreatePlacementTest()
+                    'ครั้งที่ 1 ให้ทำชุดที่ 2 ต่อ
                     If Result = "success2" Then
                         objList.dataType = "success2"
+                        Session("QuestionNo") = Nothing
                     Else
-                        'Update ระดับชั้น
+                        'ครั้งที่ 2 ให้บันทึก Level ที่ทำได้
                         Dim ResultTxt As String = UpdateStudentLevel(CInt(dtScore(0)("PercentScore")))
                         If ResultTxt <> "error" Then
                             objList.dataType = "success3"
                             objList.errorMsg = ResultTxt
+                            Session("QuizId") = Nothing
+                            Session("QuestionNo") = Nothing
                         End If
                     End If
+                    '20240712 -- เพิ่มการตรวจสอบสถานะการกดส่ง Practice
+                ElseIf Session("QuizMode") = "2" Then
+                    'QuizMode 2 : Practice
+                    If Session("QuizState") IsNot Nothing Then
+                        Session("QuizState") = Nothing
+                        Session("QuizId") = Nothing
+                        Session("QuestionNo") = Nothing
+                        objList.dataType = "success2"
+                    Else
+                        Session("QuizState") = "showanswer"
+                        objList.dataType = "showanswer"
+                        Session("QuestionNo") = Nothing
+                    End If
                 ElseIf Session("QuizMode") = "3" Then
-                    objList = CheckAndUplevel()
+                        'QuizMode 3 : Exam
+                        objList = CheckAndUplevel()
+                    Session("QuizId") = Nothing
+                    Session("QuestionNo") = Nothing
                 End If
 
                 L1.Add(objList)
                 objList = Nothing
-                Session("QuizId") = Nothing
-                Session("QuestionNo") = Nothing
+
             Catch ex As Exception
                 objList.dataType = "error"
                 objList.errorMsg = ex.Message
@@ -601,22 +627,28 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
         <AcceptVerbs(HttpVerbs.Post)>
-        Function GetLeapChoicePanel()
-            Dim L1 As New List(Of clsMain)
+        Function GetChoicePanel()
+            Dim L1 As New List(Of clsLeapChoiceData)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
-            Dim objList As New clsMain()
+            Dim objList As New clsLeapChoiceData()
             Dim LeapChoicetxt As String = ""
             Try
                 ' ================ Check Permission ================
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-                cmdMsSql = cmdSQL(cn, "select qqno,qq.QuestionId,qs.QuizScoreId,qs.AnswerId from tblQuizQuestion qq left join tblQuizScore qs on qq.QuizId = qs.QuizId and qq.QuestionId = qs.QuestionId 
+                '20240712 -- เพิ่ม Query ตาม ChoiceMode เพื่อตรวจสอบว่าแสดงข้อข้ามหรือแสดงเฉลยข้อสอบ
+                If Request.Form("ChoiceMode") = "1" Then
+                    cmdMsSql = cmdSQL(cn, "select qqno,qq.QuestionId,qs.QuizScoreId,qs.AnswerId from tblQuizQuestion qq left join tblQuizScore qs on qq.QuizId = qs.QuizId and qq.QuestionId = qs.QuestionId 
                                         where qq.quizId = @QuizId order by qqno")
+                ElseIf Request.Form("ChoiceMode") = "2" Then
+                    cmdMsSql = cmdSQL(cn, "select qqno,qq.QuestionId,qs.QuizScoreId,qs.AnswerId from tblQuizQuestion qq left join tblQuizScore qs on qq.QuizId = qs.QuizId and qq.QuestionId = qs.QuestionId 
+                                        where qq.quizId = @QuizId and qs.QuizScoreId is not null and qs.AnswerId is null order by qqno")
+                End If
 
                 With cmdMsSql
-                    .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
-                End With
+                        .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
+                    End With
 
                 dt = getDataTable(cmdMsSql)
 
@@ -652,20 +684,23 @@ Namespace Controllers
 
                             LeapChoicetxt &= "<div class=""LeapchoiceItem" & PanelClass & """ qno=""" & dt(rowNum)("QQNo").ToString & """><div class=""" & ChoiceClass & """></div><span class=""QQNo"">" & dt(rowNum)("QQNo").ToString & "</span></div>"
                             rowNum += 1
+                            If rowNum > dt.Rows.Count() - 1 Then Exit For
                         Next
                         LeapChoicetxt &= "</div>"
+                        If rowNum > dt.Rows.Count() - 1 Then Exit For
                     Next
                     LeapChoicetxt &= "</div>"
                 Next
 
-                objList.dataType = "success"
-                objList.errorMsg = LeapChoicetxt
+                objList.result = "success"
+                objList.leapChoicetxt = LeapChoicetxt
+                objList.allPage = PageNum
                 L1.Add(objList)
                 objList = Nothing
 
             Catch ex As Exception
-                objList.dataType = "error"
-                objList.errorMsg = ex.Message
+                objList.result = "error"
+                objList.leapChoicetxt = ex.Message
                 L1.Add(objList)
                 objList = Nothing
             Finally
@@ -804,18 +839,18 @@ Namespace Controllers
                 Dim QuestionId As String = dtQuestion(0)("QuestionId").ToString
                 Dim QSetId As String = dtQuestion(0)("QSetId").ToString
 
-                Dim QName As String = dtQuestion(0)("QuestionName_Quiz").ToString
-                QName = QName.Replace("___MODULE_URL___", GenFilePath(QSetId))
-
                 Dim QExplain As String = dtQuestion(0)("QuestionExpain_Quiz").ToString
                 QExplain = QExplain.Replace("___MODULE_URL___", GenFilePath(QSetId))
-
                 QExplain = "<br><div class=""ExplainQ ui-hide"">" & QExplain & "</div>"
+
+                Dim QName As String = dtQuestion(0)("QuestionName_Quiz").ToString
+                QName = QName.Replace("___MODULE_URL___", GenFilePath(QSetId))
+                QName = "<div class=""fistflexdiv"">" & dtQuestion(0)("QQNo").ToString & ".</div><div><div>" & QName & "</div>" & QExplain & "</div>"
 
                 Dim objListQuestion As New clsItemQAndA()
                 objListQuestion.ItemType = "1"
                 objListQuestion.ItemId = dtQuestion(0)("QuestionId").ToString
-                objListQuestion.Itemtxt = dtQuestion(0)("QQNo").ToString & ". " & QName & QExplain
+                objListQuestion.Itemtxt = QName
 
                 cmdMsSql = cmdSQL(cn, "select MultimediaObjId,MfileName from tblMultimediaObject where ReferenceId = @QuestionId and ReferenceType = 1 and isactive = 1;")
 
@@ -854,8 +889,12 @@ Namespace Controllers
 
                 '----Answer----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-                cmdMsSql = cmdSQL(cn, "Select qa.qano,qa.AnswerId,a.AnswerNameQuiz,qs.AnswerId as UserAnswered,a.AnswerExpainQuiz from tblQuizAnswer QA inner join tblAnswer A on qa.AnswerId = a.AnswerId  
-                                        left join tblQuizScore qs on qa.quizid = qs.quizid and qa.QuestionId = qs.QuestionId where qa.QuestionId = @QuestionId and Qa.QuizId = @QuizId order by QANo")
+                '20240712 -- แก้ Query สำหรับแสดงเฉลย
+                cmdMsSql = cmdSQL(cn, "Select qa.qano,qa.AnswerId,a.AnswerNameQuiz,qs.AnswerId as UserAnswered,qs.Score as UserScore,a.AnswerExpainQuiz, a.AnswerScore
+                                        from tblQuizAnswer QA inner join tblAnswer A on qa.AnswerId = a.AnswerId  
+                                        left join tblQuizScore qs on qa.quizid = qs.quizid and qa.QuestionId = qs.QuestionId 
+                                        where qa.QuestionId = @QuestionId and Qa.QuizId = @QuizId order by QANo")
+
                 With cmdMsSql
                     .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = QuizId
                     .Parameters.Add("@QuestionId", SqlDbType.VarChar).Value = QuestionId
@@ -870,8 +909,21 @@ Namespace Controllers
 
                 For i = 0 To dtAnswer.Rows.Count - 1
                     Dim IsAnswered As String = ""
-                    If dtAnswer(i)("AnswerId").ToString = dtAnswer(i)("UserAnswered").ToString Then
-                        IsAnswered = "Answered"
+
+                    If Session("QuizState") IsNot Nothing Then
+                        If CInt(dtAnswer(i)("AnswerScore")) > 0 Then
+                            IsAnswered = "RightAns"
+                        End If
+
+                        If (dtAnswer(i)("AnswerId").ToString = dtAnswer(i)("UserAnswered").ToString) AndAlso CInt(dtAnswer(i)("UserScore")) <= 0 Then
+                            IsAnswered = "WrongAns"
+                        End If
+
+                    Else
+                        If dtAnswer(i)("AnswerId").ToString = dtAnswer(i)("UserAnswered").ToString Then
+                            IsAnswered = "Answered"
+
+                        End If
                     End If
 
                     Dim Aname As String = dtAnswer(i)("AnswerNameQuiz").ToString
@@ -883,12 +935,14 @@ Namespace Controllers
 
                     Aname = Aname & AExplain
 
+                    '20240712 -- ปรับการแสดงเฉลยคำตอบ
                     If i Mod 2 = 0 Then
-                        AnsHtml &= "<div Class=""divAnswerRow""><div Class=""divAnswerbar Left " & IsAnswered & """ QId=""" & QuestionId & """AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
-                            ArrChoicetxt(i) & ". " & Aname & "</div>"
+                        AnsHtml &= "<div Class=""divAnswerRow"">
+                                    <div Class=""divAnswerbar flexdiv Left " & IsAnswered & """ QId=""" & QuestionId & """ AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
+                          "<div class=""fistflexdiv"">" & ArrChoicetxt(i) & ".</div><div>" & Aname & "</div></div>"
                     Else
-                        AnsHtml &= "<div Class=""divAnswerbar Right " & IsAnswered & """ QId=""" & QuestionId & """AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
-                            ArrChoicetxt(i) & ". " & Aname & "</div></div>"
+                        AnsHtml &= "<div Class=""divAnswerbar flexdiv Right " & IsAnswered & """ QId=""" & QuestionId & """ AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
+                            "<div class=""fistflexdiv""> " & ArrChoicetxt(i) & ".</div><div>" & Aname & "</div></div></div>"
                     End If
 
                     objList2.ItemType = "2"
@@ -1199,7 +1253,7 @@ Namespace Controllers
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
 
-                Dim PassExamScore As Integer = CInt(ConfigurationManager.AppSettings("PassExamScore"))
+                Dim PassExamScore As Integer = CInt(ConfigurationManager.AppSettings("PassExamPercent"))
 
                 cmdMsSql = cmdSQL(cn, "Select q.PercentScore,t.LevelId from tblquiz q inner join tbltestset t on q.TestSetId = t.TestsetId  where q.quizid = @QuizId")
 
@@ -1256,7 +1310,6 @@ Namespace Controllers
             Return objList
         End Function
 
-
 #End Region
 
 #Region "User"
@@ -1308,6 +1361,7 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+
         <AcceptVerbs(HttpVerbs.Post)>
         Function CheckLoginStatus()
             Dim L1 As New List(Of clsStudentData)
@@ -1436,17 +1490,21 @@ Namespace Controllers
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
 
-                'Get Reading
+
                 Dim skillName() As String = {"Reading", "Listening", "Grammar", "Situation", "Vocabulary"}
 
+                '20240712 -- ปรับ Query ให้ดึงเฉพาะระดับชั้นที่ตรงและน้อยกว่าที่ User สามารถเล่นได้
                 For i = 0 To skillName.Count() - 1
 
                     Dim Skn As String = skillName(i)
 
-                    cmdMsSql = cmdSQL(cn, "select row_number() over(order by testsetid)as TestsetNo,TestsetId from tblTestset where testsetname like '%' + @skillName + '%' and isactive = 1 order by TestsetId")
-
+                    cmdMsSql = cmdSQL(cn, "Select row_number() over(order by testsetid)As TestsetNo,TestsetId
+                                            From tblTestset t inner Join tbllevel l on t.LevelId = l.LevelId
+                                            Where testsetname Like '%' + @skillName + '%' and levelno <= (select top 1 levelno from tbllevel l left join tblStudentLevel sl on l.LevelId = sl.LevelId 
+                                            where studentId = @stdId)  and t.isactive = 1 and l.isactive = 1 order by TestsetId")
                     With cmdMsSql
                         .Parameters.Add("@skillName", SqlDbType.VarChar).Value = Skn
+                        .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
                         .ExecuteNonQuery()
                     End With
 
@@ -1495,6 +1553,46 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function CreatePractice()
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsMain()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                Dim StdId As String = Session("StudentId").ToString
+                Dim TestsetId As String = Request.Form("TestsetId")
+
+
+                Dim QuizData As New clsQuizData
+
+                QuizData.QuizMode = "2"
+                QuizData.TestsetId = TestsetId
+
+                CreateNewQuiz(QuizData)
+
+                objList.dataType = "success"
+                objList.errorMsg = ""
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
 #End Region
 
 #Region "Class"
@@ -1513,6 +1611,10 @@ Namespace Controllers
         Public Class clsPracticeSet
             Inherits clsMain
             Public skillSet As String, skillTxtShort As String, skillTxtAll As String, skillAmount As String
+        End Class
+        Public Class clsLeapChoiceData
+            Inherits clsMain
+            Public result As String, leapChoicetxt As String, allPage As String
         End Class
 #End Region
 
