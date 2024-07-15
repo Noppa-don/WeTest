@@ -22,7 +22,10 @@
 .divAnswerbar {width:50%;margin-top:5px;background-color:white; border-radius:0.5em;padding:20px;cursor:pointer;}
 .divAnswerbar.Left{margin-right:5px;}
 .divAnswerbar.Right{margin-left:5px;}
+
 .divAnswerbar.Answered{background-color:moccasin;}
+.divAnswerbar.RightAns{background-color:darkseagreen; color:white;}
+.divAnswerbar.WrongAns{background-color:indianred; color:white;}
 
 #divSideMenuBar { margin-right: auto; margin-left: auto;padding-top: 20px;} 
 #divPause {background: url(/images/Wetest/Pause.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;cursor:pointer;margin: auto;} 
@@ -81,3 +84,4 @@
 #divTime {font-size: 2em;}
 
 .ExplainQ {background-color: #f1d196;padding: 20px;margin: 20px;border-radius: 0.5em;}
+.fistflexdiv.RightCircle {width: 30px; height: 35px; background: url(/images/Wetest/circle.png); background-repeat: no-repeat; background-size: contain; background-position: left; margin: auto; margin-bottom: 5px;margin-top: 5px;}
