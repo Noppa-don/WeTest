@@ -279,7 +279,6 @@ function UpdateOTPStatus(OTPStatus) {
     });
 }
 function GetPackagePrice() {
-    console.log('PackagePrice');
     $.ajax({
         type: 'POST',
         url: '/weTest/GetPackagePrice',
