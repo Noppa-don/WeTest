@@ -10,7 +10,6 @@ GetQuestionAndAnswer()
 QuizTimer()
 setProgressbar();
 PageNum = 1
-AllPage = 6
 // ============================================================ //
 // ======================= Object Event ======================= //
 $(document)
@@ -71,43 +70,33 @@ $(document)
          success: function (data) {
              for (var i = 0; i < data.length; i++) {
 
-
-
                  if (data[i].dataType == 'success2') {
                      window.location = '/Wetest/Activity';
                  } else if (data[i].dataType == 'success3') {
-                     $('#divActivity').addClass("ui-hide");
-                     $('#divShowLevel').removeClass("ui-hide");
-                     $('.wrapper').removeClass("ui-hide");
-                     $('.banner').removeClass("ui-hide");
+
+                     $('#divActivity, #divGotoMainMenu').addClass("ui-hide");
+                     $('#divShowLevel,.wrapper,.banner,#divGotoLogin').removeClass("ui-hide");
                      $('#spnLevel').html('<b>Congratulations !</b> Your Level is ' + data[i].errorMsg + '<br /><br />You can go to Log-in for practice and exam more.');
-                     $('#divGotoLogin').removeClass("ui-hide");
-                     $('#divGotoMainMenu').addClass("ui-hide");
 
                      $('#lr' + data[i].errorMsg).removeClass("LR" + data[i].errorMsg);
                      $('#lr' + data[i].errorMsg).addClass("LR" + data[i].errorMsg + "Selected");
                  } else if (data[i].dataType == 'pass') {
-                     $('#divActivity').addClass("ui-hide");
-                     $('#divShowLevel').removeClass("ui-hide");
-                     $('.wrapper').removeClass("ui-hide");
-                     $('.banner').removeClass("ui-hide");
+                     $('#divActivity,#divGotoLogin').addClass("ui-hide");
+                     $('#divShowLevel,.wrapper,.banner,#divGotoMainMenu').removeClass("ui-hide");
                      $('#spnLevel').html('<b>Congratulations !</b> Your Level up to ' + data[i].errorMsg);
-                     $('#divGotoLogin').addClass("ui-hide");
-                     $('#divGotoMainMenu').removeClass("ui-hide");
 
                      $('#lr' + data[i].errorMsg).removeClass("LR" + data[i].errorMsg);
                      $('#lr' + data[i].errorMsg).addClass("LR" + data[i].errorMsg + "Selected");
                  } else if (data[i].dataType == 'notpass') {
-                     $('#divActivity').addClass("ui-hide");
-                     $('#divShowLevel').removeClass("ui-hide");
-                     $('.wrapper').removeClass("ui-hide");
-                     $('.banner').removeClass("ui-hide");
+                     $('#divActivity,#divGotoLogin').addClass("ui-hide");
+                     $('#divShowLevel,.wrapper,.banner,#divGotoMainMenu').removeClass("ui-hide");
                      $('#spnLevel').html('<b>Sorry, You dont passed</b>');
-                     $('#divGotoLogin').addClass("ui-hide");
-                     $('#divGotoMainMenu').removeClass("ui-hide");
 
                      $('#lr' + data[i].errorMsg).removeClass("LR" + data[i].errorMsg);
                      $('#lr' + data[i].errorMsg).addClass("LR" + data[i].errorMsg + "Selected");
+                 } else if (data[i].dataType == 'showanswer') {
+                     window.location = '/Wetest/Activity';
+                     $('#divRunningBar').addClass("ui-hide");
                  }
              }
          }
@@ -170,8 +159,8 @@ $(document)
  .on('click', '#dialogAlert #btnOK', function (e, data) {
      popupClose($(this).closest('.my-popup'));
  })
- .on('click', '#divAllQuestion', function (e, data) {
-     GetLeapChoicePanel();
+ .on('click', '#divAllQuestion ,#btnAllChoice', function (e, data) {
+     GetChoicePanel(1);
  })
  .on('click', '.btnNextPage', function (e, data) {
      if ($('.btnNextPage').hasClass('UnActive') == false) {
@@ -216,6 +205,10 @@ $(document)
  .on('click', '#divGotoMainMenu', function (e, data) {
      window.location = '/Wetest/User';
  })
+ .on('click', '#btnSkip', function (e, data) {
+     GetChoicePanel(2);
+ })
+
 
 // ============================================================ //
 
@@ -223,7 +216,6 @@ $(document)
 
 function GetQuestionAndAnswer(ActionType, QuestionNo) {
     var post1 = 'ActionType=' + ActionType + '&QuestionNo=' + QuestionNo;
-    console.log(post1);
     $.ajax({
         type: 'POST',
         url: '/weTest/GetQuestionAndAnswer',
@@ -285,23 +277,35 @@ function setProgressbar() {
         }
     });
 }
-function GetLeapChoicePanel() {
+function GetChoicePanel(ChoiceMode) {
+    //ChoiceMode 1 : ปกติ , ChoiceMode 2 : เฉพาะข้อข้าม
+    var post1 = 'ChoiceMode=' + ChoiceMode
     $.ajax({
         type: 'POST',
-        url: '/weTest/GetLeapChoicePanel',
+        url: '/weTest/GetChoicePanel',
+        data: post1,
         success: function (data) {
 
             for (var i = 0; i < data.length; i++) {
+                //20240712 -- แก้ปัญหากดแล้วเจอหน้าว่าง check UnActive ปุ่ม next back
+                if (data[i].result == 'success') {
+                    AllPage = data[i].allPage;
+                    PageNum = 1;
+                    $('.btnBackPage').addClass("UnActive");
 
-                if (data[i].dataType == 'success') {
-                    $('#AllPage').html(data[i].errorMsg)
+                    if (PageNum == AllPage) {
+                        $('.btnNextPage').addClass("UnActive");
+                    } else {
+                        $('.btnNextPage').removeClass("UnActive");
+                    }
+                    $('#AllPage').html(data[i].leapChoicetxt)
                     $('#dialogLeapChoice').attr('action', 'focus');
                     popupOpen($('#dialogLeapChoice'), 99999);
                     PageNum = 1;
                 }
             }
         }
-    });
+    });  
 
 
 }
