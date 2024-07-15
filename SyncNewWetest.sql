@@ -26,7 +26,7 @@ INSERT INTO WeTest_dev.dbo.tblQuestion (QuestionId,QId,QSetId,QuestionNo,Questio
 SELECT qus.Question_Id,QId,qus.QSet_Id,Question_No,Question_Name,Question_Expain,Question_Name_Quiz,Question_Expain_Quiz,qus.IsActive,qus.LastUpdate
 FROM WeTest.dbo.tblQuestion qus
 inner join WeTest.dbo.tblLayoutConfirmed lay on lay.Question_Id = qus.Question_Id inner join WeTest_dev.dbo.tblQuestionset qs on qus.QSet_Id = qs.QsetId
-where  lay.QuizTechnicalConfirmed = '1' and lay.QuizEditConfirmed = '1' and QId is not null 
+--where  lay.QuizTechnicalConfirmed = '1' and lay.QuizEditConfirmed = '1' and QId is not null 
 SET IDENTITY_INSERT WeTest.dbo.tblQuestion OFF
 
 -- tblAnswer
@@ -62,3 +62,5 @@ TRUNCATE TABLE WeTest_dev.dbo.tblMultimediaObject
 INSERT INTO WeTest_dev.dbo.tblMultimediaObject(MultimediaObjId,QSetId,MFileName,MFileType,ReferenceId,ReferenceType,IsActive,LastUpdate)
 SELECT MultimediaObjId,QSetId,MFileName,MFileType,ReferenceId,ReferenceType,IsActive,LastUpdate
 FROM WeTest.dbo.tblMultimediaObject
+
+--tblEvaluationIndexNew
