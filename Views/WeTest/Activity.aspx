@@ -30,7 +30,7 @@
         <div id="divPlayground">
             <div id="divQ">
                 <div id="divQuestionAndAnswer">
-                    <div id="divQuestion"></div>
+                    <div id="divQuestion" class="flexDiv"></div>
                     <div id="divAnswer"></div>
                 </div>
             </div>
@@ -146,8 +146,24 @@
                 <div class="Imagebtn btnNextPage"></div>
             </div>
             <div class="ui-twoButton">
-                <div class='btn btnOrange'>Go to skip</div>
-                <div class='btn'>Go to lastest</div>
+                <div class='btn btnOrange' id="btnSkip">Go to skip</div>
+                <div class='btn'id="btnAllChoice">Go to lastest</div>
+            </div>
+        </div>
+    </div>
+    <div name='lp' id="dialogResultChoice" class='my-popup confirm ui-popup-container ui-popup-hidden'>
+        <div class='ui-icon close'></div>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div id="PanelResultChoice">
+                <div class="Imagebtn btnBackPage UnActive"></div>
+                <div id="AllPage2"></div>
+                <div class="Imagebtn btnNextPage"></div>
+            </div>
+            <div class="ui-twoButton">
+                <div class='btn btnOrange'>All</div>
+                <div class='btn' id ="btnRightMode"></div>
+                <div class='btn btnOrange' id ="btnWrongMode"></div>
+                <div class='btn' id="btnLeapChoiceMode"></div>
             </div>
         </div>
     </div>
