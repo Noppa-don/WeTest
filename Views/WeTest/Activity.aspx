@@ -1,7 +1,6 @@
 ﻿<%@ Page Title="" Language="VB" MasterPageFile="~/Views/Shared/ms2018.Master" Inherits="System.Web.Mvc.ViewPage" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
-  
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
     <link href="../content/Wetest/Wetest.css?ver=1.1.2" rel="stylesheet" type="text/css" />
@@ -36,10 +35,12 @@
             </div>
 
             <div id="divSideMenuBar">
+                <div id="divShowExplain"></div>
                 <div id="divTime"><span id="minutes"></span>:<span id="seconds"></span></div>
                 <div id="divPause"></div>
-                <div id="divAllQuestion"></div>
-                <div id="divShowExplain"></div>
+                <div id="divAllLeapChoice"></div>
+                <div id="divAllQuestion" class="ui-hide"></div>
+                
             </div>
         </div>
 
@@ -59,9 +60,9 @@
 
     <div class='wrapper ui-hide'>
         <div id="divShowLevel">
-           <span id="spnLevel"> <b>Congratulations !</b> Your Level is<br />
-            <br />
-            You can go to Log-in for practice and exam more. </span>
+            <span id="spnLevel"><b>Congratulations !</b> Your Level is<br />
+                <br />
+                You can go to Log-in for practice and exam more. </span>
             <br />
             <br />
             <br />
@@ -122,7 +123,8 @@
                 <br />
                 Detail
                 <div>
-                    <textarea name="txtDetail" id='txtDetail' class="txtDetail" cols="40" rows="6" maxlength="1000"></textarea></div>
+                    <textarea name="txtDetail" id='txtDetail' class="txtDetail" cols="40" rows="6" maxlength="1000"></textarea>
+                </div>
                 <br />
                 <div id="btnSendProblem" class='btn btnSelected'>Send Problem</div>
             </div>
@@ -147,10 +149,11 @@
             </div>
             <div class="ui-twoButton">
                 <div class='btn btnOrange' id="btnSkip">Go to skip</div>
-                <div class='btn'id="btnAllChoice">Go to lastest</div>
+                <div class='btn' id="btnGoToLast">Go to lastest</div>
             </div>
         </div>
     </div>
+    <%-- 20240715 แยก Dialog แสดงข้อเพื่อแสดงเฉลย --%>
     <div name='lp' id="dialogResultChoice" class='my-popup confirm ui-popup-container ui-popup-hidden'>
         <div class='ui-icon close'></div>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
@@ -160,10 +163,19 @@
                 <div class="Imagebtn btnNextPage"></div>
             </div>
             <div class="ui-twoButton">
-                <div class='btn btnOrange'>All</div>
-                <div class='btn' id ="btnRightMode"></div>
-                <div class='btn btnOrange' id ="btnWrongMode"></div>
-                <div class='btn' id="btnLeapChoiceMode"></div>
+                <div class='btnAnswerType AllAnswer'>All</div>
+                <div class='btnAnswerType RightAnswer flexdiv' id="btnRightMode">
+                    <div class='iconAnswer iconRightAnswer firstflexdiv'></div>
+                    <div id='RightAmount'></div>
+                </div>
+                <div class='btnAnswerType WrongAnswer flexdiv' id="btnWrongMode">
+                    <div class='iconAnswer iconWrongAnswer'></div>
+                    <div id='WrongAmount'></div>
+                </div>
+                <div class='btnAnswerType LeapAnswer flexdiv' id="btnLeapChoiceMode">
+                    <div class='iconAnswer iconLeapAnswer firstflexdiv'></div>
+                    <div id='LeapAmount'></div>
+                </div>
             </div>
         </div>
     </div>
