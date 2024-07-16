@@ -19,17 +19,17 @@
 
 #divQuestion {background-color:white;width:97%; border-radius:0.5em;padding:20px;}
 .divAnswerRow {display:flex;width:100%;margin-top:15px; border-radius:0.5em;}
-.divAnswerbar {width:50%;margin-top:5px;background-color:white; border-radius:0.5em;padding:20px;cursor:pointer;}
-.divAnswerbar.Left{margin-right:5px;}
-.divAnswerbar.Right{margin-left:5px;}
+.divAnswerbar,.divAnswerbarAns{width:50%;margin-top:5px;background-color:white; border-radius:0.5em;padding:20px;cursor:pointer;}
+.divAnswerbar.Left,.divAnswerbarAns.Left {margin-right:5px;}
+.divAnswerbar.Right,.divAnswerbarAns.Right{margin-left:5px;}
 
 .divAnswerbar.Answered{background-color:moccasin;}
-.divAnswerbar.RightAns{background-color:darkseagreen; color:white;}
-.divAnswerbar.WrongAns{background-color:indianred; color:white;}
+.divAnswerbarAns.RightAns{background-color:darkseagreen; color:white;}
+.divAnswerbarAns.WrongAns{background-color:indianred; color:white;}
 
 #divSideMenuBar { margin-right: auto; margin-left: auto;padding-top: 20px;} 
 #divPause {background: url(/images/Wetest/Pause.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;cursor:pointer;margin: auto;} 
-#divAllQuestion {background: url(/images/Wetest/AllQuestion.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;margin: auto;cursor:pointer;} 
+#divAllQuestion,#divAllLeapChoice {background: url(/images/Wetest/AllQuestion.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;margin: auto;cursor:pointer;} 
 #divShowExplain {background: url(/images/Wetest/key.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;margin: auto;cursor:pointer;} 
 .footer {display: flex;}
 
@@ -68,6 +68,7 @@
 
 #dialogPromblemQuestion {min-width: 450px!important;}
 #dialogLeapChoice .ui-content{background-color: #0a3820;}
+#dialogResultChoice .ui-content{background-color: #0a3820;}
 #txtDetail {height: 240px!important;resize:none;}
 
 #ProblemTopic-button {text-align: left;font-weight: normal;}  
@@ -79,9 +80,26 @@
 .DisabledChoice {width: 30px; height: 35px; background: url(/images/Wetest/2Right.png); margin-bottom: 5px;margin-top: 5px;}
 .stay{width: 30px; height: 35px; background: url(/images/Wetest/stay.png); background-repeat: no-repeat; background-size: contain; background-position: left; margin: auto; margin-bottom: 5px;margin-top: 5px;cursor:pointer;}
 
-#PanelLeapChoice {display:flex;margin-bottom: 30px;}
+#PanelLeapChoice, #PanelResultChoice {display:flex;margin-bottom: 30px;}
 .pageLeapchoice {float:left;}
 #divTime {font-size: 2em;}
 
 .ExplainQ {background-color: #f1d196;padding: 20px;margin: 20px;border-radius: 0.5em;}
 .fistflexdiv.RightCircle {width: 30px; height: 35px; background: url(/images/Wetest/circle.png); background-repeat: no-repeat; background-size: contain; background-position: left; margin: auto; margin-bottom: 5px;margin-top: 5px;}
+
+.RightAnsweredChoice {width: 30px; height: 35px; background: url(/images/Wetest/Right.png); background-repeat: no-repeat; background-size: contain; background-position: left; margin: auto; margin-bottom: 5px;margin-top: 5px;cursor:pointer;}
+.WrongAnsweredChoice {width: 30px; height: 35px; background: url(/images/Wetest/wrongAns.png); background-repeat: no-repeat; background-size: contain; background-position: left; margin: auto; margin-bottom: 5px;margin-top: 5px;cursor:pointer;}
+.LeapAnsweredChoice {width: 30px; height: 35px; background: url(/images/Wetest/leapAns.png); background-repeat: no-repeat; background-size: contain; background-position: left; margin: auto; margin-bottom: 5px;margin-top: 5px;cursor:pointer;}
+
+.btnAnswerType {border-radius: 1em;color:white;line-height: 30px;padding: 10px;height: 30px;cursor: pointer;box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;width: fit-content;margin: auto;min-width: 20%;text-align: center;}
+    .btnAnswerType.AllAnswer {background-color: #0a3820;border-style:solid;}
+    .btnAnswerType.RightAnswer {background-color: #63c089;}
+    .btnAnswerType.WrongAnswer {background-color: #a61e24;}
+    .btnAnswerType.LeapAnswer {background-color: #abadaf;}
+
+.iconAnswer{float: left; margin: auto; margin-bottom: 5px;margin-top: 5px;cursor:pointer;}
+.iconAnswer.iconRightAnswer {margin-left: 15px;height: 25px; width: 25px; height: 25px;background: url(/images/Wetest/RightIcon.png);background-repeat: no-repeat; background-size: contain; background-position: left;}
+.iconAnswer.iconWrongAnswer {margin-left: 15px;height: 25px; width: 25px; height: 25px;background: url(/images/Wetest/WrongIcon.png);background-repeat: no-repeat; background-size: contain; background-position: left;}
+.iconAnswer.iconLeapAnswer {margin-left: 15px;height: 25px; width: 25px; height: 25px;background: url(/images/Wetest/LeapIcon.png);background-repeat: no-repeat; background-size: contain; background-position: left;}
+
+#AllPage, #AllPage2 {min-width: 480px; min-height: 202px;}
