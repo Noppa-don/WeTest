@@ -370,46 +370,52 @@ Namespace Controllers
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim objList As New clsMain()
             Try
-                ' ================ Check Permission ================
-                cn = New SqlConnection(sqlCon("Wetest"))
-                If cn.State = 0 Then cn.Open()
-                ' ==================================================
-                cmdMsSql = cmdSQL(cn, " Select QuizScoreId from tblQuizScore  where QuizId = @QuizId and QuestionId = @QuestionId;")
+                '20240715 -- ตรวจสอบไม่ให้กดตอบคำถามใน Mode เฉลย
+                If Session("QuizState") Is Nothing Then
 
-                With cmdMsSql
-                    .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
-                    .Parameters.Add("@QuestionId", SqlDbType.VarChar).Value = Request.Form("QuestionId")
-                    .ExecuteNonQuery()
-                End With
+                    ' ================ Check Permission ================
+                    cn = New SqlConnection(sqlCon("Wetest"))
+                    If cn.State = 0 Then cn.Open()
+                    ' ==================================================
+                    cmdMsSql = cmdSQL(cn, " Select QuizScoreId from tblQuizScore  where QuizId = @QuizId and QuestionId = @QuestionId;")
 
-                Dim dtScore As DataTable = getDataTable(cmdMsSql)
-
-                If dtScore.Rows.Count <> 0 Then
-                    cmdMsSql = cmdSQL(cn, "update tblQuizScore set AnswerId = @AnsweredId,ResponseAmount = ResponseAmount + 1,Score = a.AnswerScore,LastUpdate = GETDATE()
-                                            from tblQuizScore qs inner join tblAnswer a on qs.QuestionId = a.QuestionId and a.QuestionId = @QuestionId and a.AnswerId = @AnsweredId
-                                            where qs.QuizScoreId = @QuizScoreId;")
-                    With cmdMsSql
-                        .Parameters.Add("@QuizScoreId", SqlDbType.VarChar).Value = dtScore(0)("QuizScoreId").ToString
-                        .Parameters.Add("@QuestionId", SqlDbType.VarChar).Value = Request.Form("QuestionId")
-                        .Parameters.Add("@AnsweredId", SqlDbType.VarChar).Value = Request.Form("AnsweredId")
-                        .ExecuteNonQuery()
-                    End With
-                Else
-                    cmdMsSql = cmdSQL(cn, "insert into tblQuizScore select newid(),@QuizId,@QuestionId,@AnsweredId,1,getdate(),a.AnswerScore,1,getdate()
-                                            from tblQuizAnswer qa inner join tblAnswer a on qa.AnswerId = a.AnswerId where qa.quizid = @QuizId and qa.AnswerId = @AnsweredId;")
                     With cmdMsSql
                         .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
                         .Parameters.Add("@QuestionId", SqlDbType.VarChar).Value = Request.Form("QuestionId")
-                        .Parameters.Add("@AnsweredId", SqlDbType.VarChar).Value = Request.Form("AnsweredId")
                         .ExecuteNonQuery()
                     End With
-                End If
 
-                objList.dataType = "success"
-                objList.errorMsg = " "
+                    Dim dtScore As DataTable = getDataTable(cmdMsSql)
+
+                    If dtScore.Rows.Count <> 0 Then
+                        cmdMsSql = cmdSQL(cn, "update tblQuizScore set AnswerId = @AnsweredId,ResponseAmount = ResponseAmount + 1,Score = a.AnswerScore,LastUpdate = GETDATE()
+                                            from tblQuizScore qs inner join tblAnswer a on qs.QuestionId = a.QuestionId and a.QuestionId = @QuestionId and a.AnswerId = @AnsweredId
+                                            where qs.QuizScoreId = @QuizScoreId;")
+                        With cmdMsSql
+                            .Parameters.Add("@QuizScoreId", SqlDbType.VarChar).Value = dtScore(0)("QuizScoreId").ToString
+                            .Parameters.Add("@QuestionId", SqlDbType.VarChar).Value = Request.Form("QuestionId")
+                            .Parameters.Add("@AnsweredId", SqlDbType.VarChar).Value = Request.Form("AnsweredId")
+                            .ExecuteNonQuery()
+                        End With
+                    Else
+                        cmdMsSql = cmdSQL(cn, "insert into tblQuizScore select newid(),@QuizId,@QuestionId,@AnsweredId,1,getdate(),a.AnswerScore,1,getdate()
+                                            from tblQuizAnswer qa inner join tblAnswer a on qa.AnswerId = a.AnswerId where qa.quizid = @QuizId and qa.AnswerId = @AnsweredId;")
+                        With cmdMsSql
+                            .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
+                            .Parameters.Add("@QuestionId", SqlDbType.VarChar).Value = Request.Form("QuestionId")
+                            .Parameters.Add("@AnsweredId", SqlDbType.VarChar).Value = Request.Form("AnsweredId")
+                            .ExecuteNonQuery()
+                        End With
+                    End If
+
+                    objList.dataType = "success"
+                    objList.errorMsg = ""
+                Else
+                    objList.dataType = "answered"
+                    objList.errorMsg = ""
+                End If
                 L1.Add(objList)
                 objList = Nothing
-
             Catch ex As Exception
                 objList.dataType = "error"
                 objList.errorMsg = ex.Message
@@ -627,7 +633,7 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
         <AcceptVerbs(HttpVerbs.Post)>
-        Function GetChoicePanel()
+        Function GetLeapChoicePanel()
             Dim L1 As New List(Of clsLeapChoiceData)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim objList As New clsLeapChoiceData()
@@ -637,7 +643,7 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-                '20240712 -- เพิ่ม Query ตาม ChoiceMode เพื่อตรวจสอบว่าแสดงข้อข้ามหรือแสดงเฉลยข้อสอบ
+                '20240712 -- เพิ่ม Query ตาม ChoiceMode เพื่อตรวจสอบว่าแสดงทั้งหมดหรือข้อข้าม
                 If Request.Form("ChoiceMode") = "1" Then
                     cmdMsSql = cmdSQL(cn, "select qqno,qq.QuestionId,qs.QuizScoreId,qs.AnswerId from tblQuizQuestion qq left join tblQuizScore qs on qq.QuizId = qs.QuizId and qq.QuestionId = qs.QuestionId 
                                         where qq.quizId = @QuizId order by qqno")
@@ -647,8 +653,8 @@ Namespace Controllers
                 End If
 
                 With cmdMsSql
-                        .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
-                    End With
+                    .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
+                End With
 
                 dt = getDataTable(cmdMsSql)
 
@@ -701,6 +707,113 @@ Namespace Controllers
             Catch ex As Exception
                 objList.result = "error"
                 objList.leapChoicetxt = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+        '20240715 -- สร้าง Panel แสดงข้อเฉลย
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function GetAnswerChoicePanel()
+            Dim L1 As New List(Of clsAnswerChoice)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsAnswerChoice()
+            Dim AnswerChoicetxt As String = ""
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                'ChoiceMode 1 : ทั้งหมด , ChoiceMode 2 : ข้อถูก, ChoiceMode 3 : ข้อผิด, ChoiceMode 4 : ข้อข้าม
+                cmdMsSql = cmdSQL(cn, "select qqno,qq.QuestionId,qs.QuizScoreId,qs.AnswerId,qs.score from tblQuizQuestion qq left join tblQuizScore qs on qq.QuizId = qs.QuizId and qq.QuestionId = qs.QuestionId 
+                                        where qq.quizId = @QuizId order by qqno")
+
+                With cmdMsSql
+                    .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                Dim ResultRightdata = From r In dt Where r("score").ToString <> "" AndAlso CInt(r("score")) > 0
+                Dim ResultWrongdata = From r In dt Where r("score").ToString <> "" AndAlso CInt(r("score")) <= 0 And r("AnswerId").ToString <> ""
+                Dim ResultLeapdata = From r In dt Where r("QuizScoreId").ToString = "" Or r("AnswerId").ToString = ""
+
+                If Request.Form("ChoiceMode") = "2" Then
+                    If ResultRightdata.Count <> 0 Then
+                        dt = ResultRightdata.CopyToDataTable
+                    Else
+                        dt = Nothing
+                    End If
+                ElseIf Request.Form("ChoiceMode") = "3" Then
+                    If ResultWrongdata.Count <> 0 Then
+                        dt = ResultWrongdata.CopyToDataTable
+                    Else
+                        dt = Nothing
+                    End If
+                ElseIf Request.Form("ChoiceMode") = "4" Then
+                    If ResultLeapdata.Count <> 0 Then
+                        dt = ResultLeapdata.CopyToDataTable
+                    Else
+                        dt = Nothing
+                    End If
+                End If
+
+                Dim PageNum As Integer = 0
+                If dt IsNot Nothing Then
+                    PageNum = Math.Ceiling(dt.Rows.Count() / 10)
+
+                    Dim rowNum As Integer = 0
+
+                    For i = 1 To PageNum
+                        If i = 1 Then
+                            AnswerChoicetxt &= "<div id=""pageAnswerchoice" & i & """ class=""pageAnswerchoice"">"
+                        Else
+                            AnswerChoicetxt &= "<div id=""pageAnswerchoice" & i & """ class=""pageAnswerchoice ui-hide"">"
+                        End If
+
+                        For k = 1 To 2
+                            AnswerChoicetxt &= "<div class=""flexDiv"">"
+                            For r = 1 To 5
+                                Dim ChoiceClass As String = ""
+
+                                If dt(rowNum)("QuizScoreId").ToString = "" Or dt(rowNum)("AnswerId").ToString = "" Then
+                                    ChoiceClass = "LeapAnsweredChoice"
+                                ElseIf CInt(dt(rowNum)("score")) > 0 Then
+                                    ChoiceClass = "RightAnsweredChoice"
+                                Else
+                                    ChoiceClass = "WrongAnsweredChoice"
+                                End If
+
+                                AnswerChoicetxt &= "<div class=""LeapchoiceItem"" qno=""" & dt(rowNum)("QQNo").ToString & """><div class=""" & ChoiceClass & """></div><span class=""QQNo"">" & dt(rowNum)("QQNo").ToString & "</span></div>"
+                                rowNum += 1
+                                If rowNum > dt.Rows.Count() - 1 Then Exit For
+                            Next
+                            AnswerChoicetxt &= "</div>"
+                            If rowNum > dt.Rows.Count() - 1 Then Exit For
+                        Next
+                        AnswerChoicetxt &= "</div>"
+                    Next
+                End If
+
+
+
+                objList.result = "success"
+                objList.AnswerChoicetxt = AnswerChoicetxt
+                objList.allPage = PageNum
+                objList.RightAmount = ResultRightdata.Count
+                objList.WrongAmount = ResultWrongdata.Count
+                objList.LeapAmount = ResultLeapdata.Count
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.result = "error"
+                objList.AnswerChoicetxt = ex.Message
                 L1.Add(objList)
                 objList = Nothing
             Finally
@@ -909,7 +1022,7 @@ Namespace Controllers
 
                 For i = 0 To dtAnswer.Rows.Count - 1
                     Dim IsAnswered As String = ""
-
+                    Dim divName As String = ""
                     If Session("QuizState") IsNot Nothing Then
                         If CInt(dtAnswer(i)("AnswerScore")) > 0 Then
                             IsAnswered = "RightAns"
@@ -918,11 +1031,10 @@ Namespace Controllers
                         If (dtAnswer(i)("AnswerId").ToString = dtAnswer(i)("UserAnswered").ToString) AndAlso CInt(dtAnswer(i)("UserScore")) <= 0 Then
                             IsAnswered = "WrongAns"
                         End If
-
+                        divName = "Ans"
                     Else
                         If dtAnswer(i)("AnswerId").ToString = dtAnswer(i)("UserAnswered").ToString Then
                             IsAnswered = "Answered"
-
                         End If
                     End If
 
@@ -938,10 +1050,10 @@ Namespace Controllers
                     '20240712 -- ปรับการแสดงเฉลยคำตอบ
                     If i Mod 2 = 0 Then
                         AnsHtml &= "<div Class=""divAnswerRow"">
-                                    <div Class=""divAnswerbar flexdiv Left " & IsAnswered & """ QId=""" & QuestionId & """ AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
+                                    <div Class=""divAnswerbar" & divName & " flexdiv Left " & IsAnswered & """ QId=""" & QuestionId & """ AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
                           "<div class=""fistflexdiv"">" & ArrChoicetxt(i) & ".</div><div>" & Aname & "</div></div>"
                     Else
-                        AnsHtml &= "<div Class=""divAnswerbar flexdiv Right " & IsAnswered & """ QId=""" & QuestionId & """ AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
+                        AnsHtml &= "<div Class=""divAnswerbar" & divName & " flexdiv Right " & IsAnswered & """ QId=""" & QuestionId & """ AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
                             "<div class=""fistflexdiv""> " & ArrChoicetxt(i) & ".</div><div>" & Aname & "</div></div></div>"
                     End If
 
@@ -1361,7 +1473,6 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-
         <AcceptVerbs(HttpVerbs.Post)>
         Function CheckLoginStatus()
             Dim L1 As New List(Of clsStudentData)
@@ -1410,7 +1521,6 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-
         <AcceptVerbs(HttpVerbs.Post)>
         Function CreateMockUpExam()
             Dim L1 As New List(Of clsMain)
@@ -1457,6 +1567,46 @@ Namespace Controllers
 
                 objList.dataType = "success"
                 objList.errorMsg = ""
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
+        '20240715 -- Save TotalGoal
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function SaveTotalGoal()
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsMain()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                Dim StdId As String = Session("StudentId").ToString
+
+                cmdMsSql = cmdSQL(cn, "Insert into tblstudentGoal(StudentId,TotalGoalDate)values(@StdId,@GoalDate);select datediff(day,getdate(),@GoalDate);")
+                With cmdMsSql
+                    .Parameters.Add("@StdId", SqlDbType.VarChar).Value = StdId
+                    .Parameters.Add("@GoalDate", SqlDbType.VarChar).Value = Request.Form("selectedGoalDate")
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                objList.dataType = "success"
+                objList.errorMsg = "Your lastest GOAL : " & Request.Form("formatSelectedGoalDate") & " (Time left " & dt.Rows(0)(0) & " days)"
                 L1.Add(objList)
                 objList = Nothing
 
@@ -1615,6 +1765,10 @@ Namespace Controllers
         Public Class clsLeapChoiceData
             Inherits clsMain
             Public result As String, leapChoicetxt As String, allPage As String
+        End Class
+        Public Class clsAnswerChoice
+            Inherits clsMain
+            Public result As String, AnswerChoicetxt As String, allPage As String, RightAmount As String, WrongAmount As String, LeapAmount As String
         End Class
 #End Region
 
