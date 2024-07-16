@@ -1,8 +1,11 @@
-﻿var xobjClick, xobjAlert, OTPNum;
-
+﻿var xobjClick, xobjAlert, OTPNum,selectedGoalDate,formatSelectedGoalDate;
 // ========================= Page Load ======================== //
-$(function () { $('div[data-role=page]').page({ theme: 'c', }); $('#userName').focus(); });
+$(function () {
+    $('div[data-role=page]').page({ theme: 'c', });
+    $('#userName').focus();
+});
 CheckLoginStatus();
+
 // ============================================================ //
 
 // ======================= Object Event ======================= //
@@ -39,13 +42,33 @@ $(document)
     })
     .on('click', '#btnPracticeMenu', function (e, data) {
          window.location = '/Wetest/Practice';
-     })
+    })
+//20240715 -- Menu Goal
+    .on('click', '#btnGoalMenu', function (e, data) {
+        $('.MainMenu').addClass('ui-hide');
+        $('.Goal').removeClass('ui-hide');
+    })
     .on('click', '#dialogSelect .btnSelected', function (e, data) {
         popupClose($(this).closest('.my-popup'));
         GotoExam();
     })
     .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel', function (e, data) {
         popupClose($(this).closest('.my-popup'));
+    })
+
+// ======================= Goal ======================= //
+//20240715 -- Set Total Goal
+    .on('click', '#TimesUsedPercent', function (e, data) {
+        Goaldate();
+    })
+//20240715 -- Close Dialog
+    .on('click', '.ui-icon.close', function (e, data) {
+     popupClose($(this).closest('.my-popup'));
+    })
+//20240715 -- Save Goal
+    .on('click', '.btnSaveGoal', function (e, data) {
+        SaveTotalGoal();
+      
     })
 // ============================================================ //
 
@@ -60,7 +83,6 @@ function checkInvalidLoginData() {
 
     return CheckError
 }
-
 function CheckUserLogin() {
     var post1 = 'Username=' + $('#userName').val() + '&Password=' + $('#userPass').val();
    
@@ -74,9 +96,7 @@ function CheckUserLogin() {
                     $('.login').addClass('ui-hide');
                     $('.UserNameandLevel').html(data[i].Firstname + '<br />' + data[i].Firstname);
 
-                    $('.UserData').removeClass('ui-hide');
-                    $('.MainMenu').removeClass('ui-hide');
-
+                    $('.UserData,.MainMenu').removeClass('ui-hide');
                 } else {
                     $('#dialogAlert').attr('action', 'focus');
                     $('#dialogAlert .ui-text').html(data[i].Msg);
@@ -87,7 +107,6 @@ function CheckUserLogin() {
         }
     });
 }
-
 function GotoExam() {
     $.ajax({
         type: 'POST',
@@ -104,7 +123,6 @@ function GotoExam() {
         }
     });
 }
-
 function CheckLoginStatus() {
     $.ajax({
         type: 'POST',
@@ -115,14 +133,58 @@ function CheckLoginStatus() {
                     $('.login').addClass('ui-hide');
                     $('.UserNameandLevel').html(data[i].Firstname + '<br />' + data[i].Firstname);
 
-                    $('.UserData').removeClass('ui-hide');
-                    $('.MainMenu').removeClass('ui-hide');
+                    $('.UserData,.MainMenu').removeClass('ui-hide');
                 }
 
             }
         }
     });
 }
+//20240715 -- Set Datepicker And Open Dialog
+function Goaldate() {
+
+    var options = $.extend(global.datepickerOption, {
+        minDate: 1,
+        onSelect: function () {
+            var selectedDate = $("#SelectGoalDate").datepicker("getDate");
+            selectedGoalDate = selectedDate.getFullYear() + '-' + (selectedDate.getMonth() + 1) + '-' + selectedDate.getDate();
+            formatSelectedGoalDate = selectedDate.getDate() + '/' + (selectedDate.getMonth() + 1) + '/' + selectedDate.getFullYear();
+            console.log(selectedGoalDate);
+            $('#spnShowdate').html('Your Goal Date : ' + formatSelectedGoalDate)
+            $('.btnSaveGoal').removeClass('unActive');
+        }
+    });
+
+    $("#SelectGoalDate").datepicker(options);
+
+    $('#dialogGoalDate').attr('action', 'focus');
+    popupOpen($('#dialogGoalDate'), 99999);
+    
+}
+//20240715 -- Save Goal Date
+function SaveTotalGoal() {
+    var post1 = 'selectedGoalDate=' + selectedGoalDate + '&formatSelectedGoalDate=' + formatSelectedGoalDate;
+
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/SaveTotalGoal',
+        data: post1,
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].dataType == 'success') {
+                    $('#lastestGOAL').html(data[i].errorMsg);
+                    popupClose($('#dialogGoalDate').closest('.my-popup'));
+                } else {
+                    $('#dialogAlert').attr('action', 'focus');
+                    $('#dialogAlert .ui-text').html(data[i].errorMsg);
+                    popupOpen($('#dialogAlert'), 99999);
+                }
+
+            }
+        }
+    });
+}
+
 
 
 
