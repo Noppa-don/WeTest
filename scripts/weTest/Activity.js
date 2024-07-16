@@ -10,6 +10,7 @@ GetQuestionAndAnswer()
 QuizTimer()
 setProgressbar();
 PageNum = 1
+
 // ============================================================ //
 // ======================= Object Event ======================= //
 $(document)
@@ -30,17 +31,21 @@ $(document)
      }
  })
  .on('click', '.divAnswerbar', function (e, data) {
-     $('.divAnswerbar').removeClass("Answered");
-     $(this).addClass("Answered");
+     //20240715 -- ตรวจสอบไม่ให้กดตอบคำถามใน Mode เฉลย
+     $('.divAnswerbar').removeClass('Answered');
+     $(this).addClass('Answered');
 
      var post1 = 'AnsweredId=' + $(this).attr('ansid') + '&QuestionId=' + $(this).attr('QId');
-
      $.ajax({
          type: 'POST',
          url: '/weTest/SaveAnswed',
          data: post1,
          success: function (data) {
+             for (var i = 0; i < data.length; i++) {
+                 if (data[i].dataType == 'answered') {
 
+                 }
+             }
          }
      });
  })
@@ -95,8 +100,9 @@ $(document)
                      $('#lr' + data[i].errorMsg).removeClass("LR" + data[i].errorMsg);
                      $('#lr' + data[i].errorMsg).addClass("LR" + data[i].errorMsg + "Selected");
                  } else if (data[i].dataType == 'showanswer') {
-                     window.location = '/Wetest/Activity';
-                     $('#divRunningBar').addClass("ui-hide");
+                     $('#divRunningBar, #divAllLeapChoice, #divTime').addClass("ui-hide");
+                     $('#divAllQuestion, #divShowExplain').removeClass("ui-hide");
+                     GetQuestionAndAnswer('select', 1);
                  }
              }
          }
@@ -159,33 +165,33 @@ $(document)
  .on('click', '#dialogAlert #btnOK', function (e, data) {
      popupClose($(this).closest('.my-popup'));
  })
- .on('click', '#divAllQuestion ,#btnAllChoice', function (e, data) {
-     GetChoicePanel(1);
+ .on('click', '#divAllLeapChoice ,#btnAllChoice', function (e, data) {
+     GetLeapChoicePanel(1);
  })
- .on('click', '.btnNextPage', function (e, data) {
-     if ($('.btnNextPage').hasClass('UnActive') == false) {
+ .on('click', '#dialogLeapChoice .btnNextPage', function (e, data) {
+     if ($('#dialogLeapChoice .btnNextPage').hasClass('UnActive') == false) {
          $('#pageLeapchoice' + PageNum).addClass("ui-hide");
          PageNum += 1;
          $('#pageLeapchoice' + PageNum).removeClass("ui-hide");
          if (PageNum == AllPage) {
-             $('.btnNextPage').addClass("UnActive");
+             $('#dialogLeapChoice .btnNextPage').addClass("UnActive");
          }
          if (PageNum == 2) {
-             $('.btnBackPage').removeClass("UnActive");
+             $('#dialogLeapChoice .btnBackPage').removeClass("UnActive");
          }
      }
  })
- .on('click', '.btnBackPage', function (e, data) {
-     if ($('.btnBackPage').hasClass('UnActive') == false) {
+ .on('click', '#dialogLeapChoice .btnBackPage', function (e, data) {
+     if ($('#dialogLeapChoice .btnBackPage').hasClass('UnActive') == false) {
          $('#pageLeapchoice' + PageNum).addClass("ui-hide");
          PageNum -= 1;
          $('#pageLeapchoice' + PageNum).removeClass("ui-hide");
 
          if (PageNum == 1) {
-             $('.btnBackPage').addClass("UnActive");
+             $('#dialogLeapChoice .btnBackPage').addClass("UnActive");
          }
          if (PageNum == AllPage - 1) {
-             $('.btnNextPage').removeClass("UnActive");
+             $('#dialogLeapChoice .btnNextPage').removeClass("UnActive");
          }
      }
  })
@@ -206,10 +212,61 @@ $(document)
      window.location = '/Wetest/User';
  })
  .on('click', '#btnSkip', function (e, data) {
-     GetChoicePanel(2);
+     GetLeapChoicePanel(2);
  })
+ //20240715 -- ทำต่อข้อล่าสุด
+.on('click', '#btnGoToLast', function (e, data) {
+    window.location = '/Wetest/Activity';
+})
+ //20240715 -- แสดง Dialog เฉลย
+.on('click', '#divAllQuestion', function (e, data) {
+    GetAnswerChoicePanel(1)
+})
+ //20240715 -- ปุ่ม Next บน Dialog เฉลย
+.on('click', '#dialogResultChoice .btnNextPage', function (e, data) {
+    if ($('#dialogResultChoice .btnNextPage').hasClass('UnActive') == false) {
+        $('#pageAnswerchoice' + PageNum).addClass("ui-hide");
+        PageNum += 1;
+        $('#pageAnswerchoice' + PageNum).removeClass("ui-hide");
+        if (PageNum == AllPage) {
+            $('#dialogResultChoice .btnNextPage').addClass("UnActive");
+        }
+        if (PageNum == 2) {
+            $('#dialogResultChoice .btnBackPage').removeClass("UnActive");
+        }
+    }
+})
+ //20240715 -- ปุ่ม Back บน Dialog เฉลย
+.on('click', '#dialogResultChoice .btnBackPage', function (e, data) {
+    if ($('#dialogResultChoice .btnBackPage').hasClass('UnActive') == false) {
+        $('#pageAnswerchoice' + PageNum).addClass("ui-hide");
+        PageNum -= 1;
+        $('#pageAnswerchoice' + PageNum).removeClass("ui-hide");
 
-
+        if (PageNum == 1) {
+            $('#dialogResultChoice .btnBackPage').addClass("UnActive");
+        }
+        if (PageNum == AllPage - 1) {
+            $('#dialogResultChoice .btnNextPage').removeClass("UnActive");
+        }
+    }
+})
+ //20240715 -- ปุ่มดูเฉพาะข้อถูกบน Dialog เฉลย
+.on('click', '#btnRightMode', function (e, data) {
+    GetAnswerChoicePanel(2);
+})
+ //20240715 -- ปุ่มดูเฉพาะข้อผิดบน Dialog เฉลย
+.on('click', '#btnWrongMode', function (e, data) {
+    GetAnswerChoicePanel(3);
+})
+ //20240715 -- ปุ่มดูเฉพาะข้อข้ามบน Dialog เฉลย
+.on('click', '#btnLeapChoiceMode', function (e, data) {
+    GetAnswerChoicePanel(4);
+})
+ //20240715 -- ปุ่มดูข้อทั้งหมดบน Dialog เฉลย
+.on('click', '.AllAnswer', function (e, data) {
+    GetAnswerChoicePanel(1);
+})
 // ============================================================ //
 
 // ========================= Function ========================= //
@@ -277,12 +334,12 @@ function setProgressbar() {
         }
     });
 }
-function GetChoicePanel(ChoiceMode) {
+function GetLeapChoicePanel(ChoiceMode) {
     //ChoiceMode 1 : ปกติ , ChoiceMode 2 : เฉพาะข้อข้าม
     var post1 = 'ChoiceMode=' + ChoiceMode
     $.ajax({
         type: 'POST',
-        url: '/weTest/GetChoicePanel',
+        url: '/weTest/GetLeapChoicePanel',
         data: post1,
         success: function (data) {
 
@@ -305,9 +362,7 @@ function GetChoicePanel(ChoiceMode) {
                 }
             }
         }
-    });  
-
-
+    });
 }
 function setbuttonAudioPlayer(divname, FilePath) {
     console.log('setbuttonAudioPlayer');
@@ -316,4 +371,38 @@ function setbuttonAudioPlayer(divname, FilePath) {
         src: FilePath
     });
 
+}
+//20240715 -- ดึงข้อมูลสร้าง Dialog เฉลย
+function GetAnswerChoicePanel(ChoiceMode) {
+    //ChoiceMode 1 : ทั้งหมด , ChoiceMode 2 : ข้อถูก, ChoiceMode 3 : ข้อผิด, ChoiceMode 4 : ข้อข้าม
+    var post1 = 'ChoiceMode=' + ChoiceMode
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/GetAnswerChoicePanel',
+        data: post1,
+        success: function (data) {
+
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].result == 'success') {
+                    AllPage = data[i].allPage;
+                    PageNum = 1;
+                    $('.btnBackPage').addClass("UnActive");
+
+                    if (PageNum == AllPage) {
+                        $('.btnNextPage').addClass("UnActive");
+                    } else {
+                        $('.btnNextPage').removeClass("UnActive");
+                    }
+                    $('#AllPage2').html(data[i].AnswerChoicetxt)
+                    $('#RightAmount').html(data[i].RightAmount)
+                    $('#WrongAmount').html(data[i].WrongAmount)
+                    $('#LeapAmount').html(data[i].LeapAmount)
+                    popupClose($('#dialogResultChoice').closest('.my-popup'));
+                    $('#dialogResultChoice').attr('action', 'focus');
+                    popupOpen($('#dialogResultChoice'), 99999);
+                    PageNum = 1;
+                }
+            }
+        }
+    });
 }
