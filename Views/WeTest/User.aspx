@@ -2,9 +2,15 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server"></asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
-    <link href="../content/Wetest/Wetest.css?ver=1.1.2" rel="stylesheet" type="text/css" />
-    <link href="../content/Wetest/User.css?ver=1.1.2" rel="stylesheet" type="text/css" />
-    <script src="../scripts/Wetest/User.js?ver=1.1.2" type="text/javascript"></script>
+    <link href="../content/Wetest/Wetest.css?ver=1.1.3" rel="stylesheet" type="text/css" />
+    <link href="../content/Wetest/User.css?ver=1.1.3" rel="stylesheet" type="text/css" />
+    <link href="../content/Wetest/jquery-ui-1.8.18.custom.min" type="text/css" />
+
+    <script src="../scripts/Wetest/User.js?ver=1.1.3" type="text/javascript"></script>
+    <script src="../scripts/Wetest/jGlobal.js?ver=1.1.3" type="text/javascript"></script>
+    <script src="../scripts/Wetest/jquery-ui-1.8.10.offset.datepicker.min.js?ver=1.1.3" type="text/javascript"></script>
+    <script src="../scripts/Wetest/jquery-ui-1.10.1.custom.min.js?ver=1.1.3" type="text/javascript"></script>
+
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="MainContent" runat="server">
@@ -32,7 +38,6 @@
 
             <div class='textRight registerlink'>Register ?</div>
         </div>
-
         <div class="MainMenu ui-hide">
 
             <div class="menuButton">
@@ -57,6 +62,30 @@
                 </div>
             </div>
         </div>
+        <div class="Goal ui-hide">
+            Your Level : Pre-Intermidate<br />
+            <br />
+            <span id="lastestGOAL"></span>    
+            <br />
+            <br />
+            <br />
+            <div class="flexDiv">
+                <div id="TimeUsed" class="fistflexdiv">
+                    <div id="TimesUsedPercent" class="Percent">0%</div>
+                    <br />
+                    <div>Time Used</div>
+                </div>
+
+                <div id="PracticeScore">
+                    <div id="PracticeScorePercent" class="Percent">0%</div>
+                    <br />
+                    <div>Total Practice score</div>
+                </div>
+
+
+            </div>
+
+        </div>
     </div>
 
     <div name='alert' id="dialogAlert" class='my-popup alert ui-popup-container ui-popup-hidden'>
@@ -66,7 +95,6 @@
             <div id="btnOK" class='btn btnSelected'>OK</div>
         </div>
     </div>
-
     <div name='select' id="dialogSelect" class='my-popup confirm ui-popup-container ui-popup-hidden'>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
             <div class='ui-icon done'></div>
@@ -75,6 +103,21 @@
                 <div class='btn btnCancel'>No</div>
                 <div class='btn btnSelected'>Yes</div>
             </div>
+        </div>
+    </div>
+
+    <div name='GoalDate' id="dialogGoalDate" class='my-popup confirm ui-popup-container ui-popup-hidden'>
+        <div class='ui-icon close'></div>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            Set GOAL from date.<br />
+            <br />
+            <div id="SelectGoalDate"></div>
+            <br />
+            <span id="spnShowdate"></span>
+            <br />
+            <br />
+            <div id="btnSaveGoal" class="btnSaveGoal unActive"></div>
+
         </div>
     </div>
 
