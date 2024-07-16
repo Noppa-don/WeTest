@@ -5,7 +5,8 @@ $(function () { $('div[data-role=page]').page({ theme: 'c', }); });
 $(document)
 // ======================= Activity ======================= //
  .on('click', '#btnLesson', function (e, data) {
-
+     $('#btnLesson').addClass('btnSelected');
+     $('#btnRandom').removeClass('btnSelected');
      $.ajax({
          type: 'POST',
          url: '/weTest/GetLesson',
@@ -31,16 +32,15 @@ $(document)
      });
 
      $('#LessonType').removeClass("ui-hide");
-     $('#RandomType').addClass("ui-hide");
-     $('#skillRandom').addClass("ui-hide");
+     $('#RandomType,#skillRandom').addClass("ui-hide");
  })
  .on('click', '#btnRandom', function (e, data) {
+     $('#btnLesson').removeClass('btnSelected');
+     $('#btnRandom').addClass('btnSelected');
 
      $('#LessonType').addClass("ui-hide");
-     $('#RandomType').removeClass("ui-hide");
-     $('#skillRandom').removeClass("ui-hide");
+     $('#RandomType ,#skillRandom').removeClass("ui-hide");
  })
-
  .on('click', '#ReadingOther', function (e, data) {
   
      $('#PracticeType,#LessonType').addClass('ui-hide');
@@ -67,7 +67,6 @@ $(document)
      $('#PracticeType,#LessonType').addClass('ui-hide');
      $('#AllVocabulary,.footer').removeClass('ui-hide');
  })
-
  .on('click', '.btnBack', function (e, data) {
      $('#PracticeType,#LessonType').removeClass('ui-hide');
      $('#AllReading,#AllListening,#AllGrammar,#AllSituation,#AllVocabulary,.footer').addClass('ui-hide');
