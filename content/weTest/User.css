@@ -29,3 +29,16 @@
 
 .UserPhoto {background-repeat: no-repeat;background-size: contain;background-position: center;width: 100%;height: 60px;margin-bottom:10px;}
 
+.Percent {background: url(/images/Wetest/WhiteCircle.png);background-repeat: no-repeat;background-size: contain;background-position: center;
+          width: 100%;height: 200px;margin-bottom:10px;text-align: center;line-height: 200px;font-size: 3em;}
+#TimeUsed,#PracticeScore {width: 50%;text-align: center;}
+#TimeUsed {cursor:pointer;}
+
+.btnSaveGoal{background: url(/images/Wetest/GoalMenu.png);background-repeat: no-repeat;background-size: contain;background-position: center;
+          width: 100%;height: 40px;margin-bottom:10px;text-align: center;line-height: 200px;font-size: 3em;cursor:pointer;}
+.btnSaveGoal.unActive{background: url(/images/Wetest/UnActiveGoal.png);background-repeat: no-repeat;background-size: contain;background-position: center;
+          width: 100%;height: 40px;margin-bottom:10px;text-align: center;line-height: 200px;font-size: 3em;}
+
+#SelectGoalDate {border-style:solid;padding:20px;}
+
+
