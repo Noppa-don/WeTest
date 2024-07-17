@@ -1,16 +1,16 @@
-﻿var xobjClick, xobjAlert, OTPNum,selectedGoalDate,formatSelectedGoalDate;
-// ========================= Page Load ======================== //
+﻿var xobjClick, xobjAlert, OTPNum, selectedGoalDate, formatSelectedGoalDate, GoalType;
+// ========================= Page Load ====================================================================== //
 $(function () {
     $('div[data-role=page]').page({ theme: 'c', });
     $('#userName').focus();
+    CheckLoginStatus();
 });
-CheckLoginStatus();
 
-// ============================================================ //
+// ========================================================================================================== //
 
-// ======================= Object Event ======================= //
+// ============================================== Object Event ============================================== //
 $(document)
-// ======================= Login ======================= //
+// ======================== Login ============================== //
     .on('focus', '#userName, #userPass', function (e, data) { $(this).removeClass("InvalidData") })
     .on('keypress blur', '#userName, #userPass', function (e, data) {
         var xkey = keyA(e);
@@ -27,26 +27,25 @@ $(document)
     })
     .on('click', '#dialogAlert #btnOK', function (e, data) {
         popupClose($(this).closest('.my-popup'));
-        $('#userName').focus();
     })
     .on('click', '.registerlink', function (e, data) {
         window.location = '/Wetest/Registration';
     })
 
-// ======================= MainMenu ======================= //
+// ======================= MainMenu =========================== //
     .on('click', '#btnMockUpExam', function (e, data) {
-  
+
         $('#dialogSelect').attr('action', 'focus');
         $('#dialogSelect .ui-text').html('Do you want to start exam for up level ?');
         popupOpen($('#dialogSelect'), 99999);
     })
     .on('click', '#btnPracticeMenu', function (e, data) {
-         window.location = '/Wetest/Practice';
+        window.location = '/Wetest/Practice';
     })
 //20240715 -- Menu Goal
     .on('click', '#btnGoalMenu', function (e, data) {
         $('.MainMenu').addClass('ui-hide');
-        $('.Goal').removeClass('ui-hide');
+        $('.Goal,.footerGoal').removeClass('ui-hide');
     })
     .on('click', '#dialogSelect .btnSelected', function (e, data) {
         popupClose($(this).closest('.my-popup'));
@@ -56,23 +55,74 @@ $(document)
         popupClose($(this).closest('.my-popup'));
     })
 
-// ======================= Goal ======================= //
+// ========================= Goal ============================= //
 //20240715 -- Set Total Goal
     .on('click', '#TimesUsedPercent', function (e, data) {
+        GoalType ='total'
         Goaldate();
     })
 //20240715 -- Close Dialog
-    .on('click', '.ui-icon.close', function (e, data) {
-     popupClose($(this).closest('.my-popup'));
+    .on('click', '.ui-icon.close,#btnNotClear', function (e, data) {
+        popupClose($(this).closest('.my-popup'));
     })
 //20240715 -- Save Goal
-    .on('click', '.btnSaveGoal', function (e, data) {
-        SaveTotalGoal();
-      
+    .on('click', '#btnSaveGoal', function (e, data) {
+        SaveGoal();
     })
-// ============================================================ //
+//20240716 -- Go to set detail GOAL
+    .on('click', '.btnSetDetailGoal', function (e, data) {
+        $('.Goal,.btnSetDetailGoal').addClass('ui-hide');
+        $('.DetailGoal').removeClass('ui-hide');
+    })
+//20240716 -- Back Button
+    .on('click', '.btnBack', function (e, data) {
+        if ($('.Goal').hasClass('ui-hide') == false) {
+            $('.MainMenu').removeClass('ui-hide');
+            $('.Goal,.footerGoal').addClass('ui-hide');
+        } else if ($('.DetailGoal').hasClass('ui-hide') == false) {
+            $('.Goal,.btnSetDetailGoal').removeClass('ui-hide');
+            $('.DetailGoal').addClass('ui-hide');
+        }
+    })
+//20240716 -- Clear Button
+    .on('click', '.btnClear', function (e, data) {
+        $('#dialogClearGoal').attr('action', 'focus');
+        popupOpen($('#dialogClearGoal'), 99999);
+    })
+//20240716 -- Clear Goal Data
+    .on('click', '#btnConfirmClear', function (e, data) {
+        ClearGoalDate();
+        popupClose($(this).closest('.my-popup'));
+    })
+//20240716 -- Set Reading Goal
+    .on('click', '#ReadingTime', function (e, data) {
+        GoalType ='Reading'
+        Goaldate();
+    })
+//20240716 -- Set Listening Goal
+    .on('click', '#ListeningTime', function (e, data) {
+        GoalType ='Listening'
+        Goaldate();
+    })
+//20240716 -- Set Vocab Goal
+    .on('click', '#VocabTime', function (e, data) {
+        GoalType ='Vocabulary'
+        Goaldate();
+    })
+//20240716 -- Set Grammar Goal
+    .on('click', '#GrammarTime', function (e, data) {
+        GoalType = 'Grammar'
+        Goaldate();
+    })
+//20240716 -- Set Situation Goal
+    .on('click', '#SituationTime', function (e, data) {
+        GoalType = 'Situation'
+        Goaldate();
+    })
 
-// ========================= Function ========================= //
+// ========================================================================================================== //
+
+// ================================================ Function ================================================ //
 
 function checkInvalidLoginData() {
 
@@ -85,25 +135,13 @@ function checkInvalidLoginData() {
 }
 function CheckUserLogin() {
     var post1 = 'Username=' + $('#userName').val() + '&Password=' + $('#userPass').val();
-   
+
     $.ajax({
         type: 'POST',
         url: '/weTest/CheckUserLogin',
         data: post1,
         success: function (data) {
-            for (var i = 0; i < data.length; i++) {
-                if (data[i].Result == 'success') {
-                    $('.login').addClass('ui-hide');
-                    $('.UserNameandLevel').html(data[i].Firstname + '<br />' + data[i].Firstname);
-
-                    $('.UserData,.MainMenu').removeClass('ui-hide');
-                } else {
-                    $('#dialogAlert').attr('action', 'focus');
-                    $('#dialogAlert .ui-text').html(data[i].Msg);
-                    popupOpen($('#dialogAlert'), 99999);
-                }
-
-            }
+            SetUserData(data);
         }
     });
 }
@@ -128,20 +166,20 @@ function CheckLoginStatus() {
         type: 'POST',
         url: '/weTest/CheckLoginStatus',
         success: function (data) {
-            for (var i = 0; i < data.length; i++) {
-                if (data[i].Result == 'success') {
-                    $('.login').addClass('ui-hide');
-                    $('.UserNameandLevel').html(data[i].Firstname + '<br />' + data[i].Firstname);
-
-                    $('.UserData,.MainMenu').removeClass('ui-hide');
-                }
-
-            }
+            SetUserData(data);
         }
     });
 }
 //20240715 -- Set Datepicker And Open Dialog
 function Goaldate() {
+
+    $('.btnSaveGoal').addClass('unActive');
+
+    if (GoalType == 'total') {
+        $('#spnGoalName').html('Set goal from date');
+    } else {
+        $('#spnGoalName').html('Set goal for ' + GoalType);
+    }
 
     var options = $.extend(global.datepickerOption, {
         minDate: 1,
@@ -149,9 +187,11 @@ function Goaldate() {
             var selectedDate = $("#SelectGoalDate").datepicker("getDate");
             selectedGoalDate = selectedDate.getFullYear() + '-' + (selectedDate.getMonth() + 1) + '-' + selectedDate.getDate();
             formatSelectedGoalDate = selectedDate.getDate() + '/' + (selectedDate.getMonth() + 1) + '/' + selectedDate.getFullYear();
-            console.log(selectedGoalDate);
+
             $('#spnShowdate').html('Your Goal Date : ' + formatSelectedGoalDate)
-            $('.btnSaveGoal').removeClass('unActive');
+            $('#btnSaveGoal').removeProp("goaltype");
+            $('#btnSaveGoal').attr('goaltype', GoalType);
+            $('#btnSaveGoal').removeClass('unActive');
         }
     });
 
@@ -159,11 +199,12 @@ function Goaldate() {
 
     $('#dialogGoalDate').attr('action', 'focus');
     popupOpen($('#dialogGoalDate'), 99999);
-    
+
 }
 //20240715 -- Save Goal Date
-function SaveTotalGoal() {
-    var post1 = 'selectedGoalDate=' + selectedGoalDate + '&formatSelectedGoalDate=' + formatSelectedGoalDate;
+function SaveGoal() {
+    console.log(GoalType);
+    var post1 = 'selectedGoalDate=' + selectedGoalDate + '&formatSelectedGoalDate=' + formatSelectedGoalDate + '&GoalType=' + GoalType;
 
     $.ajax({
         type: 'POST',
@@ -171,15 +212,103 @@ function SaveTotalGoal() {
         data: post1,
         success: function (data) {
             for (var i = 0; i < data.length; i++) {
-                if (data[i].dataType == 'success') {
-                    $('#lastestGOAL').html(data[i].errorMsg);
+                if (data[i].Result == 'success') {
+                    if (GoalType == 'total') {
+                        $('#lastestGOAL').html('Your lastest GOAL : ' + data[i].TotalGoal + ' ( Time left ' + data[i].TotalGoalAmount + ' days )');
+                        $('#lastestBigGOAL').html('Your lastest A BIG GOAL : ' + data[i].TotalGoal + ' ( Time left ' + data[i].TotalGoalAmount + ' days )');
+                        $('.btnSetDetailGoal').removeClass('unActive');
+                        $('.btnClear').removeClass('ui-hide');
+                    } else {
+                        $('#' + GoalType + 'TimeResult').html('Due date : ' + data[i].TotalGoal + '<br />(Time left ' + data[i].TotalGoalAmount + ' days)');
+                        $('#' + GoalType + 'TimeResult').removeClass('ui-hide');
+                        $('#' + GoalType + 'PS').removeClass('PS');
+                      
+                    }
+
                     popupClose($('#dialogGoalDate').closest('.my-popup'));
+
+                   
                 } else {
                     $('#dialogAlert').attr('action', 'focus');
-                    $('#dialogAlert .ui-text').html(data[i].errorMsg);
+                    $('#dialogAlert .ui-text').html(data[i].Msg);
                     popupOpen($('#dialogAlert'), 99999);
                 }
 
+            }
+        }
+    });
+}
+//20240716 -- Set User Data
+function SetUserData(data) {
+    for (var i = 0; i < data.length; i++) {
+        if (data[i].Result == 'success') {
+            $('.login').addClass('ui-hide');
+            $('.UserData,.MainMenu').removeClass('ui-hide');
+            //20240716 -- ดึงข้อมูล User เพิ่มเติม
+            $('.UserNameandLevel').html('Welcome, ' + data[i].Firstname + '<br />' + data[i].UserLevel);
+            $('.UserData').append(data[i].UserPhoto);
+            $('#UserLevel').html('Your Level : ' + data[i].UserLevel + '<br />');
+            if (data[i].TotalGoal != '') {
+                $('#lastestGOAL').html('Your lastest GOAL : ' + data[i].TotalGoal + ' ( Time left ' + data[i].TotalGoalAmount + ' days )');
+                $('#lastestBigGOAL').html('Your lastest A BIG GOAL : ' + data[i].TotalGoal + ' ( Time left ' + data[i].TotalGoalAmount + ' days )');
+                $('.btnSetDetailGoal').removeClass('unActive');
+                $('.btnClear').removeClass('ui-hide');
+            } else {
+                $('.btnClear').addClass('ui-hide');
+            }
+            if (data[i].ReadingGoal != '') {
+                $('#ReadingTimeResult').html('Due date : ' + data[i].ReadingGoal + '<br />(Time left ' + data[i].ReadingGoalAmount + ' days)');
+                $('#ReadingTimeResult').removeClass('ui-hide');
+                $('#ReadingPS').removeClass('PS');
+            }
+            if (data[i].ListeningGoal != '') {
+                $('#ListeningTimeResult').html('Due date : ' + data[i].ListeningGoal + '<br />(Time left ' + data[i].ListeningGoalAmount + ' days)');
+                $('#ListeningTimeResult').removeClass('ui-hide');
+                $('#ListeningPS').removeClass('PS');
+            }
+            if (data[i].VocabGoal != '') {
+                $('#VocabularyTimeResult').html('Due date : ' + data[i].VocabGoal + '<br />(Time left ' + data[i].VocabGoalAmount + ' days)');
+                $('#VocabularyTimeResult').removeClass('ui-hide');
+                $('#VocabularyPS').removeClass('PS');
+            }
+            if (data[i].GrammarGoal != '') {
+                $('#GrammarTimeResult').html('Due date : ' + data[i].GrammarGoal + '<br />(Time left ' + data[i].GrammarGoalAmount + ' days)');
+                $('#GrammarTimeResult').removeClass('ui-hide');
+                $('#GrammarPS').removeClass('PS');
+            }
+            if (data[i].SituationGoal != '') {
+                $('#SituationTimeResult').html('Due date : ' + data[i].SituationGoal + '<br />(Time left ' + data[i].SituationGoalAmount + ' days)');
+                $('#SituationTimeResult').removeClass('ui-hide');
+                $('#SituationPS').removeClass('PS');
+            }
+
+        } else if (data[i].Result == 'sessionlost') {
+            if ($('.login').hasClass('ui-hide') == true) {
+                window.location = '/Wetest/User';
+            }
+        } else {
+            $('#dialogAlert').attr('action', 'focus');
+            $('#dialogAlert .ui-text').html(data[i].Msg);
+            popupOpen($('#dialogAlert'), 99999);
+        }
+    }
+}
+//20240716 -- Clear Goal Date
+function ClearGoalDate() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/ClearGoalDate',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].Result == 'success') {
+                    $('#lastestGOAL,#lastestBigGOAL,#ReadingTimeResult,#ListeningTimeResult,#VocabularyTimeResult,#GrammarTimeResult,#SituationTimeResult').html('');
+                    $('.btnClear,#ReadingTimeResult,#ListeningTimeResult,#VocabularyTimeResult,#GrammarTimeResult,#SituationTimeResult,.DetailGoal').addClass('ui-hide');
+                    $('#ReadingPS,#ListeningPS,#VocabularyPS,#GrammarPS,#SituationPS').addClass('PS');
+                    $('.Goal,.btnSetDetailGoal').removeClass('ui-hide')
+                    $('.btnSetDetailGoal').addClass('unActive');
+                    $().addClass('ui-hide');
+
+                }
             }
         }
     });
