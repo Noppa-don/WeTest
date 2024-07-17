@@ -25,7 +25,6 @@ $(document)
             //checkLogin();
         }
     })
-
     .on('click', '.footerRegister .btnNext', function (e, data) {
         if ($('.spnData').is(':visible')) {
             SaveNewUser();
@@ -52,6 +51,11 @@ $(document)
         event.preventDefault();
         $("#file").click();
     })
+//20240716 -- Browse Slip file
+    .on('click', '.btnSlipPhoto', function (e, data) {
+        event.preventDefault();
+        $("#fileSlip").click();
+    })
     .on('click', '#btnStudent, #btnOther', function (e, data) {
         $('#btnStudent, #btnOther').removeClass("btnSelected")
         $('#btnStudent, #btnOther').removeClass("InvalidData");
@@ -59,7 +63,6 @@ $(document)
         $(this).addClass("btnSelected");
         $('.spType').text($(this).text());
     })
-
     .on('change', '#file', function (e, data) {
         var _URL = window.URL || window.webkitURL;
         var image;
@@ -75,6 +78,19 @@ $(document)
         };
         image.src = _URL.createObjectURL(file);
     })
+    .on('change', '#fileSlip', function (e, data) {
+            var _URL = window.URL || window.webkitURL;
+            var image;
+            if ((file = this.files[0])) {
+                image = new Image();
+                image.onload = function () {
+                    src = this.src;
+                    UploadSlip();
+                    e.preventDefault();
+                }
+            };
+            image.src = _URL.createObjectURL(file);
+      })
 
 // ======================= OTP ======================= //
     .on('click', '#btnSendAgain', function (e, data) {
@@ -114,6 +130,12 @@ $(document)
     })
     .on('click', '#btnDiscount', function (e, data) {
         popupOpen($('#dialogDiscount'), 99999);
+    })
+    //20240716 -- skip payment
+    .on('click', '#btnskip', function (e, data) {
+        $('#dialogSelect').attr('action', 'focus');
+        $('#dialogSelect .ui-text').html('Do you want go to Placement Test now ?.');
+        popupOpen($('#dialogSelect'), 99999);
     })
     .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel', function (e, data) {
         popupClose($(this).closest('.my-popup'));
@@ -228,6 +250,34 @@ function UploadStudentPhoto() {
                             $('.register').addClass('ui-hide');
                             $('.footerRegister').addClass('ui-hide');
                             sendOTP();
+                    }
+                }
+            }
+        });
+    }
+}
+//20240716 -- Upload Slip fie
+function UploadSlip() {
+
+    var data = new FormData();
+
+    var files = $("#fileSlip").get(0).files;
+
+    if (files.length > 0) {
+        console.log(0);
+        data.append("UploadedImage", files[0]);
+
+        $.ajax({
+            type: 'POST',
+            url: '/weTest/UploadSlipFile',
+            contentType: false,
+            processData: false,
+            data: data,
+            success: function (data) {
+                for (var i = 0; i < data.length; i++) {
+                    switch (data[i].dataType) {
+                        case 'error':
+                            console.log(data[i].errorMsg);
                     }
                 }
             }
