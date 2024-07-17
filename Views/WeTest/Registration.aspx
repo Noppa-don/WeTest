@@ -3,9 +3,9 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
-    <link href="../content/Wetest/Wetest.css?ver=1.1.2" rel="stylesheet" type="text/css" />
-    <link href="../content/Wetest/Registration.css?ver=1.1.2" rel="stylesheet" type="text/css" />
-    <script src="../scripts/Wetest/Registration.js?ver=1.1.2" type="text/javascript"></script>
+    <link href="../content/Wetest/Wetest.css?ver=1.1.4" rel="stylesheet" type="text/css" />
+    <link href="../content/Wetest/Registration.css?ver=1.1.4" rel="stylesheet" type="text/css" />
+    <script src="../scripts/Wetest/Registration.js?ver=1.1.4" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="MainContent" runat="server">
@@ -21,8 +21,8 @@
             <div class="registerData">
                 <div class="registerDetail">
                     <div class="userType">
-                        <div class="btn left" id="btnStudent" stdType="1">Student / School</div>
-                        <div class="btn right" id="btnOther" stdType="2">Officer / Other</div>
+                        <div class="btn left" id="btnStudent" stdtype="1">Student / School</div>
+                        <div class="btn right" id="btnOther" stdtype="2">Officer / Other</div>
                     </div>
                     <br />
                     <br />
@@ -112,25 +112,42 @@
         <div class="payment ui-hide">
             <span>You must have a Wetest Key for register<br />
                 <br />
-                ** Price per Account is <span id="PackagePrice"></span> Bath / 1 Year **<br />
+                ** Price per Account is <span id="PackagePrice"></span>Bath / 1 Year **<br />
             </span>
             <br />
-            <span class="ui-Warning-green ui-hide" id="spnWarningDiscount">Promotion code / Discount code is already !<br /><br /></span>
-            <span class="ui-Warning-red" id="spnWarning">Please press "Payment" for pay<br />You can use Mobile Banking for this.</span>
+            <span class="ui-Warning-green ui-hide" id="spnWarningDiscount">Promotion code / Discount code is already !<br />
+                <br />
+            </span>
+            <span class="ui-Warning-red" id="spnWarning">Please press "Payment" for pay<br />
+                You can use Mobile Banking for this.</span>
             <br />
             <br />
             <div class="btn" id="btnPayment">Payment</div>
             <div class="Imagebtn btnQR ui-hide"></div>
             <br />
             <br />
-            <span>or if you have a key. Please type.</span>
-            <br />
-            <br />
-            <div class="divKeyCode">
-                <input type='text' id='txtKeyCode' placeholder='Type Key' />
+
+            <div class="flexDiv">
+                <div class="divKeyCode">
+                    <span>if you have a key. Please type.</span>
+                    <br />
+                    <div class="flexDiv">
+                        <input type='text' id='txtKeyCode' placeholder='Type Key' />
+                        <div class="btn" id="btnCheckKey">Check Key</div>
+                    </div>
+                </div>
+                <div class="divSlip">
+                    <span>Add bank tranfer image here</span>
+                    <br />
+                    <div class="flexDiv">
+                        <input type='text' id='SlipName' />
+                        <input type='file' id='fileSlip' class="ui-hide"/>
+                        <div class='Imagebtn btnSlipPhoto'></div>
+                    </div>
+                </div>
             </div>
             <br />
-            <div class="btn" id="btnCheckKey">Check Key</div>
+            <div class="btn" id="btnskip">Skip</div>
             <br />
             <span class="warningText">If you have a question and promblem.<br />
                 Please contact to @Italt</span>
@@ -189,9 +206,13 @@
     <div name='discount' id="dialogDiscount" class='my-popup confirm ui-popup-container ui-popup-hidden'>
         <div class='ui-icon close'></div>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
-            <div class='ui-textHeader'>Discount for Wetest</div><br>
+            <div class='ui-textHeader'>Discount for Wetest</div>
+            <br>
             <div class='ui-text'>Type Promotion code / Discount code</div>
-             <div class="divKeyCode"><input type='text' id='txtDiscountCode' placeholder='Promotion code / Discount code' /></div><br>
+            <div class="divKeyCode">
+                <input type='text' id='txtDiscountCode' placeholder='Promotion code / Discount code' />
+            </div>
+            <br>
             <div class='ui-Warning-red ui-hide'></div>
             <div id="btnCheckDiscountCode" class='btn btnSelected'>Apply Code</div>
         </div>
