@@ -1,23 +1,23 @@
 ﻿var OTPNum
 // ========================= Page Load ======================== //
-$(function () { $('div[data-role=page]').page({ theme: 'c', }); });
+$(function () {
+    $('div[data-role=page]').page({ theme: 'c', });
+    var sec = 0;
+    var counterId
+    var PageNum, AllPage;
 
-var sec = 0;
-var counterId
-var PageNum, AllPage;
-
-GetQuestionAndAnswer()
-QuizTimer()
-setProgressbar();
-PageNum = 1
+    GetQuestionAndAnswer()
+    QuizTimer()
+    setProgressbar();
+    PageNum = 1
+});
 
 // ============================================================ //
-// ======================= Object Event ======================= //
+// ============================================== Object Event ============================================== //
 $(document)
-// ======================= Activity ======================= //
+// ======================= Activity =========================== //
 
  .on('focus', '.txtDetail,.ui-select', function (e, data) { $(this).removeClass("InvalidData") })
-
  .on('click', '.btnNext', function (e, data) {
      if ($('.btnNext').hasClass('UnActive') == false) {
          GetQuestionAndAnswer('next', '');
@@ -165,6 +165,19 @@ $(document)
  .on('click', '#dialogAlert #btnOK', function (e, data) {
      popupClose($(this).closest('.my-popup'));
  })
+ .on('click', '#divShowExplain', function (e, data) {
+     console.log($('.ExplainQ').hasClass('ui-hide'));
+     if ($('.ExplainQ').hasClass('ui-hide') == false) {
+         $('.ExplainQ').addClass("ui-hide");
+     } else {
+         $('.ExplainQ').removeClass("ui-hide");
+     }
+ })
+ .on('click', '#divGotoMainMenu', function (e, data) {
+     window.location = '/Wetest/User';
+ })
+
+// ======================= Dialog ข้อข้าม =========================== //
  .on('click', '#divAllLeapChoice ,#btnAllChoice', function (e, data) {
      GetLeapChoicePanel(1);
  })
@@ -200,17 +213,6 @@ $(document)
      GetQuestionAndAnswer('select', QuestionNo);
      popupClose($(this).closest('.my-popup'));
  })
- .on('click', '#divShowExplain', function (e, data) {
-     console.log($('.ExplainQ').hasClass('ui-hide'));
-     if ($('.ExplainQ').hasClass('ui-hide') == false) {
-         $('.ExplainQ').addClass("ui-hide");
-     } else {
-         $('.ExplainQ').removeClass("ui-hide");
-     }
- })
- .on('click', '#divGotoMainMenu', function (e, data) {
-     window.location = '/Wetest/User';
- })
  .on('click', '#btnSkip', function (e, data) {
      GetLeapChoicePanel(2);
  })
@@ -218,6 +220,8 @@ $(document)
 .on('click', '#btnGoToLast', function (e, data) {
     window.location = '/Wetest/Activity';
 })
+
+// ======================= Dialog เฉลย =========================== //
  //20240715 -- แสดง Dialog เฉลย
 .on('click', '#divAllQuestion', function (e, data) {
     GetAnswerChoicePanel(1)
@@ -267,9 +271,10 @@ $(document)
 .on('click', '.AllAnswer', function (e, data) {
     GetAnswerChoicePanel(1);
 })
-// ============================================================ //
 
-// ========================= Function ========================= //
+// ========================================================================================================== //
+
+// ================================================ Function ================================================ //
 
 function GetQuestionAndAnswer(ActionType, QuestionNo) {
     var post1 = 'ActionType=' + ActionType + '&QuestionNo=' + QuestionNo;
@@ -406,3 +411,5 @@ function GetAnswerChoicePanel(ChoiceMode) {
         }
     });
 }
+
+// ========================================================================================================== //
