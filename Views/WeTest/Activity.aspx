@@ -3,9 +3,9 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
-    <link href="../content/Wetest/Wetest.css?ver=1.1.2" rel="stylesheet" type="text/css" />
-    <link href="../content/Wetest/Activity.css?ver=1.1.2" rel="stylesheet" type="text/css" />
-    <script src="../scripts/Wetest/Activity.js?ver=1.1.2" type="text/javascript"></script>
+    <link href="../content/Wetest/Wetest.css?ver=1.1.4" rel="stylesheet" type="text/css" />
+    <link href="../content/Wetest/Activity.css?ver=1.1.4" rel="stylesheet" type="text/css" />
+    <script src="../scripts/Wetest/Activity.js?ver=1.1.4" type="text/javascript"></script>
     <script src="../scripts/Wetest/jquery.button-audio-player.js" type="text/javascript"></script>
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="MainContent" runat="server">
@@ -25,7 +25,6 @@
             </div>
             <div id="divBtnReportProblem"></div>
         </div>
-
         <div id="divPlayground">
             <div id="divQ">
                 <div id="divQuestionAndAnswer">
@@ -43,7 +42,6 @@
                 
             </div>
         </div>
-
         <div class='footer'>
             <div class="footerButton">
                 <div class="Imagebtn btnBack"></div>
@@ -80,8 +78,6 @@
                 <div id="divGotoLogin"></div>
                 <div id="divGotoMainMenu"></div>
             </div>
-
-
         </div>
 
     </div>
@@ -153,7 +149,8 @@
             </div>
         </div>
     </div>
-    <%-- 20240715 แยก Dialog แสดงข้อเพื่อแสดงเฉลย --%>
+  
+      <%-- 20240715 แยก Dialog แสดงข้อเพื่อแสดงเฉลย --%>
     <div name='lp' id="dialogResultChoice" class='my-popup confirm ui-popup-container ui-popup-hidden'>
         <div class='ui-icon close'></div>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
