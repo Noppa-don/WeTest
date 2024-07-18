@@ -24,31 +24,31 @@
 
         <div id="LessonType" class="ui-hide">
             <div id="skillReading" class="flexDiv skilldiv">
-                <div id="iconReading"></div>
+                <div class="iconReading"></div>
                 <div id="ReadingLesson" class="flexDiv">
                 </div>
                 <div id="ReadingOther" class="otherButton"></div>
             </div>
             <div id="skillListen" class="flexDiv skilldiv">
-                <div id="iconListen"></div>
+                <div class="iconListen"></div>
                 <div id="ListeningLesson" class="flexDiv">
                 </div>
                 <div id="ListeningOther" class="otherButton"></div>
             </div>
             <div id="skillVocab" class="flexDiv skilldiv">
-                <div id="iconVocab"></div>
+                <div class="iconVocab"></div>
                 <div id="VocabularyLesson" class="flexDiv">
                 </div>
                 <div id="VocabularyOther" class="otherButton"></div>
             </div>
             <div id="skillGrammar" class="flexDiv skilldiv">
-                <div id="iconGrammar"></div>
+                <div class="iconGrammar"></div>
                 <div id="GrammarLesson" class="flexDiv">
                 </div>
                 <div id="GrammarOther" class="otherButton"></div>
             </div>
             <div id="skillSituation" class="flexDiv skilldiv">
-                <div id="iconSituation"></div>
+                <div class="iconSituation"></div>
                 <div id="SituationLesson" class="flexDiv">
                 </div>
                 <div id="SituationOther" class="otherButton"></div>
@@ -58,22 +58,22 @@
         <div id="RandomType" class="ui-hide">
             <div class="flexDiv">
                 Number of exams
-             <div class="btn ui-Left" id="btn20">20</div>
-                <div class="btn ui-Left" id="btn30">30</div>
-                <div class="btn ui-Left" id="btn50">50</div>
-                <div class="btn ui-Left" id="btn100">100</div>
-                <div class="btn ui-Left" id="btnUserType"></div>
+             <div class="btn btnAmount firstflexdiv" id="btn20">20</div>
+                <div class="btn btnAmount" id="btn30">30</div>
+                <div class="btn btnAmount" id="btn50">50</div>
+                <div class="btn btnAmount" id="btn100">100</div>
+                <div class="btn btnAmount" id="btnUserType"><input type='text' id='UserType' /></div>
             </div>
         </div>
         <div id="skillRandom" class="ui-hide">
             <div class="flexDiv">
                 skills
-             <div class="btn ui-Left" id="btnRandomAll">All</div>
-                <div class="ui-Left" id="btnRandomReading"></div>
-                <div class="ui-Left" id="btnRandomListening"></div>
-                <div class="ui-Left" id="btnRandomVocab"></div>
-                <div class="ui-Left" id="btnRandomGrammar"></div>
-                 <div class="ui-Left" id="btnRandomSituation"></div>
+             <div class="btn btnSkill firstflexdiv" id="btnRandomAll">All</div>
+                <div class="btnSkill btnReading" id="Reading"></div>
+                <div class="btnSkill btnListen" id="Listening"></div>
+                <div class="btnSkill btnVocab" id="Vocabulary"></div>
+                <div class="btnSkill btnGrammar" id="Grammar"></div>
+                <div class="btnSkill btnSituation" id="Situation"></div>
             </div>
         </div>
     </div>
@@ -86,9 +86,10 @@
         <div id="AllVocabulary" class="ui-hide"></div>
     </div>
 
-    <div class="footer ui-hide">
+    <div class="footer">
         <div class='footerButton footerAlldiv'>
             <div class="Imagebtn btnBack"></div>
+            <div class="Imagebtn btnStart ui-hide"></div>
         </div>
     </div>
 
