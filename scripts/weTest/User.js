@@ -47,6 +47,10 @@ $(document)
         $('.MainMenu').addClass('ui-hide');
         $('.Goal,.footerGoal').removeClass('ui-hide');
     })
+//20240715 -- Menu Report
+    .on('click', '#btnReport', function (e, data) {
+        window.location = '/Wetest/Report';
+    })
     .on('click', '#dialogSelect .btnSelected', function (e, data) {
         popupClose($(this).closest('.my-popup'));
         GotoExam();
@@ -58,7 +62,7 @@ $(document)
 // ========================= Goal ============================= //
 //20240715 -- Set Total Goal
     .on('click', '#TimesUsedPercent', function (e, data) {
-        GoalType ='total'
+        GoalType = 'total'
         Goaldate();
     })
 //20240715 -- Close Dialog
@@ -96,17 +100,17 @@ $(document)
     })
 //20240716 -- Set Reading Goal
     .on('click', '#ReadingTime', function (e, data) {
-        GoalType ='Reading'
+        GoalType = 'Reading'
         Goaldate();
     })
 //20240716 -- Set Listening Goal
     .on('click', '#ListeningTime', function (e, data) {
-        GoalType ='Listening'
+        GoalType = 'Listening'
         Goaldate();
     })
 //20240716 -- Set Vocab Goal
     .on('click', '#VocabTime', function (e, data) {
-        GoalType ='Vocabulary'
+        GoalType = 'Vocabulary'
         Goaldate();
     })
 //20240716 -- Set Grammar Goal
@@ -222,12 +226,12 @@ function SaveGoal() {
                         $('#' + GoalType + 'TimeResult').html('Due date : ' + data[i].TotalGoal + '<br />(Time left ' + data[i].TotalGoalAmount + ' days)');
                         $('#' + GoalType + 'TimeResult').removeClass('ui-hide');
                         $('#' + GoalType + 'PS').removeClass('PS');
-                      
+
                     }
 
                     popupClose($('#dialogGoalDate').closest('.my-popup'));
 
-                   
+
                 } else {
                     $('#dialogAlert').attr('action', 'focus');
                     $('#dialogAlert .ui-text').html(data[i].Msg);
@@ -282,6 +286,9 @@ function SetUserData(data) {
                 $('#SituationPS').removeClass('PS');
             }
 
+            $('#TimesUsedPercent').html(data[i].TotalGoalDatePercent);
+            $('#PracticeScorePercent').html(data[i].TotalGoalScorePercent);
+
         } else if (data[i].Result == 'sessionlost') {
             if ($('.login').hasClass('ui-hide') == true) {
                 window.location = '/Wetest/User';
@@ -306,7 +313,7 @@ function ClearGoalDate() {
                     $('#ReadingPS,#ListeningPS,#VocabularyPS,#GrammarPS,#SituationPS').addClass('PS');
                     $('.Goal,.btnSetDetailGoal').removeClass('ui-hide')
                     $('.btnSetDetailGoal').addClass('unActive');
-                    $().addClass('ui-hide');
+                    $('#TimesUsedPercent,#PracticeScorePercent').html('0%');
 
                 }
             }
