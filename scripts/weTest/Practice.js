@@ -1,4 +1,5 @@
-﻿// ========================= Page Load ======================== //
+﻿var ExamAmount, skill
+// ========================= Page Load ======================== //
 $(function () { $('div[data-role=page]').page({ theme: 'c', }); });
 // ============================================================ //
 // ======================= Object Event ======================= //
@@ -32,14 +33,14 @@ $(document)
      });
 
      $('#LessonType').removeClass("ui-hide");
-     $('#RandomType,#skillRandom').addClass("ui-hide");
+     $('#RandomType,#skillRandom,.btnStart').addClass("ui-hide");
  })
  .on('click', '#btnRandom', function (e, data) {
      $('#btnLesson').removeClass('btnSelected');
      $('#btnRandom').addClass('btnSelected');
 
      $('#LessonType').addClass("ui-hide");
-     $('#RandomType ,#skillRandom').removeClass("ui-hide");
+     $('#RandomType ,#skillRandom,.btnStart').removeClass("ui-hide");
  })
  .on('click', '#ReadingOther', function (e, data) {
   
@@ -68,8 +69,7 @@ $(document)
      $('#AllVocabulary,.footer').removeClass('ui-hide');
  })
  .on('click', '.btnBack', function (e, data) {
-     $('#PracticeType,#LessonType').removeClass('ui-hide');
-     $('#AllReading,#AllListening,#AllGrammar,#AllSituation,#AllVocabulary,.footer').addClass('ui-hide');
+     window.location = '/Wetest/User';
  })
  .on('click', '.Lessondiv', function (e, data) {
         var TestsetName = $(this).text();
@@ -95,6 +95,59 @@ $(document)
 
      popupClose($(this).closest('.my-popup'));
 
+ })
+ //20240717 Choose Exam Amount
+ .on('click', '.btnAmount', function (e, data) {
+     $('.btnAmount').removeClass('btnSelected');
+     $('#UserType').val('');
+     $(this).addClass('btnSelected');
+ })
+ //20240717 Check numeric key press
+ .on('keypress', '#UserType', function (e, data) {
+    if (event.which != 8 && isNaN(String.fromCharCode(event.which))) {
+        event.preventDefault(); //stop character from entering input
+    }
+ })
+
+//20240717 Choose Random All Skill
+ .on('click', '#btnRandomAll', function (e, data) {
+     $('#btnRandomAll').toggleClass('btnSelected');
+     $('.btnSkill').toggleClass('Selected');
+ })
+
+//20240717 Choose Random Skill
+ .on('click', '.btnSkill', function (e, data) {
+     $(this).toggleClass('Selected');
+     $('#btnRandomAll').removeClass('Selected');
+ })
+//20240717 Start Random
+ .on('click', '.btnStart', function (e, data) {
+     if ($(".btnAmount.btnSelected").attr('id') == 'btnUserType') {
+         ExamAmount = $("#UserType").val();
+     } else {
+        ExamAmount = $(".btnAmount.btnSelected").text();
+     }
+     var arrSkill = new Array();
+
+     if ($("#btnRandomAll").hasClass('btnSelected') == true) {
+         arrSkill.push('All');
+     } else {
+         $('.Selected').each(function (i, obj) {
+             arrSkill.push($(this).attr('id'));
+         });
+     }
+     console.log(arrSkill);
+     skill = arrSkill.join(',');
+     var post1 = 'ExamAmount=' + ExamAmount + '&arrSkill=' + skill;
+     $.ajax({
+         type: 'POST',
+         url: '/weTest/RandomPractice',
+         data: post1,
+         success: function (data) {
+             for (var i = 0; i < data.length; i++) {
+             }
+         }
+     });
  })
 
 function GotoPractice(TestsetId) {
