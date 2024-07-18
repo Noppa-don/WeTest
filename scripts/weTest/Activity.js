@@ -1,10 +1,9 @@
-﻿var OTPNum
+﻿var OTPNum,counterId, PageNum, AllPage;
+
+var sec = 0;
 // ========================= Page Load ======================== //
 $(function () {
     $('div[data-role=page]').page({ theme: 'c', });
-    var sec = 0;
-    var counterId
-    var PageNum, AllPage;
 
     GetQuestionAndAnswer()
     QuizTimer()
