@@ -1,0 +1,14 @@
+﻿.ui-page {background-color: #f7eee9;}
+
+.btnReading{background: url(/images/Wetest/btnRead.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+.btnListen{background: url(/images/Wetest/btnList.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+.btnVocab{background: url(/images/Wetest/btnVocab.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+.btnGrammar{background: url(/images/Wetest/btnGrammar.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+.btnSituation{background: url(/images/Wetest/btnSit.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+
+
+.btnReading.Selected{background: url(/images/Wetest/readActive.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+.btnListen.Selected{background: url(/images/Wetest/listActive.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+.btnVocab.Selected{background: url(/images/Wetest/vocabActive.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+.btnGrammar.Selected{background: url(/images/Wetest/grammarActive.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+.btnSituation.Selected{background: url(/images/Wetest/sitActive.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
