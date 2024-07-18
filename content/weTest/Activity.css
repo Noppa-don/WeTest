@@ -1,0 +1,105 @@
+﻿.ui-page {background-color: #f7eee9;}
+#divActivity {background-color:#f7eee9;}
+
+#divTopControlBar {width: 100%;height: 100px;background-color: #0a3820;}
+
+#divTestsetIcon {margin-left:15px;width:fit-content;float:left;width: 10%}
+#divIcon {background: url(/images/Wetest/PlacementTest.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 70px;position: relative;}
+#ptLogo {color:white; text-shadow:none;}
+#divRunningBar {margin-left:15px;float:left;width: 80%;display: flex;padding-top: 15px;}
+#divIconRun{background: url(/images/Wetest/Run.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 35px;height: 70px;}
+#divGoal{background: url(/images/Wetest/GoalFlag.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 35px;height: 70px;}
+#divQuestionRun {width:90%;border-style:solid; border-color:white; border-radius:1.2em;margin: 10px 10px 10px 10px;}
+#divBtnReportProblem {margin-right:50px;float:right;background: url(/images/Wetest/QuuestionProblem.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;cursor:pointer;}
+
+
+#divPlayground {background-color:#f7eee9;display: flex;width: 100%;padding:15px;}
+
+#divQ {width:90%;float:left;}
+
+#divQuestion {background-color:white;width:97%; border-radius:0.5em;padding:20px;}
+.divAnswerRow {display:flex;width:100%;margin-top:15px; border-radius:0.5em;}
+.divAnswerbar,.divAnswerbarAns{width:50%;margin-top:5px;background-color:white; border-radius:0.5em;padding:20px;cursor:pointer;}
+.divAnswerbar.Left,.divAnswerbarAns.Left {margin-right:5px;}
+.divAnswerbar.Right,.divAnswerbarAns.Right{margin-left:5px;}
+
+.divAnswerbar.Answered{background-color:moccasin;}
+.divAnswerbarAns.RightAns{background-color:darkseagreen; color:white;}
+.divAnswerbarAns.WrongAns{background-color:indianred; color:white;}
+
+#divSideMenuBar { margin-right: auto; margin-left: auto;padding-top: 20px;} 
+#divPause {background: url(/images/Wetest/Pause.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;cursor:pointer;margin: auto;} 
+#divAllQuestion,#divAllLeapChoice {background: url(/images/Wetest/AllQuestion.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;margin: auto;cursor:pointer;} 
+#divShowExplain {background: url(/images/Wetest/key.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;margin: auto;cursor:pointer;} 
+.footer {display: flex;}
+
+.footerButton {display: flex;justify-content:center;float:left;width:90%;padding:20px;}
+.btnBack {background: url(/images/Wetest/Previous.png);padding-left:20px;}
+.btnNext {background: url(/images/Wetest/Next.png);padding-right:20px;}
+.btnBack.UnActive {background: url(/images/Wetest/PreviousUnactive.png);padding-left:20px;cursor:not-allowed;}
+.btnNext.UnActive {background: url(/images/Wetest/NextUnactive.png);padding-right:20px;cursor:not-allowed;}
+
+.btnBackPage {background: url(/images/Wetest/back2.png);padding-left:20px;margin:auto;}
+.btnNextPage {background: url(/images/Wetest/Next2.png);padding-right:20px;margin:auto;}
+.btnBackPage.UnActive {background: url(/images/Wetest/PreviousUnactive.png);padding-left:20px;cursor:not-allowed;}
+.btnNextPage.UnActive {background: url(/images/Wetest/NextUnactive.png);padding-right:20px;cursor:not-allowed;}
+
+#divSendQuiz {background: url(/images/Wetest/SendQuiz.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 70px;height: 70px;  margin: auto;cursor:pointer;}
+.wrapper {margin-top: 130px;}
+
+.divLevelRecommend {background-repeat: no-repeat!important;background-size: contain!important;background-position: left!important;width:120px;height:300px;margin: auto;float:left;}
+
+.LR1 {background: url(/images/Wetest/LR1.png);background-repeat: no-repeat!important;background-size: contain!important}
+.LR2 {background: url(/images/Wetest/LR2.png);background-repeat: no-repeat!important;background-size: contain!important}
+.LR3 {background: url(/images/Wetest/LR3.png);background-repeat: no-repeat!important;background-size: contain!important}
+.LR4 {background: url(/images/Wetest/LR4.png);background-repeat: no-repeat!important;background-size: contain!important}
+.LR5 {background: url(/images/Wetest/LR5.png);background-repeat: no-repeat!important;background-size: contain!important}
+
+.LR1Selected {background: url(/images/Wetest/LR1Selected.png)!important;background-repeat: no-repeat!important;background-size: contain!important}
+.LR2Selected {background: url(/images/Wetest/LR2Selected.png)!important;background-repeat: no-repeat!important;background-size: contain!important}
+.LR3Selected {background: url(/images/Wetest/LR3Selected.png)!important;background-repeat: no-repeat!important;background-size: contain!important}
+.LR4Selected {background: url(/images/Wetest/LR4Selected.png)!important;background-repeat: no-repeat!important;background-size: contain!important}
+.LR5Selected {background: url(/images/Wetest/LR5Selected.png)!important;background-repeat: no-repeat!important;background-size: contain!important}
+
+#divGotoLogin{background: url(/images/Wetest/Login.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 70px;height: 70px;float: right;}
+#divGotoMainMenu{background: url(/images/Wetest/Previous.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 70px;height: 70px;float: right;}
+
+.runningStatus {background-color:white;height: 100%;width:0;border-radius: 1em 0 0 1em;}
+
+#dialogPromblemQuestion {min-width: 450px!important;}
+#dialogLeapChoice .ui-content{background-color: #0a3820;}
+#dialogResultChoice .ui-content{background-color: #0a3820;}
+#txtDetail {height: 240px!important;resize:none;}
+
+#ProblemTopic-button {text-align: left;font-weight: normal;}  
+
+.LeapchoiceItem {width: 70px; height: 75px; border-style: solid; margin: 10px; border-radius: 10px;text-align:center;background-color:white;border-color:#0a3820;}
+.LeapchoiceItemUnActive {width: 70px; height: 75px; border-style: solid; margin: 10px; border-radius: 10px;text-align:center;background-color:gray;border-color:gray;color:white;cursor:not-allowed;}
+.AnsweredChoice {width: 30px; height: 35px; background: url(/images/Wetest/Right.png); background-repeat: no-repeat; background-size: contain; background-position: left; margin: auto; margin-bottom: 5px;margin-top: 5px;cursor:pointer;}
+.NotAnsweredChoice {width: 30px; height: 35px; background: url(/images/Wetest/leap.png); background-repeat: no-repeat; background-size: contain; background-position: left; margin: auto; margin-bottom: 5px;margin-top: 5px;cursor:pointer;}
+.DisabledChoice {width: 30px; height: 35px; background: url(/images/Wetest/2Right.png); margin-bottom: 5px;margin-top: 5px;}
+.stay{width: 30px; height: 35px; background: url(/images/Wetest/stay.png); background-repeat: no-repeat; background-size: contain; background-position: left; margin: auto; margin-bottom: 5px;margin-top: 5px;cursor:pointer;}
+
+#PanelLeapChoice, #PanelResultChoice {display:flex;margin-bottom: 30px;}
+.pageLeapchoice {float:left;}
+#divTime {font-size: 2em;}
+
+.ExplainQ {background-color: #f1d196;padding: 20px;margin: 20px;border-radius: 0.5em;}
+.fistflexdiv.RightCircle {width: 30px; height: 35px; background: url(/images/Wetest/circle.png); background-repeat: no-repeat; background-size: contain; background-position: left; margin: auto; margin-bottom: 5px;margin-top: 5px;}
+
+.RightAnsweredChoice {width: 30px; height: 35px; background: url(/images/Wetest/Right.png); background-repeat: no-repeat; background-size: contain; background-position: left; margin: auto; margin-bottom: 5px;margin-top: 5px;cursor:pointer;}
+.WrongAnsweredChoice {width: 30px; height: 35px; background: url(/images/Wetest/wrongAns.png); background-repeat: no-repeat; background-size: contain; background-position: left; margin: auto; margin-bottom: 5px;margin-top: 5px;cursor:pointer;}
+.LeapAnsweredChoice {width: 30px; height: 35px; background: url(/images/Wetest/leapAns.png); background-repeat: no-repeat; background-size: contain; background-position: left; margin: auto; margin-bottom: 5px;margin-top: 5px;cursor:pointer;}
+
+.btnAnswerType {border-radius: 1em;color:white;line-height: 30px;padding: 10px;height: 30px;cursor: pointer;box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;width: fit-content;margin: auto;min-width: 20%;text-align: center;}
+    .btnAnswerType.AllAnswer {background-color: #0a3820;border-style:solid;}
+    .btnAnswerType.RightAnswer {background-color: #63c089;}
+    .btnAnswerType.WrongAnswer {background-color: #a61e24;}
+    .btnAnswerType.LeapAnswer {background-color: #abadaf;}
+
+.iconAnswer{float: left; margin: auto; margin-bottom: 5px;margin-top: 5px;cursor:pointer;}
+.iconAnswer.iconRightAnswer {margin-left: 15px;height: 25px; width: 25px; height: 25px;background: url(/images/Wetest/RightIcon.png);background-repeat: no-repeat; background-size: contain; background-position: left;}
+.iconAnswer.iconWrongAnswer {margin-left: 15px;height: 25px; width: 25px; height: 25px;background: url(/images/Wetest/WrongIcon.png);background-repeat: no-repeat; background-size: contain; background-position: left;}
+.iconAnswer.iconLeapAnswer {margin-left: 15px;height: 25px; width: 25px; height: 25px;background: url(/images/Wetest/LeapIcon.png);background-repeat: no-repeat; background-size: contain; background-position: left;}
+
+#AllPage, #AllPage2 {min-width: 480px; min-height: 202px;}
