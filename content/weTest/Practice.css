@@ -3,11 +3,24 @@
 .btnBack {background: url(/images/Wetest/Previous.png);}
 .footerButton {display: flex;justify-content: space-between;padding: 10px 10% 20px 10%;}
 
-#iconReading ,#btnRandomReading {background: url(/images/Wetest/reading.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
-#iconListen,#btnRandomListening {background: url(/images/Wetest/listening.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
-#iconVocab,#btnRandomVocab {background: url(/images/Wetest/vocab.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
-#iconGrammar ,#btnRandomGrammar{background: url(/images/Wetest/gramma.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
-#iconSituation,#btnRandomSituation {background: url(/images/Wetest/situation.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
+.iconReading{background: url(/images/Wetest/reading.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
+.iconListen{background: url(/images/Wetest/listening.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
+.iconVocab{background: url(/images/Wetest/vocab.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
+.iconGrammar{background: url(/images/Wetest/gramma.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
+.iconSituation{background: url(/images/Wetest/situation.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;}
+
+.btnReading{background: url(/images/Wetest/btnRead.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+.btnListen{background: url(/images/Wetest/btnList.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+.btnVocab{background: url(/images/Wetest/btnVocab.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+.btnGrammar{background: url(/images/Wetest/btnGrammar.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+.btnSituation{background: url(/images/Wetest/btnSit.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+
+
+.btnReading.Selected{background: url(/images/Wetest/readActive.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+.btnListen.Selected{background: url(/images/Wetest/listActive.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+.btnVocab.Selected{background: url(/images/Wetest/vocabActive.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+.btnGrammar.Selected{background: url(/images/Wetest/grammarActive.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+.btnSituation.Selected{background: url(/images/Wetest/sitActive.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
 
 .Lessondiv{float:left;width:80px;height:50px;background-color:#82d1f5;line-height:50px;text-align:center;margin-left:23px;border-radius:1em;}
 
@@ -29,8 +42,11 @@
 #AllSituation .Lessondiv{margin-bottom:10px;}
 #AllVocabulary .Lessondiv{margin-bottom:10px;}
 
-#RandomType .btn,#skillRandom .btn {width:60px; min-width: 60px;margin-right: 15px;margin-left: 15px;}
+#RandomType .btn,#skillRandom .btn {width: 45px; min-width: 45px; margin-left: 15px;}
 #RandomType,#skillRandom{margin-top: 50px;}
-
-#btnRandomReading,#btnRandomListening,#btnRandomVocab,#btnRandomGrammar,#btnRandomSituation {line-height: 30px;cursor: pointer;margin: auto;min-width: 20%;}
-    
+#btnRandomAll{margin-left: 105px!important;}  
+#btnRandomReading,#btnRandomListening,#btnRandomVocab,#btnRandomGrammar,#btnRandomSituation {line-height: 30px;cursor: pointer;margin: auto;}
+.ui-input-text{margin-top: -3px!important; background: none!important; border: none!important; box-shadow: none!important;color: white!important;}
+#UserType{text-align: center!important;}
+.btnStart{background: url(/images/Wetest/btnStart.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;    width: 125px;
+    height: 60px;}
