@@ -1,0 +1,40 @@
+﻿.wrapper {margin-top: 130px;}
+.btnBack {background: url(/images/Wetest/Previous.png);}
+.btnNext {background: url(/images/Wetest/Next.png);}
+.btnPhoto,.btnSlipPhoto {background: url(/images/Wetest/Photo.png); margin:auto;}
+.btnSlipPhoto {margin-left: 5px;}
+.btnQR {background: url(/images/Wetest/GoogleQR.jpg); margin:auto;height:100px!important;width:100px!important;}
+   
+.divPhoto {width: 20%;float: right;text-align: center;}
+.divPhoto .ui-input-text {display:none!important;}
+
+.userType {display: inline-grid;grid-template-columns: 1fr 1fr;text-align: center;width: 100%;}
+.captionName {position: absolute;line-height: 40px;}
+
+.txtData, .spnData {margin-left: 150px;}
+
+.registerDetail {float: left;width: 80%;min-height: 320px;}
+
+.spnData {display: none;line-height: 50px;}
+
+.register {display: grid;}
+
+.registerData {margin-left: auto;margin-right: auto;width: 100%;}
+
+#imgUser{border-radius: 50%;width: 100px;height: 100px;}
+
+.otp{text-align: center;}
+.payment{text-align: center;}
+.divKeyCode {width: 50%;margin: auto;text-align: left;}
+
+.footerButton {display: flex;justify-content: space-between;padding: 10px 10% 20px 10%;}
+
+#btnDiscount {min-width: fit-content!important;margin: unset;}
+
+.otp .ui-input-text {width:100px!important;text-align:center;margin:auto;}
+
+#txtOTP,#txtKeyCode {text-align:center;}
+
+#btnCheckKey{height: 10px; border-radius: 0.8em; margin-left: 5px; font-size: small; line-height: 10px; width: 66px;}
+#btnskip{height: 10px; border-radius: 0.8em;font-size: small; line-height: 10px;}
+.divSlip{text-align:left;}
