@@ -108,13 +108,11 @@ $(document)
         event.preventDefault(); //stop character from entering input
     }
  })
-
 //20240717 Choose Random All Skill
  .on('click', '#btnRandomAll', function (e, data) {
      $('#btnRandomAll').toggleClass('btnSelected');
      $('.btnSkill').toggleClass('Selected');
  })
-
 //20240717 Choose Random Skill
  .on('click', '.btnSkill', function (e, data) {
      $(this).toggleClass('Selected');
@@ -136,15 +134,19 @@ $(document)
              arrSkill.push($(this).attr('id'));
          });
      }
-     console.log(arrSkill);
+
      skill = arrSkill.join(',');
-     var post1 = 'ExamAmount=' + ExamAmount + '&arrSkill=' + skill;
+     console.log(skill);
+        var post1 = 'ExamAmount=' + ExamAmount + '&arrSkill=' + skill;
      $.ajax({
          type: 'POST',
          url: '/weTest/RandomPractice',
          data: post1,
          success: function (data) {
              for (var i = 0; i < data.length; i++) {
+                 if (data[i].dataType == 'success') {
+                     GotoPractice(data[i].errorMsg);
+                 }
              }
          }
      });
@@ -164,7 +166,7 @@ function GotoPractice(TestsetId) {
                     var x = setInterval(function () {
                         clearInterval(x);
                         window.location = '/Wetest/Activity';
-                    }, 2000);
+                    }, 1000);
                 }
             }
         }
