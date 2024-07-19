@@ -1923,71 +1923,103 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-
+        '20240718 -- ปรับวิธีการบันทึกข้อสอบแบบสุ่มตามตัวชี้วัด
         <AcceptVerbs(HttpVerbs.Post)>
         Function RandomPractice()
-            Dim L1 As New List(Of clsPracticeSet)
-            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
-
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql1 As SqlCommand, cmdMsSql2 As SqlCommand, cmdMsSql3 As SqlCommand, dt As DataTable
+            Dim TestsetId As String = Guid.NewGuid.ToString
+            Dim tsqsId As String = Guid.NewGuid.ToString
             Try
                 ' ================ Check Permission ================
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
+                'Insert tblTestset tblTestsetQuestionSet tblTestsetQuestionDetail แล้ว return Testset Id ไปส่งให้ทำข้อสอบ practice
+
+                cmdMsSql1 = cmdSQL(cn, "Insert Into tbltestset select newid(),'RandomExam',sl.LevelId,0,1,0,0,0,@stdId,1,getdate() 
+                                        from tblstudent s inner join tblStudentLevel sl on s.studentId = sl.StudentId where s.studentId = @stdId;")
+                With cmdMsSql1
+                    .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
+                    .ExecuteNonQuery()
+                End With
+
+                cmdMsSql2 = cmdSQL(cn, "insert into tblTestSetQuestionSet select @tsqsId,@TestsetId,1,newid(),null,1,getdate();")
+                With cmdMsSql2
+                    .Parameters.Add("@TestsetId", SqlDbType.VarChar).Value = TestsetId
+                    .Parameters.Add("@tsqsId", SqlDbType.VarChar).Value = tsqsId
+                    .ExecuteNonQuery()
+                End With
+
                 If Request.Form("arrSkill") = "All" Then
-                    cmdMsSql = cmdSQL(cn, "Select top @ExamAmount * from tblquestion q where q.QuestionId  In (Select questionId 
-                                        From tblTestSetQuestionSet tsqd inner Join tblTestSetQuestionDetail tsqs on tsqd.TSQSId = tsqs.tsqsid 
-                                        Where testsetid In(Select TestsetId From tblTestset t inner Join tbllevel l On t.LevelId = l.LevelId
-                                        Where levelno <= (select top 1 levelno from tbllevel l left join tblStudentLevel sl on l.LevelId = sl.LevelId 
-                                        where studentId = @stdId)  and t.isactive = 1 and l.isactive = 1)) And q.isactive = 1 
-                                        And q.QuestionId Not in (select QuestionId from tblQuizQuestion qq inner join tblQuizSession qs on qq.QuizId = qs.QuizId)
-                                        order by newid();")
-                    With cmdMsSql
+                    cmdMsSql3 = cmdSQL(cn, "insert into tblTestSetQuestionDetail Select newid(),@tsqsId,row_number() over (order by questionId),QuestionId,1,getdate() from (
+                                            select top (@ExamAmount) q.questionId from tblquestion q 
+                                            inner join tblQuestionset qs on q.qsetid = qs.QSetId inner join tblQuestionCategory qc on qs.QCategoryId  = qc.QCategoryId
+                                            inner join tblbook b on qc.BookGroupId = b.BookGroupId
+                                            where b.BookSyllabus = '51' and b.LevelId in (select levelid from tbllevel 
+                                            where levelno <= (select top 1 levelno from tbllevel l left join tblStudentLevel sl on l.LevelId = sl.LevelId 
+                                            where studentId = @stdId)) and q.isactive = 1 and qs.isactive = 1 and qc.isactive = 1  and qei.isactive = 1
+                                            and q.QuestionId not in (select questionId from tblquizquestion qq inner join tblQuizSession qs on qq.QuizId = qs.quizid 
+                                            where qs.studentId = @stdId) order by newid())a;")
+                    With cmdMsSql3
+                        .Parameters.Add("@ExamAmount", SqlDbType.TinyInt).Value = CInt(Request.Form("ExamAmount"))
                         .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
-                        .Parameters.Add("@ExamAmount", SqlDbType.VarChar).Value = Request.Form("ExamAmount")
+                        .Parameters.Add("@tsqsId", SqlDbType.VarChar).Value = tsqsId
                         .ExecuteNonQuery()
                     End With
                 Else
 
-                    Dim skill() As String = Split(Request.Form("arrSkill"), ",")
-                    Dim skilltxt As String = ""
-
-                    For i = 0 To skill.Count - 1
-                        If i = 0 Then
-                            skilltxt = "'%" & skill(i) & "%'"
-                        Else
-                            skilltxt &= " OR " & "'%" & skill(i) & "%'"
-                        End If
-
+                    Dim skilltxt() As String = Request.Form("arrSkill").Split(",")
+                    Dim skt As String = ""
+                    For Each i In skilltxt
+                        skt &= ",'" & i & "'"
                     Next
 
-                    cmdMsSql = cmdSQL(cn, "Select  top 20 * from tblquestion q where q.QuestionId  In (Select questionId 
-                                        From tblTestSetQuestionSet tsqd inner Join tblTestSetQuestionDetail tsqs on tsqd.TSQSId = tsqs.tsqsid 
-                                        Where testsetid In(Select TestsetId From tblTestset t inner Join tbllevel l On t.LevelId = l.LevelId
-                                        Where testsetname Like @skn
-                                        And levelno <= (select top 1 levelno from tbllevel l left join tblStudentLevel sl on l.LevelId = sl.LevelId 
-                                        where studentId = @stdId)  and t.isactive = 1 and l.isactive = 1)) And q.isactive = 1 
-                                        And q.QuestionId Not in (select QuestionId from tblQuizQuestion qq inner join tblQuizSession qs on qq.QuizId = qs.QuizId)
-                                        order by newid();")
-                    With cmdMsSql
+                    skt = skt.Substring(1, skt.Length - 1)
+                    Dim sqlBuilder As StringBuilder = New StringBuilder()
+                    sqlBuilder.Append("insert into tblTestSetQuestionDetail Select newid(),@tsqsId,row_number() over (order by questionId),QuestionId,1,getdate() 
+                                            from (select top (@ExamAmount) q.questionId from tblquestion q 
+                                            inner join tblQuestionset qs on q.qsetid = qs.QSetId inner join tblQuestionCategory qc on qs.QCategoryId  = qc.QCategoryId
+                                            inner join tblbook b on qc.BookGroupId = b.BookGroupId 
+                                            inner join tblQuestionEvaluationIndexItem qei on q.questionId = qei.question_Id 
+                                            where ei_id in(select EI_Id from tblEvaluationIndex WHERE Parent_Id in(")
+                    sqlBuilder.Append(skt)
+
+                    sqlBuilder.Append(") and IsActive = 1)
+                                            and b.BookSyllabus = '51' and LevelId in (select levelid from tbllevel 
+                                            where levelno <= (select top 1 levelno from tbllevel l left join tblStudentLevel sl on l.LevelId = sl.LevelId 
+                                            where studentId = @stdId)) and q.isactive = 1 and qs.isactive = 1 and qc.isactive = 1  
+                                            and qei.isactive = 1 and q.QuestionId not in (select questionId from tblquizquestion qq 
+                                            inner join tblQuizSession qs on qq.QuizId = qs.quizid where qs.studentId = @stdId) order by newid())a;")
+
+                    cmdMsSql3 = cmdSQL(cn, sqlBuilder.ToString())
+
+                    With cmdMsSql3
+                        .Parameters.Add("@ExamAmount", SqlDbType.TinyInt).Value = CInt(Request.Form("ExamAmount"))
                         .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
-                        .Parameters.Add("@skn", SqlDbType.VarChar).Value = skilltxt
-                        .Parameters.Add("@ExamAmount", SqlDbType.VarChar).Value = Request.Form("ExamAmount")
+                        .Parameters.Add("@tsqsId", SqlDbType.VarChar).Value = tsqsId
                         .ExecuteNonQuery()
                     End With
+
                 End If
 
-                dt = getDataTable(cmdMsSql)
+                Dim objList As New clsMain()
+                objList.dataType = "success"
+                objList.errorMsg = TestsetId
+                L1.Add(objList)
+                objList = Nothing
 
             Catch ex As Exception
-                Dim objList As New clsPracticeSet()
-                objList.skillSet = "error"
-                objList.skillTxtAll = ex.Message
+                Dim objList As New clsMain()
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
                 L1.Add(objList)
                 objList = Nothing
             Finally
                 If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
-                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cmdMsSql1 IsNot Nothing Then cmdMsSql1.Dispose() : cmdMsSql1 = Nothing
+                If cmdMsSql2 IsNot Nothing Then cmdMsSql2.Dispose() : cmdMsSql2 = Nothing
+                If cmdMsSql3 IsNot Nothing Then cmdMsSql3.Dispose() : cmdMsSql3 = Nothing
                 If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
