@@ -1,11 +1,11 @@
 ﻿.ui-page {background-color: #f7eee9;}
-.wrapper {margin-top: 130px;max-width: 870px;}
+.wrapper {margin-top: 100px;max-width: 920px;}
 .btnBack {background: url(/images/Wetest/Previous.png);}
 .footerButton {display: flex;justify-content: space-between;padding: 10px 10% 20px 10%;}
 #PracticeType{line-height: 55px;width: 50%;}
 #StartDate, #EndDate {width: 130px;}
 h1 {border-bottom-style:solid;border-bottom-width: 1px;}
-.calendarlogo {background: url(/images/Wetest/calendar.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 40px;margin-left: 10px;margin-right: 15px;}
+.calendarlogo {background: url(/images/Wetest/calendar.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 40px;margin-left: 10px;margin-right: 15px;cursor:pointer;}
 
  .rdb {border: none!important; background-color: #f7eee9!important; text-shadow: none!important;}
  #TimeData {margin-left: -15px;margin-top: 25px;}
@@ -21,9 +21,10 @@ h1 {border-bottom-style:solid;border-bottom-width: 1px;}
 .btnGrammar{background: url(/images/Wetest/btnGrammar.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
 .btnSituation{background: url(/images/Wetest/btnSit.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
 
-
 .btnReading.Selected{background: url(/images/Wetest/readActive.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 35px;cursor:pointer;}
 .btnListen.Selected{background: url(/images/Wetest/listActive.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
 .btnVocab.Selected{background: url(/images/Wetest/vocabActive.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
 .btnGrammar.Selected{background: url(/images/Wetest/grammarActive.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
 .btnSituation.Selected{background: url(/images/Wetest/sitActive.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 115px;height: 55px;margin-left: 10px;cursor:pointer;}
+
+#btnSearch{background: url(/images/Wetest/Done.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 50px;cursor:pointer;}
