@@ -18,35 +18,47 @@
         <div class='logo'></div>
         <div class='pagename'>- Report</div>
     </div>
+
     <div class='wrapper'>
 
-        <div id="PracticeType" class="flexDiv">
-            Practice from
+        <div class="flexDiv">
+            <div class="Filter firstflexdiv">
+                <div id="PracticeType" class="flexDiv">
+                    Practice from
              <div class="btn firstflexdiv" id="btnLesson">Lesson</div>
-            <div class="btn " id="btnRandom">Random</div>
+                    <div class="btn " id="btnRandom">Random</div>
+                </div>
+
+                <div id="TimeData" class="flexDiv">
+                    <div>
+                        <label for="rdbThisWeek" class="rdb">This week</label><input type="radio" name="radio-1" class="firstflexdiv" id="rdbThisWeek" />
+                    </div>
+                    <div>
+                        <label for="rdbMonth" class="rdb">This month</label><input type="radio" name="radio-1" id="rdbMonth" />
+                    </div>
+                    <div>
+                        <label for="rdbChooseDate" class="rdb">Choose from date</label><input type="radio" name="radio-1" id="rdbChooseDate" />
+                    </div>
+                    <div>
+                        <input type='text' id='StartDate' /></div>
+                    <div class="calendarlogo" id="btnStartDate"></div>
+
+                    <div>
+                        <input type='text' id='EndDate' /></div>
+                    <div class="calendarlogo" id="btnEndDate"></div>
+                </div>
+            </div>
+            <div>
+                <div class="Imagebtn" id="btnSearch"></div>
+            </div>
         </div>
 
-        <div id="TimeData" class="flexDiv">
-            <div>
-                <label for="rdbThisWeek" class="rdb">This week</label><input type="radio" name="radio-1" class="firstflexdiv" id="rdbThisWeek" />
-            </div>
-            <div>
-                <label for="rdbMonth" class="rdb">This month</label><input type="radio" name="radio-1" id="rdbMonth" />
-            </div>
-            <div>
-                <label for="rdbChooseDate" class="rdb">Choose from date</label><input type="radio" name="radio-1" id="rdbChooseDate" />
-            </div>
-            <div><input type='text' id='StartDate' /></div>
-            <div class="calendarlogo" id="btnStartDate"></div>
 
-            <div><input type='text' id='EndDate' /></div>
-            <div class="calendarlogo" id="btnEndDate"></div>
-        </div>
         <h1></h1>
 
         <div id="skillRandom">
             <div class="flexDiv">
-             <div class="btn btnSkill firstflexdiv" id="btnRandomAll">All</div>
+                <div class="btn btnSkill firstflexdiv" id="btnRandomAll">All</div>
                 <div class="btnSkill btnReading" id="25DA1FAB-EB20-4B1D-8409-C2FB08FC61B3"></div>
                 <div class="btnSkill btnListen" id="Listening"></div>
                 <div class="btnSkill btnVocab" id="31667BAB-89FF-43B3-806F-174774C8DFBF"></div>
@@ -63,9 +75,12 @@
         </div>
     </div>
 
-        <div name='FilterDate' id="dialogFilterDate" class='my-popup confirm ui-popup-container ui-popup-hidden'>
+    <div name='FilterDate' id="dialogFilterDate" class='my-popup confirm ui-popup-container ui-popup-hidden'>
         <div class='ui-icon close'></div>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <span id="spnDateName"></span>
+            <br />
+            <br />
             <div id="SelectFilterDate"></div>
             <br />
             <span id="spnShowdate"></span>
