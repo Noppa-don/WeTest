@@ -136,7 +136,7 @@ $(document)
      }
 
      skill = arrSkill.join(',');
-     console.log(skill);
+
         var post1 = 'ExamAmount=' + ExamAmount + '&arrSkill=' + skill;
      $.ajax({
          type: 'POST',
@@ -145,6 +145,7 @@ $(document)
          success: function (data) {
              for (var i = 0; i < data.length; i++) {
                  if (data[i].dataType == 'success') {
+                     console.log(data[i].errorMsg);
                      GotoPractice(data[i].errorMsg);
                  }
              }
