@@ -207,7 +207,6 @@ function Goaldate() {
 }
 //20240715 -- Save Goal Date
 function SaveGoal() {
-    console.log(GoalType);
     var post1 = 'selectedGoalDate=' + selectedGoalDate + '&formatSelectedGoalDate=' + formatSelectedGoalDate + '&GoalType=' + GoalType;
 
     $.ajax({
@@ -314,7 +313,6 @@ function ClearGoalDate() {
                     $('.Goal,.btnSetDetailGoal').removeClass('ui-hide')
                     $('.btnSetDetailGoal').addClass('unActive');
                     $('#TimesUsedPercent,#PracticeScorePercent').html('0%');
-
                 }
             }
         }
