@@ -1927,7 +1927,7 @@ Namespace Controllers
         <AcceptVerbs(HttpVerbs.Post)>
         Function RandomPractice()
             Dim L1 As New List(Of clsMain)
-            Dim cn As SqlConnection, cmdMsSql1 As SqlCommand, cmdMsSql2 As SqlCommand, cmdMsSql3 As SqlCommand, dt As DataTable
+            Dim cn As SqlConnection, cmdMsSql1 As SqlCommand, cmdMsSql2 As SqlCommand, cmdMsSql3 As SqlCommand
             Dim TestsetId As String = Guid.NewGuid.ToString
             Dim tsqsId As String = Guid.NewGuid.ToString
             Try
@@ -1937,10 +1937,11 @@ Namespace Controllers
                 ' ==================================================
                 'Insert tblTestset tblTestsetQuestionSet tblTestsetQuestionDetail แล้ว return Testset Id ไปส่งให้ทำข้อสอบ practice
 
-                cmdMsSql1 = cmdSQL(cn, "Insert Into tbltestset select newid(),'RandomExam',sl.LevelId,0,1,0,0,0,@stdId,1,getdate() 
+                cmdMsSql1 = cmdSQL(cn, "Insert Into tbltestset select @testsetid,'RandomExam',sl.LevelId,0,1,0,0,0,@stdId,1,getdate() 
                                         from tblstudent s inner join tblStudentLevel sl on s.studentId = sl.StudentId where s.studentId = @stdId;")
                 With cmdMsSql1
                     .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
+                    .Parameters.Add("@testsetid", SqlDbType.VarChar).Value = TestsetId
                     .ExecuteNonQuery()
                 End With
 
@@ -2016,7 +2017,6 @@ Namespace Controllers
                 L1.Add(objList)
                 objList = Nothing
             Finally
-                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
                 If cmdMsSql1 IsNot Nothing Then cmdMsSql1.Dispose() : cmdMsSql1 = Nothing
                 If cmdMsSql2 IsNot Nothing Then cmdMsSql2.Dispose() : cmdMsSql2 = Nothing
                 If cmdMsSql3 IsNot Nothing Then cmdMsSql3.Dispose() : cmdMsSql3 = Nothing
@@ -2032,6 +2032,97 @@ Namespace Controllers
 #Region "Report"
         Function Report() As ActionResult
             Return View()
+        End Function
+        '20240719 -- ดึงข้อมูล Report
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function GetReport()
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsMain()
+            Try
+                ''StartDate=' + startdate + '&EndDate=' + enddate + '&PracticeType=' + PracticeType
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                'Query Hard code id ของตัวชี้วัดไว้ก่อน คิดว่าควรจะต้องหาวิธีบอกว่ามีตัวชี้วัดไหนที่จะใช้บ้าง
+
+                Dim sqlBuilder As StringBuilder = New StringBuilder()
+                sqlBuilder.Append("select distinct DENSE_RANK() OVER(Order By FORMAT (q.StartTime, 'dd/MM/yyyy')) as GroupIndex, 
+                                        FORMAT (q.StartTime, 'dd/MM/yyyy') as Quizdate,FORMAT (q.StartTime, 'hh:mm tt') as starttime,
+                                        case when FORMAT (q.endtime, 'hh:mm tt') is null then 'none' else FORMAT (q.endtime, 'hh:mm tt') end as endtime ,t.TestSetName,
+                                        case when cast(cast(q.TotalScore as int) as varchar) + '/' + cast(cast(q.FullScore as int) as varchar) is null 
+                                        then '0/' + cast(cast(q.FullScore as int) as varchar) else cast(cast(q.TotalScore as int) as varchar) + '/' + cast(cast(q.FullScore as int) as varchar) end as Score,
+                                        eiparent.EI_Id,q.QuizId from tblTestset t inner join tbltestsetquestionset tqs on t.TestsetId = tqs.TestSetId 
+                                        inner join tblTestSetQuestionDetail tqd on tqs.tsqsid = tqd.TSQSId inner join tblQuestionEvaluationIndexItem qei on tqd.questionId = qei.question_Id 
+                                        inner join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id inner join tblEvaluationIndex eiParent on eiParent.EI_Id = ei.parent_id 
+                                        and eiParent.ei_id in('31667BAB-89FF-43B3-806F-174774C8DFBF','5BBD801D-610F-40EB-89CB-5957D05C4A0B','FB4B4A71-B777-4164-BA4D-5C1EA9522226','25DA1FAB-EB20-4B1D-8409-C2FB08FC61B3')
+                                        inner join tblQuiz q on q.TestSetId = t.testsetId inner join tblQuizSession qs on q.QuizId = qs.QuizId 
+                                        where IsPractice = 1 and IsStandart = @IsStandard and ei.IsActive = 1 and qei.isactive = 1 and qs.studentid  = @stdId and t.IsActive = 1")
+
+                Select Case Request.Form("StartDate").ToString
+                    Case "week"
+                        sqlBuilder.Append(" AND q.StartTime >= dateadd(day, 1-datepart(dw, getdate()), CONVERT(date,getdate())) 
+                                            AND q.StartTime <  dateadd(day, 8-datepart(dw, getdate()), CONVERT(date,getdate())) ")
+                    Case "month"
+                        sqlBuilder.Append(" AND q.starttime >= datefromparts(year(getdate()), month(getdate()), 1) ")
+                    Case Else
+                        sqlBuilder.Append(" AND q.starttime >= @StartDate and q.starttime <= @EndDate ")
+                End Select
+
+                sqlBuilder.Append("  order by Quizdate;")
+
+
+                cmdMsSql = cmdSQL(cn, sqlBuilder.ToString())
+
+                With cmdMsSql
+                    .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
+                    .Parameters.Add("@IsStandard", SqlDbType.VarChar).Value = Request.Form("PracticeType").ToString
+                    .Parameters.Add("@StartDate", SqlDbType.VarChar).Value = Request.Form("StartDate").ToString
+                    .Parameters.Add("@EndDate", SqlDbType.VarChar).Value = Request.Form("EndDate").ToString
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows().Count = 0 Then
+                    objList.dataType = "nodata"
+                Else
+                    Dim ReportData As String
+                    ReportData = "<div class='reportdata'>"
+
+                    Dim groupno, groupi As Integer
+                    groupi = dt(0)("GroupIndex")
+
+                    For Each i In dt.Rows
+
+                        groupno = i("GroupIndex")
+
+                        If groupno = groupi Then
+                            ReportData &= "<div class='divDate'>" & i("Quizdate") & "</div><div class='divStartTime'>" & i("starttime") & "</div><div class='divEndTime'>" &
+                                i("endtime") & "</div><div class='Testsetname'>" & i("TestSetName") & "</div>"
+                        End If
+                    Next
+
+                    objList.dataType = "success"
+                    objList.errorMsg = ""
+
+                End If
+
+
+                L1.Add(objList)
+                objList = Nothing
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
 #End Region
 
