@@ -1,14 +1,14 @@
-﻿var OTPNum, PackagePrice, StudentType, file;
+﻿var OTPNum, PackagePrice, StudentType, file,EditMode;
 
 // ========================= Page Load ======================== //
 $(function () { $('div[data-role=page]').page({ theme: 'c', }); $('#Firstname').focus(); });
+    checkEditMode();
 // ============================================================ //
 // ======================= Object Event ======================= //
 $(document)
 // ======================= Register ======================= //
     .on('focus', '#Firstname, #Surname, #MobileNo, #EMail, #Username, #Password, #ConfirmPassword', function (e, data) { $(this).removeClass("InvalidData") })
     .on('keypress blur', '#Firstname, #Surname, #MobileNo, #EMail, #Username, #Password', function (e, data) {
-        $('.sp' + $(this).attr('id')).text($(this).val());
         var xkey = keyA(e);
         if (xkey == 13) { keyEnterNextItem(e); }
     })
@@ -16,34 +16,29 @@ $(document)
         var xkey = keyA(e);
         if (xkey == 13) {
             if (checkInvalidRegisterData() == 'true') {
-                $('#captionConfirmPassword').css("display", "none");
-                $('#captionPassword').css("display", "none");
-                $('.spnData').css("display", "block");
-                $('.txtData').css("display", "none");
+                SetConfirmtxt()
+                $('#captionConfirmPassword,#captionPassword,.txtData').addClass('ui-hide');
+                $('.spnData').removeClass('ui-hide');
             };
-
-            //checkLogin();
         }
     })
     .on('click', '.footerRegister .btnNext', function (e, data) {
-        if ($('.spnData').is(':visible')) {
-            SaveNewUser();
-        } else {
+        if ($('.spnData').hasClass('ui-hide')) {
             if (checkInvalidRegisterData() == 'true') {
-                $('#captionConfirmPassword, #captionPassword').css("display", "none");
-                $('.spnData').css("display", "block");
-                $('#capType').removeClass('ui-hide');
-                $('.txtData,#btnStudent, #btnOther').css("display", "none");
+                SetConfirmtxt()
+                $('#captionConfirmPassword, #captionPassword,.txtData,#btnStudent, #btnOther').addClass('ui-hide');
+                $('.spnData,#capType').removeClass('ui-hide');
             };
+        } else {
+            if (EditMode) { SaveEditUser(); } else { SaveNewUser(); }
         }
     })
     .on('click', '.footerRegister .btnBack', function (e, data) {
-        if ($('.spnData').is(':visible')) {
-            $('#captionConfirmPassword, #captionPassword').css("display", "block");
-            $('.spnData').css("display", "none");
-            $('.txtData').css("display", "block");
-        } else {
+        if ($('.spnData').hasClass('ui-hide')) {
             window.location = '/Wetest/User';
+        } else {
+            $('#captionConfirmPassword, #captionPassword,.txtData').removeClass('ui-hide');
+            $('.spnData').addClass('ui-hide');
         }
 
     })
@@ -100,17 +95,8 @@ $(document)
     .on('click', '#btnConfirm', function (e, data) {
         var ttb = $('#txtOTP').val();
         if ($('#txtOTP').val() == '') { $('#txtOTP').addClass("InvalidData"); } else {
-            if (ttb == OTPNum) {
-                UpdateOTPStatus(2);
-                $('.otp ,.footerOTP').addClass('ui-hide');
-                $('.payment ,.footerPayment').removeClass('ui-hide');
-                GetPackagePrice();
-            } else {
-                UpdateOTPStatus(1);
-                $('#dialogConfirm').attr('action', 'focus');
-                $('#dialogConfirm .ui-text').html('OTP is wrong! Please try again');
-                popupOpen($('#dialogConfirm'), 99999);
-            }
+            var OSId = $(this).attr('OSId')
+            CheckAndUpdateOTPStatus(ttb, OSId)
         }
     })
 
@@ -132,10 +118,10 @@ $(document)
         popupOpen($('#dialogDiscount'), 99999);
     })
     //20240716 -- skip payment
+    //20240723 -- Update UpdateTrialDate skip
     .on('click', '#btnskip', function (e, data) {
-        $('#dialogSelect').attr('action', 'focus');
-        $('#dialogSelect .ui-text').html('Do you want go to Placement Test now ?.');
-        popupOpen($('#dialogSelect'), 99999);
+        UpdateTrialDate();
+        
     })
     .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel', function (e, data) {
         popupClose($(this).closest('.my-popup'));
@@ -153,6 +139,11 @@ $(document)
     .on('click', '#dialogDiscount #btnCheckDiscountCode', function (e, data) {
         CheckDiscount();
     })
+    //20240723 -- Dialog Confirm SaveUser
+    .on('click', '#dialogConfirmSaveUser #btnComplete', function (e, data) {
+        popupClose($(this).closest('.my-popup'));
+        window.location = '/Wetest/User';
+    })
 
 // ============================================================ //
 
@@ -167,20 +158,29 @@ function checkInvalidRegisterData() {
     if ($('#MobileNo').val() == '' || $('#MobileNo').val().length != 10) { $('#MobileNo').addClass("InvalidData"); CheckError = 'false'; }
     if ($('#EMail').val() == '') { $('#EMail').addClass("InvalidData"); CheckError = 'false'; }
     if ($('#Username').val() == '') { $('#Username').addClass("InvalidData"); CheckError = 'false'; }
-    if ($('#Password').val() == '') { $('#Password').addClass("InvalidData"); CheckError = 'false'; }
-    if ($('#ConfirmPassword').val() == '') { $('#ConfirmPassword').addClass("InvalidData"); CheckError = 'false'; }
+    if (EditMode == false) {
+        if ($('#Password').val() == '') { $('#Password').addClass("InvalidData"); CheckError = 'false'; }
+        if ($('#ConfirmPassword').val() == '') { $('#ConfirmPassword').addClass("InvalidData"); CheckError = 'false'; }
 
-    if ($('#ConfirmPassword').val() != $('#Password').val()) {
-        $('#Password, #ConfirmPassword').addClass("InvalidData");
-        CheckError = 'false';
-    }
-
-    if ($('#btnStudent, #btnOther').hasClass("btnSelected")) { } else {
-        $('#btnStudent, #btnOther').addClass("InvalidData");
-        CheckError = 'false';
+        if ($('#ConfirmPassword').val() != $('#Password').val()) {
+            $('#Password, #ConfirmPassword').addClass("InvalidData");
+            CheckError = 'false';
+        }
+        if ($('#btnStudent, #btnOther').hasClass("btnSelected")) { } else {
+            $('#btnStudent, #btnOther').addClass("InvalidData");
+            CheckError = 'false';
+        }
     }
 
     return CheckError
+}
+function SetConfirmtxt() {
+    console.log($('#Firstname').val());
+    $('.spFirstname').html($('#Firstname').val());
+    $('.spSurname').text($('#Surname').val());
+    $('.spMobileNo').text($('#MobileNo').val());
+    $('.spEMail').text($('#EMail').val());
+    $('.spUsername').text($('#Username').val());
 }
 function SaveNewUser() {
     var post1 = 'FirstName=' + $('.spFirstname').text() + '&Surname=' + $('.spSurname').text() + '&MobileNo=' + $('.spMobileNo').text() +
@@ -284,9 +284,9 @@ function UploadSlip() {
         });
     }
 }
+//20240723 -- ปรับวิธีการส่ง OTP
 function sendOTP() {
     OTPNum = Math.floor(100000 + Math.random() * 900000);
-   // console.log(OTPNum);
 
     var post1 = 'MobileNo=' + $('.spMobileNo').text() + '&OTPNum=' + OTPNum;
     $.ajax({
@@ -295,10 +295,11 @@ function sendOTP() {
         data: post1,
         success: function (data) {
             for (var i = 0; i < data.length; i++) {
-                switch (data[i].dataType) {
+                switch (data[i].ResultStatus) {
                     case 'error':
-                        console.log(data[i].errorMsg);
+                        console.log(data[i].Resulttxt);
                     case 'success':
+                        $('#btnConfirm').attr('OSId', data[i].OSId);
                         var startTime = new Date().getTime()
                         var countDownDate = new Date();
 
@@ -311,20 +312,37 @@ function sendOTP() {
                                 clearInterval(x);
                                 $('#btnSendAgain').removeClass('btnUnActive');
                             }
-                        }, 1000);
+                        }, data[i].ReponseTime);
                 }
             }
         }
     });
 }
-function UpdateOTPStatus(OTPStatus) {
-    var post1 = 'OTPStatus=' + OTPStatus
+//20240723 -- ปรับวิธีการตรวจสอบ OTP และเพิ่มการบันทึกการตอบกลับ OTP
+function CheckAndUpdateOTPStatus(OTPNum, OSId) {
+    var post1 = 'OTPNum=' + OTPNum + '&OSId=' + OSId
     $.ajax({
         type: 'POST',
-        url: '/weTest/UpdateOTPStatus',
+        url: '/weTest/CheckAndUpdateOTPStatus',
         data: post1,
         success: function (data) {
-
+            for (var i = 0; i < data.length; i++) {
+                switch (data[i].ResultStatus) {
+                    case 'error':
+                        console.log(data[i].Resulttxt);
+                        break;
+                    case 'success':
+                        $('.otp ,.footerOTP').addClass('ui-hide');
+                        $('.payment ,.footerPayment').removeClass('ui-hide');
+                        GetPackagePrice();
+                        break;
+                    default :
+                        $('#dialogConfirm').attr('action', 'focus');
+                        $('#dialogConfirm .ui-text').html(data[i].Resulttxt);
+                        popupOpen($('#dialogConfirm'), 99999);
+                        break;
+                }
+            }
         }
     });
 }
@@ -395,7 +413,6 @@ function CheckDiscount() {
                 for (var i = 0; i < data.length; i++) {
 
                     if (data[i].dataType == 'Success') {
-                        0
                         $('#txtDiscountCode').val('');
                         $('#dialogDiscount .ui-Warning-red').addClass('ui-hide');
                         $('#spnWarningDiscount').removeClass('ui-hide')
@@ -414,3 +431,69 @@ function CheckDiscount() {
     }
 
 }
+//20240723 -- Update ExpiredDate case กด skip
+function UpdateTrialDate() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/UpdateTrialDate',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+
+                if (data[i].dataType == 'success') {
+                    $('#dialogSelect').attr('action', 'focus');
+                    $('#dialogSelect .ui-text').html('Do you want go to Placement Test now ?.');
+                    popupOpen($('#dialogSelect'), 99999);
+                } else {
+                    $('#dialogDiscount .ui-Warning-red').html(data[i].errorMsg);
+                    $('#dialogDiscount .ui-Warning-red').removeClass('ui-hide');
+                }
+
+            }
+        }
+    });
+}
+//20240723 -- Check EditMode And Get User Data
+function checkEditMode() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/checkEditMode',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].Result == 'edit') {
+                    $('#Firstname').val(data[i].Firstname);
+                    $('#Surname').val(data[i].Surname);
+                    $('#MobileNo').val(data[i].MobileNo);
+                    $('#EMail').val(data[i].Email);
+                    $('#Username').val(data[i].Username);
+
+                    $('#btnStudent, #btnOther').addClass('ui-hide');
+                    EditMode = true;
+                } else if (data[i].Result == 'add') {
+                    EditMode = false;
+                }
+            }
+        }
+    });
+}
+//20240723 -- SaveEditUser
+function SaveEditUser() {
+    var post1 = 'FirstName=' + $('.spFirstname').text() + '&Surname=' + $('.spSurname').text() + '&MobileNo=' + $('.spMobileNo').text() +
+      '&EMail=' + $('.spEMail').text() + '&Username=' + $('.spUsername').text() + '&Password=' + $('#Password').val();
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/UpdateUser',
+        data: post1,
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                switch (data[i].dataType) {
+                    case 'error':
+                        console.log(data[i].errorMsg);
+                    case 'success':
+                        $('#dialogConfirmSaveUser').attr('action', 'focus');
+                        popupOpen($('#dialogConfirmSaveUser'), 99999);
+                        break;                       
+                }
+            }
+        }
+    });
+ }
