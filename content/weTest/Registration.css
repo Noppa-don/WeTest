@@ -15,7 +15,7 @@
 
 .registerDetail {float: left;width: 80%;min-height: 320px;}
 
-.spnData {display: none;line-height: 50px;}
+.spnData {line-height: 50px;}
 
 .register {display: grid;}
 
