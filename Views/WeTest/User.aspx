@@ -2,11 +2,11 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server"></asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
-    <link href="../content/Wetest/Wetest.css?ver=1.1.4" rel="stylesheet" type="text/css" />
-    <link href="../content/Wetest/User.css?ver=1.1.4" rel="stylesheet" type="text/css" />
+    <link href="../content/Wetest/Wetest.css?ver=1.1.5" rel="stylesheet" type="text/css" />
+    <link href="../content/Wetest/User.css?ver=1.1.5" rel="stylesheet" type="text/css" />
     <link href="../content/Wetest/jquery-ui-1.8.18.custom.min" type="text/css" />
 
-    <script src="../scripts/Wetest/User.js?ver=1.1.4" type="text/javascript"></script>
+    <script src="../scripts/Wetest/User.js?ver=1.1.5" type="text/javascript"></script>
     <script src="../scripts/Wetest/jGlobal.js" type="text/javascript"></script>
     <script src="../scripts/Wetest/jquery-ui-1.8.10.offset.datepicker.min.js?ver=1.1.3" type="text/javascript"></script>
     <script src="../scripts/Wetest/jquery-ui-1.10.1.custom.min.js?ver=1.1.3" type="text/javascript"></script>
@@ -59,6 +59,7 @@
                     <span class="txtMenu">Report</span>
                 </div>
             </div>
+             <div class="expiredDate"></div>
         </div>
         <div class="Goal ui-hide">
             <div class="flexDiv">
