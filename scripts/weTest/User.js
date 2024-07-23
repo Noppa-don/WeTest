@@ -249,6 +249,7 @@ function SetUserData(data) {
             $('.UserData,.MainMenu').removeClass('ui-hide');
             //20240716 -- ดึงข้อมูล User เพิ่มเติม
             $('.UserNameandLevel').html('Welcome, ' + data[i].Firstname + '<br />' + data[i].UserLevel);
+            $('.expiredDate').html(data[i].ExpiredDate)
             $('.UserData').append(data[i].UserPhoto);
             $('#UserLevel').html('Your Level : ' + data[i].UserLevel + '<br />');
             if (data[i].TotalGoal != '') {
@@ -287,6 +288,14 @@ function SetUserData(data) {
 
             $('#TimesUsedPercent').html(data[i].TotalGoalDatePercent);
             $('#PracticeScorePercent').html(data[i].TotalGoalScorePercent);
+
+            if (data[i].GrammarScorePercent != '') {
+                $('#GrammarPS').html(data[i].GrammarScorePercent);
+            }
+
+            if (data[i].VocabScorePercent != '') {
+                $('#VocabularyPS').html(data[i].VocabScorePercent);
+            }
 
         } else if (data[i].Result == 'sessionlost') {
             if ($('.login').hasClass('ui-hide') == true) {
