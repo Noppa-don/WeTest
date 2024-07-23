@@ -3,9 +3,9 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
-    <link href="../content/Wetest/Wetest.css?ver=1.1.5" rel="stylesheet" type="text/css" />
-    <link href="../content/Wetest/Registration.css?ver=1.1.5" rel="stylesheet" type="text/css" />
-    <script src="../scripts/Wetest/Registration.js?ver=1.1.5" type="text/javascript"></script>
+    <link href="../content/Wetest/Wetest.css?ver=1.1.6" rel="stylesheet" type="text/css" />
+    <link href="../content/Wetest/Registration.css?ver=1.1.6" rel="stylesheet" type="text/css" />
+    <script src="../scripts/Wetest/Registration.js?ver=1.1.6" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="MainContent" runat="server">
@@ -35,35 +35,35 @@
                         <div class="txtData">
                             <input type='text' id='Firstname' title='Firstname' placeholder='First name' />
                         </div>
-                        <div class="spnData"><span class="spFirstname"></span></div>
+                        <div class="spnData ui-hide"><span class="spFirstname"></span></div>
                     </div>
                     <div>
                         <span class="captionName">Surname</span>
                         <div class="txtData">
                             <input type='text' id='Surname' title='Surname' placeholder='Surname' />
                         </div>
-                        <div class="spnData"><span class="spSurname"></span></div>
+                        <div class="spnData ui-hide"><span class="spSurname"></span></div>
                     </div>
                     <div>
                         <span class="captionName">Mobile No.</span>
                         <div class="txtData">
                             <input type="text" maxlength="10" id='MobileNo' title='MobileNo' placeholder='xxx-xxx-xxxx' />
                         </div>
-                        <div class="spnData"><span class="spMobileNo"></span></div>
+                        <div class="spnData ui-hide"><span class="spMobileNo"></span></div>
                     </div>
                     <div>
                         <span class="captionName">E-Mail</span>
                         <div class="txtData">
                             <input type='text' id='EMail' title='EMail' placeholder='E-Mail' />
                         </div>
-                        <div class="spnData"><span class="spEMail"></span></div>
+                        <div class="spnData ui-hide"><span class="spEMail"></span></div>
                     </div>
                     <div>
                         <span class="captionName">Username</span>
                         <div class="txtData">
                             <input type='text' id='Username' title='Username' placeholder='Username' />
                         </div>
-                        <div class="spnData"><span class="spUsername"></span></div>
+                        <div class="spnData ui-hide"><span class="spUsername"></span></div>
                     </div>
                     <div>
                         <span class="captionName" id="captionPassword">Password</span>
@@ -141,7 +141,7 @@
                     <br />
                     <div class="flexDiv">
                         <input type='text' id='SlipName' />
-                        <input type='file' id='fileSlip' class="ui-hide"/>
+                        <input type='file' id='fileSlip' class="ui-hide" />
                         <div class='Imagebtn btnSlipPhoto'></div>
                     </div>
                 </div>
@@ -170,20 +170,19 @@
         </div>
     </div>
 
+
     <div name='alert' id="dialogAlert" class='my-popup alert ui-popup-container ui-popup-hidden'>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
             <div class='ui-icon wrong'></div>
             <div class='ui-text'></div>
         </div>
     </div>
-
     <div name='alert' id="dialogGotoQuiz" class='my-popup alert ui-popup-container ui-popup-hidden'>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
             <div class='ui-icon wait'></div>
             <div class='ui-text'>Please wait...We are taking you to Placement Test.</div>
         </div>
     </div>
-
     <div name='confirm' id="dialogConfirm" class='my-popup alert ui-popup-container ui-popup-hidden'>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
             <div class='ui-icon wrong'></div>
@@ -191,7 +190,6 @@
             <div id="btnOK" class='btn btnSelected'>OK</div>
         </div>
     </div>
-
     <div name='select' id="dialogSelect" class='my-popup confirm ui-popup-container ui-popup-hidden'>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
             <div class='ui-icon done'></div>
@@ -202,7 +200,6 @@
             </div>
         </div>
     </div>
-
     <div name='discount' id="dialogDiscount" class='my-popup confirm ui-popup-container ui-popup-hidden'>
         <div class='ui-icon close'></div>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
@@ -217,5 +214,11 @@
             <div id="btnCheckDiscountCode" class='btn btnSelected'>Apply Code</div>
         </div>
     </div>
-
+     <div name='confirm' id="dialogConfirmSaveUser" class='my-popup alert ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon done'></div>
+            <div class='ui-text'>Update Complete !</div>
+            <div id="btnComplete" class='btn btnSelected'>OK</div>
+        </div>
+    </div>
 </asp:Content>
