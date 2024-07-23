@@ -476,16 +476,25 @@ Namespace Controllers
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
                 '20240712 -- เพิ่ม dialog กดจบการทำฝึกฝน
-                If Session("QuizMode").ToString = 1 Then
-                    objList.dataType = "pmt"
-                    objList.errorMsg = "Do you want to send placement test ?"
-                ElseIf Session("QuizMode").ToString = 2 Then
-                    objList.dataType = "practice"
-                    objList.errorMsg = "Do you want to send Practice ?"
-                ElseIf Session("QuizMode").ToString = 3 Then
-                    objList.dataType = "exam"
-                    objList.errorMsg = "Do you want to send Exam ?"
+                If Session("QuizMode") IsNot Nothing Then
+                    If Session("QuizMode").ToString = 1 Then
+                        objList.dataType = "pmt"
+                        objList.errorMsg = "Do you want to send placement test ?"
+                    ElseIf Session("QuizMode").ToString = 2 Then
+                        objList.dataType = "practice"
+                        objList.errorMsg = "Do you want to send Practice ?"
+                    ElseIf Session("QuizMode").ToString = 3 Then
+                        objList.dataType = "exam"
+                        objList.errorMsg = "Do you want to send Exam ?"
+                    End If
                 End If
+
+                '20240722 -- เพิ่ม dialog กลับไปหน้า Report
+                If Session("AnsweredfromReport") = "true" Then
+                    objList.dataType = "report"
+                    objList.errorMsg = "Do you want to go back to report ?"
+                End If
+
                 L1.Add(objList)
                 objList = Nothing
 
@@ -569,6 +578,14 @@ Namespace Controllers
                     objList = CheckAndUplevel()
                     Session("QuizId") = Nothing
                     Session("QuestionNo") = Nothing
+                End If
+
+                If Session("AnsweredfromReport") IsNot Nothing Then
+                    objList.dataType = "gotoreport"
+                    Session("QuizState") = Nothing
+                    Session("QuizId") = Nothing
+                    Session("QuestionNo") = Nothing
+                    Session("AnsweredfromReport") = Nothing
                 End If
 
                 L1.Add(objList)
@@ -861,6 +878,29 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
 
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function checkAnsweredFromReport()
+            Dim L1 As New List(Of clsMain)
+            Dim objList As New clsMain()
+
+            Try
+                If Session("AnsweredfromReport") IsNot Nothing Then
+                    objList.dataType = "showanswer"
+                Else
+                    objList.dataType = "no"
+                End If
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.ToString
+                L1.Add(objList)
+                objList = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
         Function CreateNewQuiz(QuizData As clsQuizData) As clsQuizData
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim L1 As New List(Of clsMain)
@@ -892,7 +932,7 @@ Namespace Controllers
 
                     Dim Fullscore As String = dt(0)(0).ToString
 
-                    cmdMsSql = cmdSQL(cn, "insert into tblquiz(quizId,testsetid,starttime,QuizMode,FullScore) values(@QuizId,@TestsetId,getdate(),@QuizMode,@FullScore);
+                    cmdMsSql = cmdSQL(cn, "insert into tblquiz(quizId,testsetid,starttime,QuizMode,FullScore,QuizName) values(@QuizId,@TestsetId,getdate(),@QuizMode,@FullScore,@QuizName);
                                            insert into tblquizSession(quizid, studentid)values(@QuizId,@stdId);
                                            insert into tblquizQuestion select newid(),@QuizId,questionId,ROW_NUMBER() over (order by newid()),1,getdate() 
                                            from tbltestsetquestiondetail tsqd inner join tbltestsetquestionset tsqs on tsqd.tsqsid = tsqs.tsqsid
@@ -909,6 +949,7 @@ Namespace Controllers
                         .Parameters.Add("@TestsetId", SqlDbType.VarChar).Value = QuizData.TestsetId.ToLower
                         .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString.ToLower
                         .Parameters.Add("@QuizMode", SqlDbType.VarChar).Value = QuizData.QuizMode
+                        .Parameters.Add("@QuizName", SqlDbType.VarChar).Value = QuizData.QuizName
                     End With
 
                     dt = getDataTable(cmdMsSql)
@@ -1194,7 +1235,7 @@ Namespace Controllers
 
                     QuizData.QuizMode = "1"
                     QuizData.TestsetId = dt(0)(0).ToString
-
+                    QuizData.QuizName = "Placement Test"
                     CreateNewQuiz(QuizData)
 
                     If QuizData.resultType = "success" Then
@@ -1459,6 +1500,8 @@ Namespace Controllers
             Return objList
         End Function
 
+
+
 #End Region
 
 #Region "User"
@@ -1569,7 +1612,7 @@ Namespace Controllers
 
                 QuizData.QuizMode = "3"
                 QuizData.TestsetId = dt(0)("TestsetId").ToString
-
+                QuizData.QuizName = "Mockup Exam"
                 CreateNewQuiz(QuizData)
 
                 If QuizData.resultType = "success" Then
@@ -1706,8 +1749,8 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-
-                cmdMsSql = cmdSQL(cn, "select top 1 s.StudentId,Firstname,l.LevelShortName
+                '20240722 เพิ่ม ExpiredDate
+                cmdMsSql = cmdSQL(cn, "select top 1 s.StudentId,Firstname,l.LevelShortName,CONVERT (varchar(10), kc.ExpiredDate, 103) AS expiredDate
                                             ,CONVERT(varchar(10), sg.TotalGoalDate, 103) as TotalGoal,datediff(day,getdate(),sg.TotalGoalDate) as TotalGoalAmount
                                             ,CONVERT(varchar(10), sg.ReadingGoal, 103) as ReadingGoal,datediff(day,getdate(),sg.ReadingGoal) as ReadingGoalAmount
                                             ,CONVERT(varchar(10), sg.ListeningGoal, 103) as ListeningGoal,datediff(day,getdate(),sg.ListeningGoal) as ListeningGoalAmount 
@@ -1716,7 +1759,7 @@ Namespace Controllers
                                             ,CONVERT(varchar(10), sg.SituationGoal, 103) as SituationGoal,datediff(day,getdate(),sg.SituationGoal) as SituationGoalAmount    
                                             from tblStudent s inner join tblStudentLevel sl on s.studentId = sl.StudentId 
                                             inner join tblLevel l on sl.levelId = l.LevelId left join tblstudentGoal sg on s.StudentId = sg.StudentId 
-                                            and sg.IsActive = 1 and getdate() <= sg.TotalGoalDate 
+                                            and sg.IsActive = 1 and getdate() <= sg.TotalGoalDate inner join tblkeycode kc on kc.KeyCodeId = s.KeyCodeId
                                             where s.studentId = @stdid and s.IsActive = 1 and sl.IsActive = 1  
                                             order by sl.lastupdate desc;")
                 With cmdMsSql
@@ -1728,6 +1771,7 @@ Namespace Controllers
                 If dt.Rows.Count <> 0 Then
                     objList.UserPhoto = "<div class=""UserPhoto"" style=""background: url(../WetestPhoto/UserPhoto/" & dt(0)("StudentId").ToString & ".png);"">"
                     objList.Firstname = dt(0)("Firstname").ToString
+                    objList.ExpiredDate = "Your account expire date is : " & dt(0)("expiredDate").ToString
                     objList.UserLevel = dt(0)("LevelShortName").ToString
                     objList.TotalGoal = dt(0)("TotalGoal").ToString
                     objList.TotalGoalAmount = dt.Rows(0)("TotalGoalAmount").ToString
@@ -1787,13 +1831,42 @@ Namespace Controllers
                     End If
 
                     objList.TotalGoalScorePercent = SPercent.ToString & "%"
+
+                    '20240722 เพิ่มการคำนวน % แบบแยกสกิล
+                    cmdMsSql = cmdSQL(cn, "select ei_id,(userscore * 100)/answerscore as skillPercent from (
+                                            select EI_Id,case when sum(totalscore) is null then 0 else sum(totalscore) end as UserScore ,answerScore from(
+                                            select distinct pei.EI_Id,qz.totalscore,sum(a.AnswerScore) as answerScore
+                                            from tblQuiz qz inner join tblquizSession qs on qz.quizId = qs.QuizId 
+                                            inner join tblQuizQuestion qq on qz.QuizId = qq.QuizId
+                                            inner join tblstudentGoal sg on qs.studentId = sg.StudentId
+                                            inner join tblquestion q on q.questionId = qq.QuestionId
+                                            inner join tblanswer a on q.QuestionId = a.QuestionId
+                                            inner join tblQuestionEvaluationIndexItem qei on q.QuestionId = qei.Question_Id and qei.question_Id = qq.QuestionId
+                                            inner join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id inner join tblEvaluationIndex pei on ei.Parent_Id = pei.ei_id 
+                                            and pei.EI_Id in('31667BAB-89FF-43B3-806F-174774C8DFBF','5BBD801D-610F-40EB-89CB-5957D05C4A0B','FB4B4A71-B777-4164-BA4D-5C1EA9522226','25DA1FAB-EB20-4B1D-8409-C2FB08FC61B3')
+                                            where qs.StudentId = @stdid and qz.starttime between sg.lastupdate and sg.TotalGoalDate and sg.isactive = 1 group by pei.ei_id,qz.totalscore)a group by ei_id,answerScore)b;")
+                    With cmdMsSql
+                        .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentid").ToString
+                    End With
+                    Dim dtTotal = getDataTable(cmdMsSql)
+                    If dtTotal.Rows.Count <> 0 Then
+                        For Each i In dtTotal.Rows
+                            Select Case i("EI_Id").ToString.ToUpper
+                                Case "5BBD801D-610F-40EB-89CB-5957D05C4A0B"
+                                    objList.GrammarScorePercent = Format(i("skillPercent"), "N2") & "%"
+                                Case "31667BAB-89FF-43B3-806F-174774C8DFBF"
+                                    objList.VocabScorePercent = Format(i("skillPercent"), "N2") & "%"
+                            End Select
+                        Next
+                    End If
+
                 Else
                     objList.TotalGoalDatePercent = "0%"
                     objList.TotalGoalScorePercent = "0%"
                 End If
 
             Catch ex As Exception
-                objList.Result = "error"
+                objList.Result = "Error"
                 objList.Msg = ex.Message
             Finally
                 If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
@@ -1897,13 +1970,13 @@ Namespace Controllers
 
                 Dim StdId As String = Session("StudentId").ToString
                 Dim TestsetId As String = Request.Form("TestsetId")
-
+                Dim TestsetName As String = Request.Form("TestsetName")
 
                 Dim QuizData As New clsQuizData
 
                 QuizData.QuizMode = "2"
                 QuizData.TestsetId = TestsetId
-
+                QuizData.QuizName = TestsetName
                 CreateNewQuiz(QuizData)
 
                 objList.dataType = "success"
@@ -1978,20 +2051,19 @@ Namespace Controllers
 
                     skt = skt.Substring(1, skt.Length - 1)
                     Dim sqlBuilder As StringBuilder = New StringBuilder()
-                    sqlBuilder.Append("insert into tblTestSetQuestionDetail Select newid(),@tsqsId,row_number() over (order by questionId),QuestionId,1,getdate() 
-                                            from (select top (@ExamAmount) q.questionId from tblquestion q 
-                                            inner join tblQuestionset qs on q.qsetid = qs.QSetId inner join tblQuestionCategory qc on qs.QCategoryId  = qc.QCategoryId
-                                            inner join tblbook b on qc.BookGroupId = b.BookGroupId 
-                                            inner join tblQuestionEvaluationIndexItem qei on q.questionId = qei.question_Id 
-                                            where ei_id in(select EI_Id from tblEvaluationIndex WHERE Parent_Id in(")
+                    sqlBuilder.Append("insert into tblTestSetQuestionDetail Select distinct newid(),@tsqsId,row_number() over (order by (SELECT NULL)) as qno,Question_Id,1,getdate()
+                                        from (select top (@ExamAmount) qei.question_Id from tblQuestionEvaluationIndexItem qei
+                                        inner join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id
+                                        inner join tblTestSetQuestionDetail tsqd on tsqd.questionId = qei.Question_Id
+                                        inner join tblTestSetQuestionSet tsqs on tsqd.tsqsid = tsqs.TSQSId
+                                        inner join tblTestset t on tsqs.testsetId = t.testsetid and t.LevelId in(select levelid from tbllevel where levelno <= (
+                                        select top 1 levelno from tbllevel l left join tblStudentLevel sl on l.LevelId = sl.LevelId where studentId = @stdId order by levelno))
+                                        where ei.Parent_Id in(")
+
                     sqlBuilder.Append(skt)
 
-                    sqlBuilder.Append(") and IsActive = 1)
-                                            and b.BookSyllabus = '51' and LevelId in (select levelid from tbllevel 
-                                            where levelno <= (select top 1 levelno from tbllevel l left join tblStudentLevel sl on l.LevelId = sl.LevelId 
-                                            where studentId = @stdId)) and q.isactive = 1 and qs.isactive = 1 and qc.isactive = 1  
-                                            and qei.isactive = 1 and q.QuestionId not in (select questionId from tblquizquestion qq 
-                                            inner join tblQuizSession qs on qq.QuizId = qs.quizid where qs.studentId = @stdId) order by newid())a;")
+                    sqlBuilder.Append(") And qei.isactive = 1 And ei.IsActive = 1 And tsqd.IsActive = 1 And tsqs.IsActive = 1 And t.IsActive = 1 
+                                        order by newid())a order by qno;")
 
                     cmdMsSql3 = cmdSQL(cn, sqlBuilder.ToString())
 
@@ -2034,82 +2106,25 @@ Namespace Controllers
             Return View()
         End Function
         '20240719 -- ดึงข้อมูล Report
+        '20240722 -- ปรับการดึงข้อมูล และการสร้าง div Report Item ต่างๆ
         <AcceptVerbs(HttpVerbs.Post)>
         Function GetReport()
             Dim L1 As New List(Of clsMain)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim objList As New clsMain()
             Try
-                ''StartDate=' + startdate + '&EndDate=' + enddate + '&PracticeType=' + PracticeType
                 ' ================ Check Permission ================
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
 
-                'Query Hard code id ของตัวชี้วัดไว้ก่อน คิดว่าควรจะต้องหาวิธีบอกว่ามีตัวชี้วัดไหนที่จะใช้บ้าง
-
-                Dim sqlBuilder As StringBuilder = New StringBuilder()
-                sqlBuilder.Append("select distinct DENSE_RANK() OVER(Order By FORMAT (q.StartTime, 'dd/MM/yyyy')) as GroupIndex, 
-                                        FORMAT (q.StartTime, 'dd/MM/yyyy') as Quizdate,FORMAT (q.StartTime, 'hh:mm tt') as starttime,
-                                        case when FORMAT (q.endtime, 'hh:mm tt') is null then 'none' else FORMAT (q.endtime, 'hh:mm tt') end as endtime ,t.TestSetName,
-                                        case when cast(cast(q.TotalScore as int) as varchar) + '/' + cast(cast(q.FullScore as int) as varchar) is null 
-                                        then '0/' + cast(cast(q.FullScore as int) as varchar) else cast(cast(q.TotalScore as int) as varchar) + '/' + cast(cast(q.FullScore as int) as varchar) end as Score,
-                                        eiparent.EI_Id,q.QuizId from tblTestset t inner join tbltestsetquestionset tqs on t.TestsetId = tqs.TestSetId 
-                                        inner join tblTestSetQuestionDetail tqd on tqs.tsqsid = tqd.TSQSId inner join tblQuestionEvaluationIndexItem qei on tqd.questionId = qei.question_Id 
-                                        inner join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id inner join tblEvaluationIndex eiParent on eiParent.EI_Id = ei.parent_id 
-                                        and eiParent.ei_id in('31667BAB-89FF-43B3-806F-174774C8DFBF','5BBD801D-610F-40EB-89CB-5957D05C4A0B','FB4B4A71-B777-4164-BA4D-5C1EA9522226','25DA1FAB-EB20-4B1D-8409-C2FB08FC61B3')
-                                        inner join tblQuiz q on q.TestSetId = t.testsetId inner join tblQuizSession qs on q.QuizId = qs.QuizId 
-                                        where IsPractice = 1 and IsStandart = @IsStandard and ei.IsActive = 1 and qei.isactive = 1 and qs.studentid  = @stdId and t.IsActive = 1")
-
-                Select Case Request.Form("StartDate").ToString
-                    Case "week"
-                        sqlBuilder.Append(" AND q.StartTime >= dateadd(day, 1-datepart(dw, getdate()), CONVERT(date,getdate())) 
-                                            AND q.StartTime <  dateadd(day, 8-datepart(dw, getdate()), CONVERT(date,getdate())) ")
-                    Case "month"
-                        sqlBuilder.Append(" AND q.starttime >= datefromparts(year(getdate()), month(getdate()), 1) ")
-                    Case Else
-                        sqlBuilder.Append(" AND q.starttime >= @StartDate and q.starttime <= @EndDate ")
-                End Select
-
-                sqlBuilder.Append("  order by Quizdate;")
-
-
-                cmdMsSql = cmdSQL(cn, sqlBuilder.ToString())
-
-                With cmdMsSql
-                    .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
-                    .Parameters.Add("@IsStandard", SqlDbType.VarChar).Value = Request.Form("PracticeType").ToString
-                    .Parameters.Add("@StartDate", SqlDbType.VarChar).Value = Request.Form("StartDate").ToString
-                    .Parameters.Add("@EndDate", SqlDbType.VarChar).Value = Request.Form("EndDate").ToString
-                End With
-
-                dt = getDataTable(cmdMsSql)
-
-                If dt.Rows().Count = 0 Then
-                    objList.dataType = "nodata"
+                If Request.Form("PracticeType").ToString = "0" Then
+                    objList.errorMsg = GetRandomReport(Request.Form("StartDate").ToString, Request.Form("EndDate").ToString, Request.Form("PracticeType").ToString)
                 Else
-                    Dim ReportData As String
-                    ReportData = "<div class='reportdata'>"
-
-                    Dim groupno, groupi As Integer
-                    groupi = dt(0)("GroupIndex")
-
-                    For Each i In dt.Rows
-
-                        groupno = i("GroupIndex")
-
-                        If groupno = groupi Then
-                            ReportData &= "<div class='divDate'>" & i("Quizdate") & "</div><div class='divStartTime'>" & i("starttime") & "</div><div class='divEndTime'>" &
-                                i("endtime") & "</div><div class='Testsetname'>" & i("TestSetName") & "</div>"
-                        End If
-                    Next
-
-                    objList.dataType = "success"
-                    objList.errorMsg = ""
-
+                    objList.errorMsg = GetLessonReport(Request.Form("StartDate").ToString, Request.Form("EndDate").ToString, Request.Form("PracticeType").ToString)
                 End If
 
-
+                objList.dataType = "success"
                 L1.Add(objList)
                 objList = Nothing
             Catch ex As Exception
@@ -2124,6 +2139,244 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function SetSeesionAnswered()
+            Dim L1 As New List(Of clsMain)
+            Dim objList As New clsMain()
+            Try
+                Session("AnsweredfromReport") = "true"
+                Session("QuizId") = Request.Form("quizId").ToString
+                Session("QuizState") = "showanswer"
+
+                objList.dataType = "success"
+                L1.Add(objList)
+                objList = Nothing
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+        '20240722 GetLessonReport
+        Function GetLessonReport(StartDate, EndDate, PracticeType)
+
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim reportdata As String = ""
+            Try
+                ''StartDate=' + startdate + '&EndDate=' + enddate + '&PracticeType=' + PracticeType
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                'Query Hard code id ของตัวชี้วัดไว้ก่อน คิดว่าควรจะต้องหาวิธีบอกว่ามีตัวชี้วัดไหนที่จะใช้บ้าง
+                Dim skilltxt() As String = Request.Form("arrSkill").Split(",")
+                Dim skt As String = ""
+                For Each i In skilltxt
+                    skt &= ",'" & i & "'"
+                Next
+
+                skt = skt.Substring(1, skt.Length - 1)
+
+                Dim sqlBuilder As StringBuilder = New StringBuilder()
+                sqlBuilder.Append("select distinct FORMAT (q.StartTime, 'dd/MM/yyyy') as Quizdate,FORMAT (q.StartTime, 'hh:mm tt') as starttime,
+                                        case when FORMAT (q.endtime, 'hh:mm tt') is null then 'none' else FORMAT (q.endtime, 'hh:mm tt') end as endtime ,q.QuizName,
+                                        case when cast(cast(q.TotalScore as int) as varchar) + '/' + cast(cast(q.FullScore as int) as varchar) is null 
+                                        then '0/' + cast(cast(q.FullScore as int) as varchar) else cast(cast(q.TotalScore as int) as varchar) + '/' + cast(cast(q.FullScore as int) as varchar) end as Score,
+                                        eiparent.EI_Id,q.testsetId,q.quizId from tblTestset t inner join tbltestsetquestionset tqs on t.TestsetId = tqs.TestSetId 
+                                        inner join tblTestSetQuestionDetail tqd on tqs.tsqsid = tqd.TSQSId inner join tblQuestionEvaluationIndexItem qei on tqd.questionId = qei.question_Id 
+                                        inner join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id inner join tblEvaluationIndex eiParent on eiParent.EI_Id = ei.parent_id")
+                If skt <> "'All'" Then
+                    sqlBuilder.Append(" And eiParent.ei_id in(")
+                    sqlBuilder.Append(skt)
+                    sqlBuilder.Append(")")
+                Else
+                    sqlBuilder.Append(" And eiParent.ei_id in('31667BAB-89FF-43B3-806F-174774C8DFBF','5BBD801D-610F-40EB-89CB-5957D05C4A0B','FB4B4A71-B777-4164-BA4D-5C1EA9522226','25DA1FAB-EB20-4B1D-8409-C2FB08FC61B3')")
+                End If
+
+                sqlBuilder.Append(" inner join tblQuiz q on q.TestSetId = t.testsetId inner join tblQuizSession qs on q.QuizId = qs.QuizId 
+                                    where IsPractice = 1 and IsStandart = @IsStandard and ei.IsActive = 1 and qei.isactive = 1 and qs.studentid  = @stdId and t.IsActive = 1")
+
+                Select Case Request.Form("StartDate").ToString
+                    Case "week"
+                        sqlBuilder.Append(" AND q.StartTime >= dateadd(day, 1-datepart(dw, getdate()), CONVERT(date,getdate())) 
+                                            AND q.StartTime <  dateadd(day, 8-datepart(dw, getdate()), CONVERT(date,getdate())) ")
+                    Case "month"
+                        sqlBuilder.Append(" AND q.starttime >= datefromparts(year(getdate()), month(getdate()), 1) ")
+                    Case Else
+                        sqlBuilder.Append(" AND q.starttime between @StartDate and @EndDate ")
+                End Select
+
+                sqlBuilder.Append("  order by Quizdate,starttime;")
+
+
+                cmdMsSql = cmdSQL(cn, sqlBuilder.ToString())
+
+                With cmdMsSql
+                    .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
+                    .Parameters.Add("@IsStandard", SqlDbType.VarChar).Value = PracticeType
+                    .Parameters.Add("@StartDate", SqlDbType.VarChar).Value = StartDate
+                    .Parameters.Add("@EndDate", SqlDbType.VarChar).Value = EndDate
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows().Count = 0 Then
+                    reportdata = "nodata"
+                Else
+                    For Each i In dt.Rows
+
+                        Dim ItemClass As String
+
+                        Select Case i("Ei_Id").ToString.ToUpper
+                            Case "31667BAB-89FF-43B3-806F-174774C8DFBF"
+                                ItemClass = "vocabItem"
+                            Case "5BBD801D-610F-40EB-89CB-5957D05C4A0B"
+                                ItemClass = "grammarItem"
+                            Case Else
+                                ItemClass = "noeiItem"
+                        End Select
+
+                        reportdata &= "<div Class='flexDiv'><div class='divDate reportItem " & ItemClass & " firstflexdiv'>" & i("Quizdate") &
+                                        "</div><div class='divStartTime reportItem " & ItemClass & "'>" & i("starttime") &
+                                        "</div><div class='divEndTime reportItem " & ItemClass & "'>" & i("endtime") &
+                                        "</div><div Class='divTestsetName reportItem " & ItemClass & "'>" & i("QuizName") &
+                                        "</div><div Then Class='divScore reportItem " & ItemClass & "'>" & i("Score") &
+                                        "</div><div class='divAnswered reportItem " & ItemClass & "' QuizId='" & i("quizId").ToString & "'></div><div class='divAgain reportItem' testsetId='" & i("testsetId").ToString & "'></div></div>"
+
+                    Next
+                End If
+            Catch ex As Exception
+                Return "error"
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return reportdata
+        End Function
+        '20240722 GetRandomReport
+        Function GetRandomReport(StartDate, EndDate, PracticeType)
+
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim ReportData As String = ""
+            Try
+                ''StartDate=' + startdate + '&EndDate=' + enddate + '&PracticeType=' + PracticeType
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                'Query Hard code id ของตัวชี้วัดไว้ก่อน คิดว่าควรจะต้องหาวิธีบอกว่ามีตัวชี้วัดไหนที่จะใช้บ้าง
+                Dim skilltxt() As String = Request.Form("arrSkill").Split(",")
+                Dim skt As String = ""
+                For Each i In skilltxt
+                    skt &= ",'" & i & "'"
+                Next
+
+                skt = skt.Substring(1, skt.Length - 1)
+
+                Dim sqlBuilder As StringBuilder = New StringBuilder()
+                sqlBuilder.Append("select distinct FORMAT (q.StartTime, 'dd/MM/yyyy') as Quizdate,FORMAT (q.StartTime, 'hh:mm tt') as starttime,
+                                        case when FORMAT (q.endtime, 'hh:mm tt') is null then 'none' else FORMAT (q.endtime, 'hh:mm tt') end as endtime ,
+                                        case when cast(cast(q.TotalScore as int) as varchar) + '/' + cast(cast(q.FullScore as int) as varchar) is null 
+                                        then '0/' + cast(cast(q.FullScore as int) as varchar) else cast(cast(q.TotalScore as int) as varchar) + '/' + cast(cast(q.FullScore as int) as varchar) end as Score,
+                                        q.testsetId,q.quizId from tblTestset t inner join tbltestsetquestionset tqs on t.TestsetId = tqs.TestSetId 
+                                        inner join tblTestSetQuestionDetail tqd on tqs.tsqsid = tqd.TSQSId inner join tblQuestionEvaluationIndexItem qei on tqd.questionId = qei.question_Id 
+                                        inner join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id inner join tblEvaluationIndex eiParent on eiParent.EI_Id = ei.parent_id")
+                If skt <> "'All'" Then
+                    sqlBuilder.Append(" And eiParent.ei_id in(")
+                    sqlBuilder.Append(skt)
+                    sqlBuilder.Append(")")
+                Else
+                    sqlBuilder.Append(" And eiParent.ei_id in('31667BAB-89FF-43B3-806F-174774C8DFBF','5BBD801D-610F-40EB-89CB-5957D05C4A0B','FB4B4A71-B777-4164-BA4D-5C1EA9522226','25DA1FAB-EB20-4B1D-8409-C2FB08FC61B3')")
+                End If
+
+                sqlBuilder.Append(" inner join tblQuiz q on q.TestSetId = t.testsetId inner join tblQuizSession qs on q.QuizId = qs.QuizId 
+                                    where IsPractice = 1 and IsStandart = @IsStandard and ei.IsActive = 1 and qei.isactive = 1 and qs.studentid  = @stdId and t.IsActive = 1")
+
+                Select Case Request.Form("StartDate").ToString
+                    Case "week"
+                        sqlBuilder.Append(" AND q.StartTime >= dateadd(day, 1-datepart(dw, getdate()), CONVERT(date,getdate())) 
+                                            AND q.StartTime <  dateadd(day, 8-datepart(dw, getdate()), CONVERT(date,getdate())) ")
+                    Case "month"
+                        sqlBuilder.Append(" AND q.starttime >= datefromparts(year(getdate()), month(getdate()), 1) ")
+                    Case Else
+                        sqlBuilder.Append(" AND q.starttime between @StartDate and @EndDate ")
+                End Select
+
+                sqlBuilder.Append("  order by Quizdate;")
+
+
+                cmdMsSql = cmdSQL(cn, sqlBuilder.ToString())
+
+                With cmdMsSql
+                    .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
+                    .Parameters.Add("@IsStandard", SqlDbType.VarChar).Value = PracticeType
+                    .Parameters.Add("@StartDate", SqlDbType.VarChar).Value = StartDate
+                    .Parameters.Add("@EndDate", SqlDbType.VarChar).Value = EndDate
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows().Count = 0 Then
+                    ReportData = "nodata"
+                Else
+                    For Each i In dt.Rows
+
+
+                        ReportData &= "<div class='flexDiv'><div class='divDate reportItem random firstflexdiv'>" & i("Quizdate") &
+                                        "</div><div class='divStartTime reportItem random'>" & i("starttime") &
+                                        "</div><div class='divEndTime reportItem random'>" & i("endtime") & "</div>"
+
+                        If Request.Form("PracticeType").ToString = "0" Then
+
+                            cmdMsSql = cmdSQL(cn, "Select distinct pei.EI_id from tblQuizQuestion qq inner join tblQuestionEvaluationIndexItem qei On qq.QuestionId = qei.Question_Id
+                                                        inner Join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id inner join tblEvaluationIndex pei on ei.Parent_Id = pei.ei_id 
+                                                        And pei.EI_Id in('31667BAB-89FF-43B3-806F-174774C8DFBF','5BBD801D-610F-40EB-89CB-5957D05C4A0B','FB4B4A71-B777-4164-BA4D-5C1EA9522226','25DA1FAB-EB20-4B1D-8409-C2FB08FC61B3')
+                                                        where qq.QuizId = @quizId and qq.isactive = 1 and qei.IsActive = 1;")
+                            With cmdMsSql
+                                .Parameters.Add("@quizId", SqlDbType.VarChar).Value = i("quizId").ToString
+                            End With
+
+                            Dim dtEi As DataTable = getDataTable(cmdMsSql)
+
+                            If dtEi.Rows.Count <> 0 Then
+                                ReportData &= "<div Class='divEI reportItem random'>"
+                                For Each k In dtEi.Rows
+                                    Select Case k("Ei_Id").ToString.ToUpper
+                                        Case "31667BAB-89FF-43B3-806F-174774C8DFBF"
+                                            ReportData &= " <div Class='Logovocab'></div>"
+                                        Case "5BBD801D-610F-40EB-89CB-5957D05C4A0B"
+                                            ReportData &= " <div Class='Logogrammar'></div>"
+                                    End Select
+                                Next
+                                ReportData &= "</div>"
+                            End If
+
+
+                        Else
+                            ReportData &= " < div Class='divTestsetName reportItem random'>" & i("QuizName") & "</div>"
+                        End If
+
+                        ReportData &= "<div Then Class='divScore reportItem random'>" & i("Score") &
+                     "</div><div class='divAnswered reportItem random' QuizId='" & i("quizId").ToString & "'></div><div class='divAgain reportItem' testsetId='" & i("testsetId").ToString & "'></div></div>"
+
+                    Next
+                End If
+            Catch ex As Exception
+                Return "error"
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return ReportData
+        End Function
 #End Region
 
 #Region "Class"
@@ -2132,7 +2385,7 @@ Namespace Controllers
             Public Firstname As String, UserPhoto As String, Result As String, Msg As String, UserLevel As String, TotalGoal As String _
             , TotalGoalAmount As String, ReadingGoal As String, ReadingGoalAmount As String, ListeningGoal As String, ListeningGoalAmount As String _
             , VocabGoal As String, VocabGoalAmount As String, GrammarGoal As String, GrammarGoalAmount As String, SituationGoal As String, SituationGoalAmount As String _
-            , TotalGoalDatePercent As String, TotalGoalScorePercent As String
+            , TotalGoalDatePercent As String, TotalGoalScorePercent As String, GrammarScorePercent As String, VocabScorePercent As String, ExpiredDate As String
         End Class
         Private Class clsItemQAndA
             Inherits clsMain
@@ -2140,7 +2393,7 @@ Namespace Controllers
         End Class
         Public Class clsQuizData
             Inherits clsMain
-            Public QuizId As String, QuizMode As String, TestsetId As String, FullScore As String, QuestionAmount As String, resultType As String, resultMsg As String
+            Public QuizId As String, QuizMode As String, TestsetId As String, FullScore As String, QuestionAmount As String, resultType As String, resultMsg As String, QuizName As String
         End Class
         Public Class clsPracticeSet
             Inherits clsMain
