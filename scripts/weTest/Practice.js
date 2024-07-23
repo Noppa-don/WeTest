@@ -72,24 +72,25 @@ $(document)
      window.location = '/Wetest/User';
  })
  .on('click', '.Lessondiv', function (e, data) {
-        var TestsetName = $(this).text();
+
+     var TestsetName = $(this).text();
         var TestsetId = $(this).attr('id');
         $('#dialogSelect').attr('action', 'focus');
-        $('#dialogSelect').attr('TestsetName', TestsetName);
-        $('#dialogSelect').attr('TestsetId', TestsetId);
+        //$('#dialogSelect').attr('TestsetName', TestsetName);
+        //$('#dialogSelect').attr('TestsetId', TestsetId);
 
         $('#dialogSelect .ui-text').html('Do you want to start practice ' + TestsetName + ' now!');
         $('#dialogSelect .btnSelected').attr('TestsetId', TestsetId);
-
+        $('#dialogSelect  .btnSelected').attr('TestsetName', TestsetName);
         popupOpen($('#dialogSelect'), 99999);
     })
  .on('click', '.ui-icon.close ', function (e, data) {
       popupClose($(this).closest('.my-popup'));
  })
  .on('click', '#dialogSelect .btnSelected', function (e, data) {
-
+     console.log($(this).attr('TestsetName'))
       popupClose($(this).closest('.my-popup'));
-      GotoPractice($(this).attr('testsetid'));
+      GotoPractice($(this).attr('TestsetId'), $(this).attr('TestsetName'));
  })
  .on('click', '#dialogSelect .btnCancel', function (e, data) {
 
@@ -146,17 +147,17 @@ $(document)
              for (var i = 0; i < data.length; i++) {
                  if (data[i].dataType == 'success') {
                      console.log(data[i].errorMsg);
-                     GotoPractice(data[i].errorMsg);
+                     GotoPractice(data[i].errorMsg,'RandomPractice');
                  }
              }
          }
      });
  })
 
-function GotoPractice(TestsetId) {
+function GotoPractice(TestsetId,TestsetName) {
 
-    var post1 = 'TestsetId=' + TestsetId;
-
+    var post1 = 'TestsetId=' + TestsetId + '&TestsetName=' + TestsetName;
+    console.log(TestsetName);
     $.ajax({
         type: 'POST',
         url: '/weTest/CreatePractice',
