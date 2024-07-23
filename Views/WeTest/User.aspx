@@ -2,11 +2,11 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server"></asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
-    <link href="../content/Wetest/Wetest.css?ver=1.1.5" rel="stylesheet" type="text/css" />
-    <link href="../content/Wetest/User.css?ver=1.1.5" rel="stylesheet" type="text/css" />
+    <link href="../content/Wetest/Wetest.css?ver=1.1.6" rel="stylesheet" type="text/css" />
+    <link href="../content/Wetest/User.css?ver=1.1.6" rel="stylesheet" type="text/css" />
     <link href="../content/Wetest/jquery-ui-1.8.18.custom.min" type="text/css" />
 
-    <script src="../scripts/Wetest/User.js?ver=1.1.5" type="text/javascript"></script>
+    <script src="../scripts/Wetest/User.js?ver=1.1.6" type="text/javascript"></script>
     <script src="../scripts/Wetest/jGlobal.js" type="text/javascript"></script>
     <script src="../scripts/Wetest/jquery-ui-1.8.10.offset.datepicker.min.js?ver=1.1.3" type="text/javascript"></script>
     <script src="../scripts/Wetest/jquery-ui-1.10.1.custom.min.js?ver=1.1.3" type="text/javascript"></script>
@@ -16,11 +16,29 @@
 <asp:Content ID="Content3" ContentPlaceHolderID="MainContent" runat="server">
 
     <div class="banner">
-        <div class="logo"></div>
+        <div class="AppData">
+            <div class="logo"></div>
+            <div class='pagename'></div>
+        </div>
         <div class="UserData flexDiv ui-hide">
             <div class="UserNameandLevel"></div>
         </div>
+        <div class="UserMenu ui-hide">
+            <div class="btnAccountMenu EditAccount flexDiv">
+                <div class="Accountlogo firstflexdiv"></div>
+                <div>Account</div>
+            </div>
+            <div class="btnAccountMenu Logout flexDiv">
+                <div class="Logoutlogo firstflexdiv"></div>
+                <div class="firstflexdiv">Log out</div>
+            </div>
+            <div class="btnAccountMenu DeleteAccount flexDiv">
+                <div class="Deletelogo firstflexdiv"></div>
+                <div>Delete Account</div>
+            </div>
+        </div>
     </div>
+
     <div class='wrapper'>
         <div class="login">
             <div>
@@ -59,7 +77,7 @@
                     <span class="txtMenu">Report</span>
                 </div>
             </div>
-             <div class="expiredDate"></div>
+            <div class="expiredDate"></div>
         </div>
         <div class="Goal ui-hide">
             <div class="flexDiv">
@@ -87,53 +105,53 @@
 
             </div>
         </div>
-  
-</div>
-      <div class="DetailGoal ui-hide">
-          <div class="flexDiv">
-                <span id="lastestBigGOAL" class="fistflexdiv"></span>
+
+    </div>
+    <div class="DetailGoal ui-hide">
+        <div class="flexDiv">
+            <span id="lastestBigGOAL" class="fistflexdiv"></span>
             <div class="btn btnClear btnOrange">Clear</div>
-          </div>
-         
-            <br />
-            <br />
-            <br />
-            <div class="flexDiv">
-                <div class="firstflexdiv">
-                    <div></div>
-                    <div id="TU">Time Used</div>
-                    <div id="TPC">Total Practice Score</div>
-                </div>
-                <div class="divPercentContain">
-                    <div id="ReadingIcon"></div>
-                    <div id="ReadingTime" class="ReadingPercent">0%</div>
-                    <div class="TimeResult"><span id="ReadingTimeResult" class="smalltxt ui-hide"></span></div>
-                    <div id="ReadingPS" class="ReadingPercent PS">0%</div>
-                </div>
-                <div class="divPercentContain">
-                    <div id="ListeningIcon"></div>
-                    <div id="ListeningTime" class="ListeningPercent">0%</div>
-                    <div class="TimeResult"><span id="ListeningTimeResult" class="smalltxt ui-hide"></span></div>
-                    <div id="ListeningPS" class="ListeningPercent PS">0%</div>
-                </div>
-                <div class="divPercentContain">
-                    <div id="VocabIcon"></div>
-                    <div id="VocabTime" class="VocabPercent">0%</div>
-                    <div class="TimeResult"><span id="VocabularyTimeResult" class="smalltxt ui-hide"></span></div>
-                    <div id="VocabularyPS" class="VocabPercent PS">0%</div>
-                </div>
-                <div class="divPercentContain">
-                    <div id="GrammarIcon"></div>
-                    <div id="GrammarTime" class="GrammarPercent">0%</div>
-                    <div class="TimeResult"><span id="GrammarTimeResult" class="smalltxt ui-hide"></span></div>
-                    <div id="GrammarPS" class="GrammarPercent PS">0%</div>
-                </div>
-                <div class="divPercentContain">
-                    <div id="SituationIcon"></div>
-                    <div id="SituationTime" class="SituationPercent">0%</div>
-                    <div class="TimeResult"><span id="SituationTimeResult" class="smalltxt ui-hide"></span></div>
-                    <div id="SituationPS" class="SituationPercent PS">0%</div>
-                </div>
+        </div>
+
+        <br />
+        <br />
+        <br />
+        <div class="flexDiv">
+            <div class="firstflexdiv">
+                <div></div>
+                <div id="TU">Time Used</div>
+                <div id="TPC">Total Practice Score</div>
+            </div>
+            <div class="divPercentContain">
+                <div id="ReadingIcon"></div>
+                <div id="ReadingTime" class="ReadingPercent">0%</div>
+                <div class="TimeResult"><span id="ReadingTimeResult" class="smalltxt ui-hide"></span></div>
+                <div id="ReadingPS" class="ReadingPercent PS">0%</div>
+            </div>
+            <div class="divPercentContain">
+                <div id="ListeningIcon"></div>
+                <div id="ListeningTime" class="ListeningPercent">0%</div>
+                <div class="TimeResult"><span id="ListeningTimeResult" class="smalltxt ui-hide"></span></div>
+                <div id="ListeningPS" class="ListeningPercent PS">0%</div>
+            </div>
+            <div class="divPercentContain">
+                <div id="VocabIcon"></div>
+                <div id="VocabTime" class="VocabPercent">0%</div>
+                <div class="TimeResult"><span id="VocabularyTimeResult" class="smalltxt ui-hide"></span></div>
+                <div id="VocabularyPS" class="VocabPercent PS">0%</div>
+            </div>
+            <div class="divPercentContain">
+                <div id="GrammarIcon"></div>
+                <div id="GrammarTime" class="GrammarPercent">0%</div>
+                <div class="TimeResult"><span id="GrammarTimeResult" class="smalltxt ui-hide"></span></div>
+                <div id="GrammarPS" class="GrammarPercent PS">0%</div>
+            </div>
+            <div class="divPercentContain">
+                <div id="SituationIcon"></div>
+                <div id="SituationTime" class="SituationPercent">0%</div>
+                <div class="TimeResult"><span id="SituationTimeResult" class="smalltxt ui-hide"></span></div>
+                <div id="SituationPS" class="SituationPercent PS">0%</div>
+            </div>
         </div>
     </div>
     <div class="footer">
@@ -163,7 +181,8 @@
     <div name='GoalDate' id="dialogGoalDate" class='my-popup confirm ui-popup-container ui-popup-hidden'>
         <div class='ui-icon close'></div>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
-            <span id="spnGoalName"></span><br />
+            <span id="spnGoalName"></span>
+            <br />
             <br />
             <div id="SelectGoalDate"></div>
             <br />
@@ -182,6 +201,26 @@
             <div class="ui-twoButton">
                 <div id="btnNotClear" class='btn btnCancel'>No</div>
                 <div id="btnConfirmClear" class='btn btnSelected'>Yes</div>
+            </div>
+        </div>
+    </div>
+    <div name='select' id="dialogLogout" class='my-popup confirm ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon done'></div>
+            <div class='ui-text'>Do you want to Logout ?</div>
+            <div class="ui-twoButton">
+                <div class='btn btnCancel'>No</div>
+                <div class='btn btnConfirmLogout'>Yes</div>
+            </div>
+        </div>
+    </div>
+    <div name='select' id="dialogDeleteAccount" class='my-popup confirm ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon done'></div>
+            <div class='ui-text'>Do you want to Delete your account ?</div>
+            <div class="ui-twoButton">
+                <div class='btn btnCancel'>No</div>
+                <div class='btn btnConfirmDelete'>Yes</div>
             </div>
         </div>
     </div>
