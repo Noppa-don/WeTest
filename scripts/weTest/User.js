@@ -46,6 +46,7 @@ $(document)
     .on('click', '#btnGoalMenu', function (e, data) {
         $('.MainMenu').addClass('ui-hide');
         $('.Goal,.footerGoal').removeClass('ui-hide');
+        $('.pagename').html('- Goal');
     })
 //20240715 -- Menu Report
     .on('click', '#btnReport', function (e, data) {
@@ -55,10 +56,71 @@ $(document)
         popupClose($(this).closest('.my-popup'));
         GotoExam();
     })
-    .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel', function (e, data) {
+    .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel,#dialogLogout .btnCancel,#dialogDeleteAccount .btnCancel', function (e, data) {
         popupClose($(this).closest('.my-popup'));
     })
-
+//20240723 toggle User Menu
+    .on('click', '.UserNameandLevel,.UserPhoto', function (e, data) {
+        $('.UserMenu').toggleClass('ui-hide');
+    })
+//20240723 Logout 
+    .on('click', '.btnAccountMenu.Logout', function (e, data) {
+        $('#dialogLogout').attr('action', 'focus');
+        popupOpen($('#dialogLogout'), 99999);
+    })
+//20240723 Confirm Logout
+    .on('click', '.btnConfirmLogout', function (e, data) {
+       $.ajax({
+           type: 'POST',
+           url: '/weTest/Logout',
+           success: function (data) {
+               for (var i = 0; i < data.length; i++) {
+                   if (data[i].Result == 'success') {
+                       popupClose($('#dialogLogout').closest('.my-popup'));
+                       $('.UserData,.UserMenu,.MainMenu,.Goal,.DetailGoal,.footer,.UserPhoto').addClass('ui-hide');
+                       $('.login').removeClass('ui-hide');
+                       $('#userName,#userPass').val('');
+                   }
+               }
+           }
+       });
+   })
+//20240723 Delete Account
+   .on('click', '.btnAccountMenu.DeleteAccount', function (e, data) {
+        $('#dialogDeleteAccount').attr('action', 'focus');
+        popupOpen($('#dialogDeleteAccount'), 99999);
+    })
+//20240723 Confirm Delete Account
+   .on('click', '.btnConfirmDelete', function (e, data) {
+       $.ajax({
+           type: 'POST',
+           url: '/weTest/DeleteAccount',
+           success: function (data) {
+               for (var i = 0; i < data.length; i++) {
+                   if (data[i].Result == 'success') {
+                       popupClose($('#dialogDeleteAccount').closest('.my-popup'));
+                       $('.UserData,.UserMenu,.MainMenu,.Goal,.DetailGoal,.footer,.UserPhoto').addClass('ui-hide');
+                       $('.login').removeClass('ui-hide');
+                       $('#userName,#userPass').val('');
+                   }
+               }
+           }
+       });
+   })
+//20240723 Confirm Delete Account
+   .on('click', '.btnAccountMenu.EditAccount', function (e, data) {
+       $.ajax({
+           type: 'POST',
+           url: '/weTest/SetEditUserMode',
+           success: function (data) {
+               for (var i = 0; i < data.length; i++) {
+                   if (data[i].dataType == 'success') {
+                       window.location = '/Wetest/Registration';
+                   }
+               }
+           }
+       });
+   })
 // ========================= Goal ============================= //
 //20240715 -- Set Total Goal
     .on('click', '#TimesUsedPercent', function (e, data) {
@@ -83,6 +145,7 @@ $(document)
         if ($('.Goal').hasClass('ui-hide') == false) {
             $('.MainMenu').removeClass('ui-hide');
             $('.Goal,.footerGoal').addClass('ui-hide');
+            $('.pagename').html('');
         } else if ($('.DetailGoal').hasClass('ui-hide') == false) {
             $('.Goal,.btnSetDetailGoal').removeClass('ui-hide');
             $('.DetailGoal').addClass('ui-hide');
@@ -247,11 +310,13 @@ function SetUserData(data) {
         if (data[i].Result == 'success') {
             $('.login').addClass('ui-hide');
             $('.UserData,.MainMenu').removeClass('ui-hide');
+            $('.pagename').html('');
             //20240716 -- ดึงข้อมูล User เพิ่มเติม
             $('.UserNameandLevel').html('Welcome, ' + data[i].Firstname + '<br />' + data[i].UserLevel);
             $('.expiredDate').html(data[i].ExpiredDate)
             $('.UserData').append(data[i].UserPhoto);
             $('#UserLevel').html('Your Level : ' + data[i].UserLevel + '<br />');
+
             if (data[i].TotalGoal != '') {
                 $('#lastestGOAL').html('Your lastest GOAL : ' + data[i].TotalGoal + ' ( Time left ' + data[i].TotalGoalAmount + ' days )');
                 $('#lastestBigGOAL').html('Your lastest A BIG GOAL : ' + data[i].TotalGoal + ' ( Time left ' + data[i].TotalGoalAmount + ' days )');
