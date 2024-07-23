@@ -25,11 +25,13 @@
 .footer {position: fixed;bottom: 30px;width: 100%;}
 
 .logo {background: url(/images/Wetest/logo.png);background-repeat: no-repeat;background-size: contain;
-       background-position: left;width: 183px;height: 80px;}
-
+       background-position: left;width: 183px;height: 80px;float:left;}
+.UserNameandLevel {padding-right: 30px;line-height: 30px;padding-top: 10px;}
 .UserData {width: fit-content;height: 80px;display:flex;color:white;}
+.AppData{display:flex;}
+.pagename {color: #ffffff;line-height: 110px;font-weight: 500;}
 
-.pagename {color: #ffffff;margin-left: 182px;line-height: 110px;font-weight: 500;}
+.UserPhoto {background-repeat: no-repeat!important;background-size: contain!important;background-position: center!important;width: 60px;height: 60px;margin-bottom: 5px;margin-top: 10px;margin-right: 30px;}
 
 .ui-input-text input::placeholder {color: #bbbbbb; text-shadow: none;text-align: center;}
 .InvalidData {border-color: #d21717 !important;border-style: solid !important;border-width: medium !important;}
@@ -50,7 +52,7 @@
 .my-popup .ui-content{margin:0 auto;height:unset;}
 .my-popup .ui-content .ui-icon{height:2.5em;width:100%;margin-bottom:0.5em;background-repeat: no-repeat;background-size: contain;background-position: center;}
 .my-popup .ui-content .ui-iconbig{height:18em;width:50em;margin-bottom:0.5em;background-repeat: no-repeat;background-size: contain;background-position: center;cursor:pointer;}
-.my-popup .ui-content .ui-text{text-align:center;margin-top:15px;margin-bottom:20px;}
+.my-popup .ui-content .ui-text{text-align:center;margin-top:15px;margin-bottom:20px;min-width: 200px;}
 .my-popup .ui-twoButton {display:flex;}
 .my-popup .ui-body-cbig {border: none;background: none;}
 
