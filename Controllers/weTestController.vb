@@ -128,91 +128,146 @@ Namespace Controllers
         End Function
         <AcceptVerbs(HttpVerbs.Post)>
         Function SendOTP()
-            Dim L1 As New List(Of clsMain)
-            Dim MobileNo As String = Request.Form("MobileNo")
-            Dim OTPNum As String = Request.Form("OTPNum")
 
-            Dim url As String
+            Dim L1 As New List(Of clsOTPStatus)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsOTPStatus()
+            Dim OSId As String = Guid.NewGuid.ToString
+            Try
+                Dim MobileNo As String = "66" & Request.Form("MobileNo").TrimStart("0")
+                Dim OTPNum As String = Request.Form("OTPNum")
 
-            Dim MyReq As WebRequest
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
 
-            Dim MyRes As WebResponse
+                Dim url As String
 
-            Dim Rec As Stream
+                Dim MyReq As WebRequest
+                Dim MyRes As WebResponse
+                Dim Rec As Stream
+                Dim Reader As StreamReader
+                Dim Content As String
+                Dim Pos As Integer
+                Dim apiKey As String = "whIRYTWJkMat1SiuQBs1vhlw5kJ9ZCAw7PLcp5sNHs8="
+                Dim clientID As String = "6ee932cc-aba1-46b2-9b1e-e2f60dd239de"
+                url = "https://api.send-sms.in.th/api/v2/SendSMS?SenderID=WeTell&Message=" & "OTP code for Wetest : " & OTPNum & "&MobileNumbers=" + MobileNo + "&ApiKey=" & apiKey & "&ClientId=" & clientID & "&is_unicode=true"
+                MyReq = WebRequest.Create(url)
+                MyReq.ContentLength = 0
+                MyReq.Method = "GET"
+                MyReq.ContentType = "application/json; charset=utf-8"
+                MyRes = MyReq.GetResponse
+                Rec = MyRes.GetResponseStream
+                Reader = New StreamReader(Rec, Encoding.UTF8)
+                Content = Reader.ReadToEnd
+                Pos = Content.IndexOf("Success", 0)
 
-            Dim Reader As StreamReader
+                If Pos > 0 Then
+                    cmdMsSql = cmdSQL(cn, "insert into tblOTPStatus(OSId,OTPCode,ReferenceId)values(@OSId,@OTPNum,@StudentID);")
+                    With cmdMsSql
+                        .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = Session("StudentID")
+                        .Parameters.Add("@OTPNum", SqlDbType.VarChar).Value = OTPNum
+                        .Parameters.Add("@OSId", SqlDbType.VarChar).Value = OSId
+                        .ExecuteNonQuery()
+                    End With
+                    Dim OTPAgainTime = ConfigurationManager.AppSettings("OTPAgainTime")
+                    objList.ResultStatus = "success"
+                    objList.ReponseTime = OTPAgainTime
+                    objList.OSId = OSId
 
-            Dim Content As String
+                Else
+                    cmdMsSql = cmdSQL(cn, "insert into tblOTPStatus(OTPCode,ReferenceId,SendStatus)values(@OTPNum,@StudentID,0)")
+                    With cmdMsSql
+                        .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = Session("StudentID")
+                        .Parameters.Add("@OTPNum", SqlDbType.VarChar).Value = OTPNum
+                        .ExecuteNonQuery()
+                    End With
 
-            Dim Pos As Integer
+                    objList.ResultStatus = "error"
+                    objList.Resulttxt = "Can not Send OTP please try again"
 
-            MobileNo = "66" + MobileNo.TrimStart("0")
+                End If
+                L1.Add(objList)
+                objList = Nothing
 
-            Dim apiKey As String = "whIRYTWJkMat1SiuQBs1vhlw5kJ9ZCAw7PLcp5sNHs8="
-
-            Dim clientID As String = "6ee932cc-aba1-46b2-9b1e-e2f60dd239de"
-
-            url = "https://api.send-sms.in.th/api/v2/SendSMS?SenderID=WeTell&Message=" & "OTP code for Wetest : " & OTPNum & "&MobileNumbers=" + MobileNo + "&ApiKey=" & apiKey & "&ClientId=" & clientID & "&is_unicode=true"
-
-            MyReq = WebRequest.Create(url)
-
-            MyReq.ContentLength = 0
-
-            MyReq.Method = "GET"
-
-            MyReq.ContentType = "application/json; charset=utf-8"
-
-            MyRes = MyReq.GetResponse
-
-            Rec = MyRes.GetResponseStream
-
-            Reader = New StreamReader(Rec, Encoding.UTF8)
-
-            Content = Reader.ReadToEnd
-
-            Pos = Content.IndexOf("Success", 0)
-
-            'Pos = 1
-
-            Dim objList As New clsMain()
-            If Pos > 0 Then
-                objList.dataType = "success"
-                objList.errorMsg = "success"
-
-            Else
-                objList.dataType = "error"
-                objList.errorMsg = "ไม่สามารถส่งรหัส OTP ได้"
-
-            End If
-            L1.Add(objList)
-            objList = Nothing
+            Catch ex As Exception
+                objList.ResultStatus = "error"
+                objList.Resulttxt = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
 
         End Function
+        '20240723 -- ปรับวิธีการตรวจสอบ OTP และเพิ่มการบันทึกการตอบกลับ OTP
         <AcceptVerbs(HttpVerbs.Post)>
-        Function UpdateOTPStatus()
-            Dim L1 As New List(Of clsMain)
+        Function CheckAndUpdateOTPStatus()
+            Dim L1 As New List(Of clsOTPStatus)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
-            Dim objList As New clsMain()
+            Dim objList As New clsOTPStatus()
+            Dim OTPNum As String = Request.Form("OTPNum")
+            Dim OSId As String = Request.Form("OSId")
             Try
                 ' ================ Check Permission ================
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-                cmdMsSql = cmdSQL(cn, "Update tblStudent set OTPConfirm = @OTPStatus where studentId = @StudentID")
+                Dim OTPAgainTime = ConfigurationManager.AppSettings("OTPResponseTime")
+
+                cmdMsSql = cmdSQL(cn, "select OTPCode,DATEDIFF(ms,sendtime,getdate()) as SendTime from tblOTPStatus where OSId = @OSId and isactive = 1;")
+
                 With cmdMsSql
-                    .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = Session("StudentID")
-                    .Parameters.Add("@OTPStatus", SqlDbType.VarChar).Value = Request.Form("OTPStatus")
-                    .ExecuteNonQuery()
+                    .Parameters.Add("@OSId", SqlDbType.VarChar).Value = OSId
                 End With
 
-                objList.dataType = "success"
-                objList.errorMsg = ""
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows().Count <> 0 Then
+                    If dt.Rows(0)("sendtime") > OTPAgainTime Then
+                        cmdMsSql = cmdSQL(cn, "Update tblOTPStatus set ResponseTime = getdate(),ResponseStatus = 3 , lastupdate = getdate() where osid = @OSId;")
+
+                        With cmdMsSql
+                            .Parameters.Add("@OSId", SqlDbType.VarChar).Value = OSId
+                            .ExecuteNonQuery()
+                        End With
+
+                        objList.ResultStatus = "Expired"
+                        objList.Resulttxt = "OTP is Expired! Please click Send again"
+                    ElseIf dt.Rows(0)("OTPCode").ToString <> OTPNum Then
+
+                        cmdMsSql = cmdSQL(cn, "Update tblOTPStatus set ResponseTime = getdate(),ResponseStatus = 2 , lastupdate = getdate() where osid = @OSId;")
+
+                        With cmdMsSql
+                            .Parameters.Add("@OSId", SqlDbType.VarChar).Value = OSId
+                            .ExecuteNonQuery()
+                        End With
+
+                        objList.ResultStatus = "wrong"
+                        objList.Resulttxt = "OTP is wrong! Please try again"
+                    Else
+                        cmdMsSql = cmdSQL(cn, "Update tblOTPStatus set ResponseTime = getdate(),ResponseStatus = 1 , lastupdate = getdate() where osid = @OSId;")
+
+                        With cmdMsSql
+                            .Parameters.Add("@OSId", SqlDbType.VarChar).Value = OSId
+                            .ExecuteNonQuery()
+                        End With
+
+                        objList.ResultStatus = "success"
+                        objList.Resulttxt = ""
+                    End If
+
+                End If
+
                 L1.Add(objList)
                 objList = Nothing
             Catch ex As Exception
-                objList.dataType = "error"
-                objList.errorMsg = ex.Message
+                objList.ResultStatus = "error"
+                objList.Resulttxt = ex.Message
                 L1.Add(objList)
                 objList = Nothing
             Finally
@@ -365,7 +420,43 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+        '20240723 -- Update ExpiredDate case กด skip ให้ใช้ TrialDate
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function UpdateTrialDate()
 
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsMain()
+            Dim stdId As String = Session("studentid").ToString
+            Dim TrialTime = ConfigurationManager.AppSettings("TrialTime")
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                cmdMsSql = cmdSQL(cn, "update tblStudent set ExpiredDate =  DATEADD(HH, 168, getdate()) where StudentId = @stdId;")
+
+                With cmdMsSql
+                    .Parameters.Add("@stdId", SqlDbType.VarChar).Value = stdId
+                    .ExecuteNonQuery()
+                End With
+
+                objList.dataType = "success"
+                L1.Add(objList)
+                objList = Nothing
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
         <AcceptVerbs(HttpVerbs.Post)>
         Function SaveFirstPlacementTest()
             Dim L1 As New List(Of clsMain)
@@ -379,7 +470,7 @@ Namespace Controllers
                     L1.Add(objList)
                     objList = Nothing
                 Else
-                    objList.dataType = "error"
+                    objList.dataType = "Error"
                     objList.errorMsg = Result
                     L1.Add(objList)
                     objList = Nothing
@@ -387,10 +478,94 @@ Namespace Controllers
 
 
             Catch ex As Exception
+                objList.dataType = "Error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+        '20240723 -- Check Edit Mode and Get User Data
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function checkEditMode()
+            Dim L1 As New List(Of clsStudentData)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsStudentData()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                If Session("EditUserData") IsNot Nothing Then
+                    objList = GetUserData(Session("studentid"))
+                    objList.Result = "edit"
+                Else
+                    objList.Result = "add"
+                End If
+
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.Result = "error"
+                objList.Msg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+        '20240723 -- Update User Data
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function UpdateUser()
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim StdId As String = Session("studentId")
+            Dim objList As New clsMain(), fileName As String, fiInfo As FileInfo, filePath As String, oriImage As Image, reImage As Image
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+                cmdMsSql = cmdSQL(cn, "Update tblStudent set FirstName = @FirstName,Surname = @Surname,MobileNo = @MobileNo,Email = @Email,Username = @Username  where studentId = @StudentID;")
+                With cmdMsSql
+                    .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = StdId
+                    .Parameters.Add("@FirstName", SqlDbType.VarChar).Value = Request.Form("FirstName")
+                    .Parameters.Add("@Surname", SqlDbType.VarChar).Value = Request.Form("Surname")
+                    .Parameters.Add("@MobileNo", SqlDbType.VarChar).Value = Request.Form("MobileNo")
+                    .Parameters.Add("@Email", SqlDbType.VarChar).Value = Request.Form("Email")
+                    .Parameters.Add("@Username", SqlDbType.VarChar).Value = Request.Form("Username")
+                    .ExecuteNonQuery()
+                End With
+
+                If Request.Form("Password").ToString <> "" Then
+                    cmdMsSql = cmdSQL(cn, "Update Password = @Password where studentId = @StudentID;")
+                    With cmdMsSql
+                        .Parameters.Add("@Password", SqlDbType.VarChar).Value = oneWayKN(Request.Form("Password"))
+                        .ExecuteNonQuery()
+                    End With
+                End If
+
+                objList.dataType = "success"
+                objList.errorMsg = ""
+                L1.Add(objList)
+                objList = Nothing
+
+                Session("EditUserData") = Nothing
+
+            Catch ex As Exception
                 objList.dataType = "error"
                 objList.errorMsg = ex.Message
                 L1.Add(objList)
                 objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
@@ -414,7 +589,7 @@ Namespace Controllers
                     cn = New SqlConnection(sqlCon("Wetest"))
                     If cn.State = 0 Then cn.Open()
                     ' ==================================================
-                    cmdMsSql = cmdSQL(cn, " Select QuizScoreId from tblQuizScore  where QuizId = @QuizId and QuestionId = @QuestionId;")
+                    cmdMsSql = cmdSQL(cn, " Select QuizScoreId from tblQuizScore  where QuizId = @QuizId And QuestionId = @QuestionId;")
 
                     With cmdMsSql
                         .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
@@ -425,7 +600,7 @@ Namespace Controllers
                     Dim dtScore As DataTable = getDataTable(cmdMsSql)
 
                     If dtScore.Rows.Count <> 0 Then
-                        cmdMsSql = cmdSQL(cn, "update tblQuizScore set AnswerId = @AnsweredId,ResponseAmount = ResponseAmount + 1,Score = a.AnswerScore,LastUpdate = GETDATE()
+                        cmdMsSql = cmdSQL(cn, "update tblQuizScore Set AnswerId = @AnsweredId,ResponseAmount = ResponseAmount + 1,Score = a.AnswerScore,LastUpdate = GETDATE()
                                             from tblQuizScore qs inner join tblAnswer a on qs.QuestionId = a.QuestionId and a.QuestionId = @QuestionId and a.AnswerId = @AnsweredId
                                             where qs.QuizScoreId = @QuizScoreId;")
                         With cmdMsSql
@@ -1508,7 +1683,6 @@ Namespace Controllers
         Function User() As ActionResult
             Return View()
         End Function
-
         <AcceptVerbs(HttpVerbs.Post)>
         Function CheckUserLogin()
             Dim L1 As New List(Of clsStudentData)
@@ -1580,7 +1754,6 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-
         <AcceptVerbs(HttpVerbs.Post)>
         Function CreateMockUpExam()
             Dim L1 As New List(Of clsMain)
@@ -1740,7 +1913,82 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+        '20240723 -- Logout
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function Logout()
+            Dim L1 As New List(Of clsStudentData)
+            Dim objList As New clsStudentData()
+            Try
+                Session.Contents.RemoveAll()
+                objList.Result = "success"
+                L1.Add(objList)
+                objList = Nothing
 
+            Catch ex As Exception
+                objList.Result = "error"
+                objList.Msg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+        '20240723 -- Delete Account
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function DeleteAccount()
+            Dim L1 As New List(Of clsStudentData)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsStudentData()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                Dim StdId As String = Session("StudentId").ToString
+
+                cmdMsSql = cmdSQL(cn, "Update tblstudent set isActive = 0 ,LastUpdate = getdate() where StudentId = @StdId;")
+                With cmdMsSql
+                    .Parameters.Add("@StdId", SqlDbType.VarChar).Value = StdId
+                    .ExecuteNonQuery()
+                End With
+
+                objList.Result = "success"
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.Result = "error"
+                objList.Msg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+        '20240723 -- Delete Account
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function SetEditUserMode()
+            Dim L1 As New List(Of clsMain)
+            Dim objList As New clsMain()
+            Try
+                Session("EditUserData") = True
+
+                objList.dataType = "success"
+                L1.Add(objList)
+                objList = Nothing
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+        '20240722 เพิ่ม ExpiredDate
+        '20240723 เพิ่ม User Data สำหรับแก้ไข
         Function GetUserData(stdId As String)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim objList As New clsStudentData()
@@ -1749,19 +1997,18 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-                '20240722 เพิ่ม ExpiredDate
-                cmdMsSql = cmdSQL(cn, "select top 1 s.StudentId,Firstname,l.LevelShortName,CONVERT (varchar(10), kc.ExpiredDate, 103) AS expiredDate
-                                            ,CONVERT(varchar(10), sg.TotalGoalDate, 103) as TotalGoal,datediff(day,getdate(),sg.TotalGoalDate) as TotalGoalAmount
-                                            ,CONVERT(varchar(10), sg.ReadingGoal, 103) as ReadingGoal,datediff(day,getdate(),sg.ReadingGoal) as ReadingGoalAmount
-                                            ,CONVERT(varchar(10), sg.ListeningGoal, 103) as ListeningGoal,datediff(day,getdate(),sg.ListeningGoal) as ListeningGoalAmount 
-                                            ,CONVERT(varchar(10), sg.VocabGoal, 103) as VocabGoal,datediff(day,getdate(),sg.VocabGoal) as VocabGoalAmount  
-                                            ,CONVERT(varchar(10), sg.GrammarGoal, 103) as GrammarGoal,datediff(day,getdate(),sg.GrammarGoal) as GrammarGoalAmount  
-                                            ,CONVERT(varchar(10), sg.SituationGoal, 103) as SituationGoal,datediff(day,getdate(),sg.SituationGoal) as SituationGoalAmount    
-                                            from tblStudent s inner join tblStudentLevel sl on s.studentId = sl.StudentId 
-                                            inner join tblLevel l on sl.levelId = l.LevelId left join tblstudentGoal sg on s.StudentId = sg.StudentId 
-                                            and sg.IsActive = 1 and getdate() <= sg.TotalGoalDate inner join tblkeycode kc on kc.KeyCodeId = s.KeyCodeId
-                                            where s.studentId = @stdid and s.IsActive = 1 and sl.IsActive = 1  
-                                            order by sl.lastupdate desc;")
+
+                cmdMsSql = cmdSQL(cn, "select top 1 s.StudentId,Firstname,Surname,MobileNo,Email,Username,l.LevelShortName,CONVERT (varchar(10),s.ExpiredDate , 103) AS expiredDate
+                                        ,CONVERT(varchar(10), sg.TotalGoalDate, 103) as TotalGoal,datediff(day,getdate(),sg.TotalGoalDate) as TotalGoalAmount
+                                        ,CONVERT(varchar(10), sg.ReadingGoal, 103) as ReadingGoal,datediff(day,getdate(),sg.ReadingGoal) as ReadingGoalAmount
+                                        ,CONVERT(varchar(10), sg.ListeningGoal, 103) as ListeningGoal,datediff(day,getdate(),sg.ListeningGoal) as ListeningGoalAmount 
+                                        ,CONVERT(varchar(10), sg.VocabGoal, 103) as VocabGoal,datediff(day,getdate(),sg.VocabGoal) as VocabGoalAmount  
+                                        ,CONVERT(varchar(10), sg.GrammarGoal, 103) as GrammarGoal,datediff(day,getdate(),sg.GrammarGoal) as GrammarGoalAmount  
+                                        ,CONVERT(varchar(10), sg.SituationGoal, 103) as SituationGoal,datediff(day,getdate(),sg.SituationGoal) as SituationGoalAmount    
+                                        from tblStudent s inner join tblStudentLevel sl on s.studentId = sl.StudentId 
+                                        inner join tblLevel l on sl.levelId = l.LevelId left join tblstudentGoal sg on s.StudentId = sg.StudentId 
+                                        and sg.IsActive = 1 and getdate() <= sg.TotalGoalDate where s.studentId = @stdid and s.IsActive = 1 and sl.IsActive = 1  
+                                        order by sl.lastupdate desc;")
                 With cmdMsSql
                     .Parameters.Add("@stdid", SqlDbType.VarChar).Value = stdId
                 End With
@@ -1771,6 +2018,10 @@ Namespace Controllers
                 If dt.Rows.Count <> 0 Then
                     objList.UserPhoto = "<div class=""UserPhoto"" style=""background: url(../WetestPhoto/UserPhoto/" & dt(0)("StudentId").ToString & ".png);"">"
                     objList.Firstname = dt(0)("Firstname").ToString
+                    objList.Surname = dt(0)("Surname").ToString
+                    objList.MobileNo = dt(0)("MobileNo").ToString
+                    objList.Email = dt(0)("Email").ToString
+                    objList.Username = dt(0)("Username").ToString
                     objList.ExpiredDate = "Your account expire date is : " & dt(0)("expiredDate").ToString
                     objList.UserLevel = dt(0)("LevelShortName").ToString
                     objList.TotalGoal = dt(0)("TotalGoal").ToString
@@ -1786,7 +2037,6 @@ Namespace Controllers
                     objList.SituationGoal = dt(0)("SituationGoal").ToString
                     objList.SituationGoalAmount = dt(0)("SituationGoalAmount").ToString
                 End If
-
 
                 cmdMsSql = cmdSQL(cn, "select (100 - ((DATEDIFF(DAY,getdate(),totalgoaldate)*100) / DATEDIFF(DAY,LastUpdate,totalgoaldate))) as DatePercent
                                             from tblStudentGoal where StudentId = @stdid and isactive = 1;")
@@ -1875,6 +2125,8 @@ Namespace Controllers
             End Try
             Return objList
         End Function
+
+
 #End Region
 
 #Region "Practice"
@@ -2382,10 +2634,11 @@ Namespace Controllers
 #Region "Class"
         Private Class clsStudentData
             Inherits clsMain
-            Public Firstname As String, UserPhoto As String, Result As String, Msg As String, UserLevel As String, TotalGoal As String _
-            , TotalGoalAmount As String, ReadingGoal As String, ReadingGoalAmount As String, ListeningGoal As String, ListeningGoalAmount As String _
+            Public Firstname As String, Surname As String, MobileNo As String, Email As String, Username As String, UserPhoto As String _
+            , Result As String, Msg As String, UserLevel As String, ExpiredDate As String _
+            , TotalGoal As String, TotalGoalAmount As String, ReadingGoal As String, ReadingGoalAmount As String, ListeningGoal As String, ListeningGoalAmount As String _
             , VocabGoal As String, VocabGoalAmount As String, GrammarGoal As String, GrammarGoalAmount As String, SituationGoal As String, SituationGoalAmount As String _
-            , TotalGoalDatePercent As String, TotalGoalScorePercent As String, GrammarScorePercent As String, VocabScorePercent As String, ExpiredDate As String
+            , TotalGoalDatePercent As String, TotalGoalScorePercent As String, GrammarScorePercent As String, VocabScorePercent As String
         End Class
         Private Class clsItemQAndA
             Inherits clsMain
@@ -2406,6 +2659,11 @@ Namespace Controllers
         Public Class clsAnswerChoice
             Inherits clsMain
             Public result As String, AnswerChoicetxt As String, allPage As String, RightAmount As String, WrongAmount As String, LeapAmount As String
+        End Class
+        '20240723 -- OTP Data
+        Public Class clsOTPStatus
+            Inherits clsMain
+            Public OSId As String, ReponseTime As String, ResultStatus As String, Resulttxt As String
         End Class
 #End Region
 
