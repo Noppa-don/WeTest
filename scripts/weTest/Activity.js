@@ -5,10 +5,8 @@ var sec = 0;
 $(function () {
     $('div[data-role=page]').page({ theme: 'c', });
 
-    GetQuestionAndAnswer()
-    QuizTimer()
-    setProgressbar();
-    PageNum = 1
+    checkAnsweredFromReport();
+
 });
 
 // ============================================================ //
@@ -102,7 +100,10 @@ $(document)
                      $('#divRunningBar, #divAllLeapChoice, #divTime').addClass("ui-hide");
                      $('#divAllQuestion, #divShowExplain').removeClass("ui-hide");
                      GetQuestionAndAnswer('select', 1);
+                 } else if (data[i].dataType == 'gotoreport') {
+                     window.location = '/Wetest/Report';
                  }
+                 
              }
          }
      });
@@ -405,6 +406,29 @@ function GetAnswerChoicePanel(ChoiceMode) {
                     $('#dialogResultChoice').attr('action', 'focus');
                     popupOpen($('#dialogResultChoice'), 99999);
                     PageNum = 1;
+                }
+            }
+        }
+    });
+}
+//20240722 -- ตรวจสอบว่าเป็นการกดดูเฉลยหรือไม่
+function checkAnsweredFromReport() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/checkAnsweredFromReport',
+        success: function (data) {
+
+            for (var i = 0; i < data.length; i++) {
+                console.log(data[i].dataType);
+                if (data[i].dataType == 'showanswer') {
+                    $('#divRunningBar, #divAllLeapChoice, #divTime').addClass("ui-hide");
+                    $('#divAllQuestion, #divShowExplain').removeClass("ui-hide");
+                    GetQuestionAndAnswer('select', 1);
+                } else {
+                    GetQuestionAndAnswer()
+                    QuizTimer()
+                    setProgressbar();
+                    PageNum = 1
                 }
             }
         }
