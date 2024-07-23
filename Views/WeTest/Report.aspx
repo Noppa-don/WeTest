@@ -3,20 +3,25 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
-    <link href="/content/weTest/Wetest.css?ver=1.1.5" rel="stylesheet" type="text/css" />
-    <link href="/content/weTest/Report.css?ver=1.1.5" rel="stylesheet" type="text/css" />
+    <link href="/content/weTest/Wetest.css?ver=1.1.6" rel="stylesheet" type="text/css" />
+    <link href="/content/weTest/Report.css?ver=1.1.6" rel="stylesheet" type="text/css" />
     <link href="../content/Wetest/jquery-ui-1.8.18.custom.min" type="text/css" />
 
-    <script src="/scripts/weTest/Report.js?ver=1.1.5" type="text/javascript"></script>
+    <script src="/scripts/weTest/Report.js?ver=1.1.6" type="text/javascript"></script>
     <script src="../scripts/Wetest/jGlobal.js" type="text/javascript"></script>
     <script src="../scripts/Wetest/jquery-ui-1.8.10.offset.datepicker.min.js?ver=1.1.3" type="text/javascript"></script>
     <script src="../scripts/Wetest/jquery-ui-1.10.1.custom.min.js?ver=1.1.3" type="text/javascript"></script>
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="MainContent" runat="server">
 
-    <div class="banner">
-        <div class='logo'></div>
-        <div class='pagename'>- Report</div>
+   <div class="banner">
+        <div class="AppData">
+            <div class="logo"></div>
+            <div class='pagename'>- Report</div>
+        </div>
+        <div class="UserData flexDiv">
+            <div class="UserNameandLevel"></div>
+        </div>
     </div>
 
     <div class='wrapper'>
