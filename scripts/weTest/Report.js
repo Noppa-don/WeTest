@@ -1,6 +1,7 @@
 ﻿var IsLesson, selectedStartDate, selectedEndDate, formatSelectedDate;
 // ========================= Page Load ======================== //
 $(function () { $('div[data-role=page]').page({ theme: 'c', }); });
+CheckLoginStatus();
 // ============================================================ //
 // ======================= Object Event ======================= //
 $(document)
@@ -270,6 +271,23 @@ function GotoPracticeAgain(TestsetId) {
                         clearInterval(x);
                         window.location = '/Wetest/Activity';
                     }, 1000);
+                }
+            }
+        }
+    });
+}
+//20240723 Get name level and Photo
+function CheckLoginStatus() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/CheckLoginStatus',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].Result == 'success') {
+                    $('.UserNameandLevel').html('Welcome, ' + data[i].Firstname + '<br />' + data[i].UserLevel);
+                    $('.UserData').append(data[i].UserPhoto);
+                    $('#UserLevel').html('Your Level : ' + data[i].UserLevel + '<br />');
+
                 }
             }
         }
