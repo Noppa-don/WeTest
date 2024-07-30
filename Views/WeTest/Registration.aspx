@@ -28,7 +28,7 @@
                     <br />
                     <div>
                         <span class="captionName ui-hide" id="capType">Type</span>
-                        <div class="spnData"><span class="spType"></span></div>
+                        <div class="spnData ui-hide"><span class="spType"></span></div>
                     </div>
                     <div>
                         <span class="captionName">First name</span>
