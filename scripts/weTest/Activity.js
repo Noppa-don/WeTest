@@ -15,13 +15,19 @@ $(document)
 // ======================= Activity =========================== //
 
  .on('focus', '.txtDetail,.ui-select', function (e, data) { $(this).removeClass("InvalidData") })
+ //20240726 -- เพิ่มการกดหยุดไฟล์เสียง
  .on('click', '.btnNext', function (e, data) {
+     if ($('.bap-icon').children().hasClass('bap-icon-on')) { $('.bap-btn').click()}
+    
      if ($('.btnNext').hasClass('UnActive') == false) {
          GetQuestionAndAnswer('next', '');
          setProgressbar();
      }
  })
+//20240726 -- เพิ่มการกดหยุดไฟล์เสียง
  .on('click', '.btnBack', function (e, data) {
+     if ($('.bap-icon').children().hasClass('bap-icon-on')) { $('.bap-btn').click()}
+
      if ($('.btnBack').hasClass('UnActive') == false) {
          GetQuestionAndAnswer('back', '');
          setProgressbar();
@@ -328,8 +334,9 @@ function setProgressbar() {
 
             for (var i = 0; i < data.length; i++) {
 
-                if (data[i].dataType == 'success') {
-                    $(".runningStatus").css("width", data[i].errorMsg + '%');
+                if (data[i].Result == 'success') {
+                    $(".runningStatus").css("width", data[i].AnsweredPercent + '%');
+                    $(".runningAmount").html(data[i].AnsweredAmount);
 
                     if (data[i].errorMsg == '100') {
                         $(".runningStatus").css("border-radius", "1em 1em 1em 1em");
@@ -369,13 +376,13 @@ function GetLeapChoicePanel(ChoiceMode) {
         }
     });
 }
+//20240726 -- เพิ่มการตั้งค่าไม่ให้เล่นไฟล์ซ้ำ
 function setbuttonAudioPlayer(divname, FilePath) {
-    console.log('setbuttonAudioPlayer');
     $('#' + divname).buttonAudioPlayer({
         type: 'default',
+        loop:false,
         src: FilePath
     });
-
 }
 //20240715 -- ดึงข้อมูลสร้าง Dialog เฉลย
 function GetAnswerChoicePanel(ChoiceMode) {
