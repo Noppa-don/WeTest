@@ -1,8 +1,8 @@
-﻿var OTPNum, PackagePrice, StudentType, file,EditMode;
+﻿var OTPNum, PackagePrice, StudentType, file, EditMode;
 
 // ========================= Page Load ======================== //
 $(function () { $('div[data-role=page]').page({ theme: 'c', }); $('#Firstname').focus(); });
-    checkEditMode();
+checkEditMode();
 // ============================================================ //
 // ======================= Object Event ======================= //
 $(document)
@@ -37,7 +37,7 @@ $(document)
         if ($('.spnData').hasClass('ui-hide')) {
             window.location = '/Wetest/User';
         } else {
-            $('#captionConfirmPassword, #captionPassword,.txtData').removeClass('ui-hide');
+            $('#captionConfirmPassword, #captionPassword,.txtData,#btnStudent, #btnOther').removeClass('ui-hide');
             $('.spnData').addClass('ui-hide');
         }
 
@@ -45,11 +45,6 @@ $(document)
     .on('click', '.btnPhoto', function (e, data) {
         event.preventDefault();
         $("#file").click();
-    })
-//20240716 -- Browse Slip file
-    .on('click', '.btnSlipPhoto', function (e, data) {
-        event.preventDefault();
-        $("#fileSlip").click();
     })
     .on('click', '#btnStudent, #btnOther', function (e, data) {
         $('#btnStudent, #btnOther').removeClass("btnSelected")
@@ -74,18 +69,18 @@ $(document)
         image.src = _URL.createObjectURL(file);
     })
     .on('change', '#fileSlip', function (e, data) {
-            var _URL = window.URL || window.webkitURL;
-            var image;
-            if ((file = this.files[0])) {
-                image = new Image();
-                image.onload = function () {
-                    src = this.src;
-                    UploadSlip();
-                    e.preventDefault();
-                }
-            };
-            image.src = _URL.createObjectURL(file);
-      })
+        var _URL = window.URL || window.webkitURL;
+        var image;
+        if ((file = this.files[0])) {
+            image = new Image();
+            image.onload = function () {
+                src = this.src;
+                UploadSlip();
+                e.preventDefault();
+            }
+        };
+        image.src = _URL.createObjectURL(file);
+    })
 
 // ======================= OTP ======================= //
     .on('click', '#btnSendAgain', function (e, data) {
@@ -121,7 +116,7 @@ $(document)
     //20240723 -- Update UpdateTrialDate skip
     .on('click', '#btnskip', function (e, data) {
         UpdateTrialDate();
-        
+
     })
     .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel', function (e, data) {
         popupClose($(this).closest('.my-popup'));
@@ -144,7 +139,11 @@ $(document)
         popupClose($(this).closest('.my-popup'));
         window.location = '/Wetest/User';
     })
-
+//20240716 -- Browse Slip file
+    .on('click', '.btnSlipPhoto', function (e, data) {
+        event.preventDefault();
+        $("#fileSlip").click();
+    })
 // ============================================================ //
 
 // ========================= Function ========================= //
@@ -183,7 +182,7 @@ function SetConfirmtxt() {
     $('.spUsername').text($('#Username').val());
 }
 function SaveNewUser() {
-    var post1 = 'FirstName=' + $('.spFirstname').text() + '&Surname=' + $('.spSurname').text() + '&MobileNo=' + $('.spMobileNo').text() +
+    var post1 = 'FirstName=' + $('.spFirstname').text() + '&Surname=' + $('.spSurname').text() + '&Fullname=' + $('.spFirstname').text() + $('.spSurname').text() + '&MobileNo=' + $('.spMobileNo').text() +
         '&EMail=' + $('.spEMail').text() + '&Username=' + $('.spUsername').text() + '&Password=' + $('#Password').val() + '&StudentType=' + StudentType;
     $.ajax({
         type: 'POST',
@@ -191,11 +190,12 @@ function SaveNewUser() {
         data: post1,
         success: function (data) {
             for (var i = 0; i < data.length; i++) {
-                switch (data[i].dataType) {
-                    case 'error':
-                        console.log(data[i].errorMsg);
-                    case 'success':
-                        UploadStudentPhoto();
+                if (data[i].dataType == 'pass') {
+                    UploadStudentPhoto();
+                } else {
+                    $('#dialogConfirm').attr('action', 'focus');
+                    $('#dialogConfirm .ui-text').html(data[i].errorMsg);
+                    popupOpen($('#dialogConfirm'), 99999);
                 }
             }
         }
@@ -233,7 +233,7 @@ function UploadStudentPhoto() {
             }
         });
     } else {
-       
+
         $.ajax({
             type: 'POST',
             url: '/weTest/UploadDummyStudentPhoto',
@@ -336,7 +336,7 @@ function CheckAndUpdateOTPStatus(OTPNum, OSId) {
                         $('.payment ,.footerPayment').removeClass('ui-hide');
                         GetPackagePrice();
                         break;
-                    default :
+                    default:
                         $('#dialogConfirm').attr('action', 'focus');
                         $('#dialogConfirm .ui-text').html(data[i].Resulttxt);
                         popupOpen($('#dialogConfirm'), 99999);
@@ -491,9 +491,9 @@ function SaveEditUser() {
                     case 'success':
                         $('#dialogConfirmSaveUser').attr('action', 'focus');
                         popupOpen($('#dialogConfirmSaveUser'), 99999);
-                        break;                       
+                        break;
                 }
             }
         }
     });
- }
+}
