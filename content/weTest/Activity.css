@@ -103,3 +103,7 @@
 .iconAnswer.iconLeapAnswer {margin-left: 15px;height: 25px; width: 25px; height: 25px;background: url(/images/Wetest/LeapIcon.png);background-repeat: no-repeat; background-size: contain; background-position: left;}
 
 #AllPage, #AllPage2 {min-width: 480px; min-height: 202px;}
+
+.runningAmount { z-index:999;position: absolute;width: 70%;height: 45px;line-height: 45px;font-size: 25px;text-align: center;color: #ef9f73;}
+
+.divAnswerbar .fistflexdiv,.divAnswerbarAns .fistflexdiv,#divQuestion .fistflexdiv {padding-right: 15px;}
