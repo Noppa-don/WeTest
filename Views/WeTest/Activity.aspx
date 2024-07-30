@@ -19,6 +19,7 @@
             <div id="divRunningBar">
                 <div id="divIconRun"></div>
                 <div id="divQuestionRun">
+                      <div class="runningAmount"></div>
                     <div class="runningStatus"></div>
                 </div>
                 <div id="divGoal"></div>
