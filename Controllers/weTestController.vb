@@ -19,35 +19,42 @@ Namespace Controllers
             Dim L1 As New List(Of clsMain)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim StdId As String = Guid.NewGuid.ToString
-            Dim objList As New clsMain(), fileName As String, fiInfo As FileInfo, filePath As String, oriImage As Image, reImage As Image
+            Dim objList As New clsMain()
             Try
                 ' ================ Check Permission ================
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-                cmdMsSql = cmdSQL(cn, "Insert into tblStudent(StudentID,FirstName,Surname,MobileNo,Email,Username,Password,StudentType) 
-                                        values(@StudentID,@FirstName,@Surname,@MobileNo,@Email,@Username,@Password,@StudentType)")
-                With cmdMsSql
-                    .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = StdId
-                    .Parameters.Add("@FirstName", SqlDbType.VarChar).Value = Request.Form("FirstName")
-                    .Parameters.Add("@Surname", SqlDbType.VarChar).Value = Request.Form("Surname")
-                    .Parameters.Add("@MobileNo", SqlDbType.VarChar).Value = Request.Form("MobileNo")
-                    .Parameters.Add("@Email", SqlDbType.VarChar).Value = Request.Form("Email")
-                    .Parameters.Add("@Username", SqlDbType.VarChar).Value = Request.Form("Username")
-                    .Parameters.Add("@Password", SqlDbType.VarChar).Value = oneWayKN(Request.Form("Password"))
-                    .Parameters.Add("@StudentType", SqlDbType.VarChar).Value = Request.Form("StudentType")
-                    .ExecuteNonQuery()
-                End With
+                Dim CheckResult As String = CheckDuplicateUser()
+                If CheckResult = "pass" Then
 
-                objList.dataType = "success"
-                objList.errorMsg = ""
+                    cmdMsSql = cmdSQL(cn, "Insert into tblStudent(StudentID,FirstName,Surname,MobileNo,Email,Username,Password,StudentType) 
+                                        values(@StudentID,@FirstName,@Surname,@MobileNo,@Email,@Username,@Password,@StudentType)")
+                    With cmdMsSql
+                        .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = StdId
+                        .Parameters.Add("@FirstName", SqlDbType.VarChar).Value = Request.Form("FirstName")
+                        .Parameters.Add("@Surname", SqlDbType.VarChar).Value = Request.Form("Surname")
+                        .Parameters.Add("@MobileNo", SqlDbType.VarChar).Value = Request.Form("MobileNo")
+                        .Parameters.Add("@Email", SqlDbType.VarChar).Value = Request.Form("Email")
+                        .Parameters.Add("@Username", SqlDbType.VarChar).Value = Request.Form("Username")
+                        .Parameters.Add("@Password", SqlDbType.VarChar).Value = oneWayKN(Request.Form("Password"))
+                        .Parameters.Add("@StudentType", SqlDbType.VarChar).Value = Request.Form("StudentType")
+                        .ExecuteNonQuery()
+                    End With
+
+                    objList.dataType = "pass"
+                    objList.errorMsg = ""
+
+                    Session("StudentId") = StdId
+                Else
+                    objList.dataType = "notpass"
+                    objList.errorMsg = CheckResult
+                End If
+
                 L1.Add(objList)
                 objList = Nothing
-
-                Session("StudentId") = StdId
-
             Catch ex As Exception
-                objList.dataType = "error"
+                objList.dataType = "notpass"
                 objList.errorMsg = ex.Message
                 L1.Add(objList)
                 objList = Nothing
@@ -569,6 +576,65 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+
+        Function CheckDuplicateUser()
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim Duptxt As String = ""
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                cmdMsSql = cmdSQL(cn, "select firstname + Surname as Fullname,MobileNo,username,email,studentType 
+                                        from tblStudent where firstname + Surname = @Fullname or MobileNo = @MobileNo 
+                                        or Username = @Username or email = @Email and IsActive = 1 and ExpiredDate > getdate();")
+
+                With cmdMsSql
+                    .Parameters.Add("@Fullname", SqlDbType.VarChar).Value = Request.Form("Fullname")
+                    .Parameters.Add("@MobileNo", SqlDbType.VarChar).Value = Request.Form("MobileNo")
+                    .Parameters.Add("@Email", SqlDbType.VarChar).Value = Request.Form("Email")
+                    .Parameters.Add("@Username", SqlDbType.VarChar).Value = Request.Form("Username")
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows().Count() > 0 Then
+
+                    If dt.Rows(0)("studentType") <> Request.Form("StudentType") Then
+                        If dt.Rows(0)("Username") = Request.Form("Username") Then
+                            Duptxt &= ",Username"
+                        End If
+                    Else
+                        If dt.Rows(0)("Fullname") = Request.Form("Fullname") Then
+                            Duptxt &= ",Name"
+                        End If
+                        If dt.Rows(0)("MobileNo") = Request.Form("MobileNo") Then
+                            Duptxt &= ",Mobile No."
+                        End If
+                        If dt.Rows(0)("email") = Request.Form("Email") Then
+                            Duptxt &= ",E-Mail"
+                        End If
+                        If dt.Rows(0)("Username") = Request.Form("Username") Then
+                            Duptxt &= ",Username"
+                        End If
+                    End If
+                End If
+
+                If Duptxt = "" Then
+                    Return "pass"
+                Else
+                    Duptxt = Duptxt.Substring(1) & " is already exist!"
+                    Return Duptxt
+                End If
+            Catch ex As Exception
+                Return "error"
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+        End Function
 #End Region
 
 #Region "Activity"
@@ -780,9 +846,9 @@ Namespace Controllers
         End Function
         <AcceptVerbs(HttpVerbs.Post)>
         Function GetProgressbarStatus()
-            Dim L1 As New List(Of clsMain)
+            Dim L1 As New List(Of clsProgressbar)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As New DataTable, dtAnswered As New DataTable
-            Dim objList As New clsMain()
+            Dim objList As New clsProgressbar()
             Try
                 ' ================ Check Permission ================
                 cn = New SqlConnection(sqlCon("Wetest"))
@@ -806,13 +872,14 @@ Namespace Controllers
                 End If
 
 
-                objList.dataType = "success"
-                objList.errorMsg = PercentAnswered
+                objList.Result = "success"
+                objList.AnsweredPercent = PercentAnswered
+                objList.AnsweredAmount = dtAnswered(0)("AnsweredNum").ToString & "/" & CInt(dtAnswered(0)("FullScore")).ToString
                 L1.Add(objList)
                 objList = Nothing
             Catch ex As Exception
-                objList.dataType = "error"
-                objList.errorMsg = ex.Message
+                objList.Result = "error"
+                objList.ResultTxt = ex.Message
                 L1.Add(objList)
                 objList = Nothing
             Finally
@@ -1137,7 +1204,8 @@ Namespace Controllers
                     Session("QuizId") = NewQuizId
                     Session("QuestionAmount") = dt(0)(0)
                     Session("QuizMode") = QuizData.QuizMode
-
+                    Session("QuestionNo") = 1
+                    Session("QuizState") = Nothing
                     QuizData = Nothing
                 End If
             Catch ex As Exception
@@ -2664,6 +2732,10 @@ Namespace Controllers
         Public Class clsOTPStatus
             Inherits clsMain
             Public OSId As String, ReponseTime As String, ResultStatus As String, Resulttxt As String
+        End Class
+        Public Class clsProgressbar
+            Inherits clsMain
+            Public Result As String, ResultTxt As String, AnsweredAmount As String, AnsweredPercent As String
         End Class
 #End Region
 
