@@ -77,9 +77,6 @@ $(document)
      var TestsetName = $(this).text();
         var TestsetId = $(this).attr('id');
         $('#dialogSelect').attr('action', 'focus');
-        //$('#dialogSelect').attr('TestsetName', TestsetName);
-        //$('#dialogSelect').attr('TestsetId', TestsetId);
-
         $('#dialogSelect .ui-text').html('Do you want to start practice ' + TestsetName + ' now!');
         $('#dialogSelect .btnSelected').attr('TestsetId', TestsetId);
         $('#dialogSelect  .btnSelected').attr('TestsetName', TestsetName);
