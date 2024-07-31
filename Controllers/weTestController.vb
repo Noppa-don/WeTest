@@ -148,53 +148,67 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
+                '20240730 เพิ่มการจำกัดจำนวนการส่ง otp ตาม web.config
+                Dim OTPPerDay = ConfigurationManager.AppSettings("OTPPerDay")
+                cmdMsSql = cmdSQL(cn, "select count(osid) + 1 as otpToday from tblOTPStatus where ReferenceId = @StudentID;")
+                With cmdMsSql
+                    .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = Session("StudentID")
+                    .ExecuteNonQuery()
+                End With
 
-                Dim url As String
+                dt = getDataTable(cmdMsSql)
 
-                Dim MyReq As WebRequest
-                Dim MyRes As WebResponse
-                Dim Rec As Stream
-                Dim Reader As StreamReader
-                Dim Content As String
-                Dim Pos As Integer
-                Dim apiKey As String = "whIRYTWJkMat1SiuQBs1vhlw5kJ9ZCAw7PLcp5sNHs8="
-                Dim clientID As String = "6ee932cc-aba1-46b2-9b1e-e2f60dd239de"
-                url = "https://api.send-sms.in.th/api/v2/SendSMS?SenderID=WeTell&Message=" & "OTP code for Wetest : " & OTPNum & "&MobileNumbers=" + MobileNo + "&ApiKey=" & apiKey & "&ClientId=" & clientID & "&is_unicode=true"
-                MyReq = WebRequest.Create(url)
-                MyReq.ContentLength = 0
-                MyReq.Method = "GET"
-                MyReq.ContentType = "application/json; charset=utf-8"
-                MyRes = MyReq.GetResponse
-                Rec = MyRes.GetResponseStream
-                Reader = New StreamReader(Rec, Encoding.UTF8)
-                Content = Reader.ReadToEnd
-                Pos = Content.IndexOf("Success", 0)
-
-                If Pos > 0 Then
-                    cmdMsSql = cmdSQL(cn, "insert into tblOTPStatus(OSId,OTPCode,ReferenceId)values(@OSId,@OTPNum,@StudentID);")
-                    With cmdMsSql
-                        .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = Session("StudentID")
-                        .Parameters.Add("@OTPNum", SqlDbType.VarChar).Value = OTPNum
-                        .Parameters.Add("@OSId", SqlDbType.VarChar).Value = OSId
-                        .ExecuteNonQuery()
-                    End With
-                    Dim OTPAgainTime = ConfigurationManager.AppSettings("OTPAgainTime")
-                    objList.ResultStatus = "success"
-                    objList.ReponseTime = OTPAgainTime
-                    objList.OSId = OSId
-
+                If CInt(dt(0)("otpToday")) > OTPPerDay Then
+                    objList.ResultStatus = "over"
+                    objList.Resulttxt = "You have sent OTP more than " & OTPPerDay & " times per day. Please contact us @italt."
                 Else
-                    cmdMsSql = cmdSQL(cn, "insert into tblOTPStatus(OTPCode,ReferenceId,SendStatus)values(@OTPNum,@StudentID,0)")
-                    With cmdMsSql
-                        .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = Session("StudentID")
-                        .Parameters.Add("@OTPNum", SqlDbType.VarChar).Value = OTPNum
-                        .ExecuteNonQuery()
-                    End With
+                    Dim url As String
+                    Dim MyReq As WebRequest
+                    Dim MyRes As WebResponse
+                    Dim Rec As Stream
+                    Dim Reader As StreamReader
+                    Dim Content As String
+                    Dim Pos As Integer
+                    Dim apiKey As String = "whIRYTWJkMat1SiuQBs1vhlw5kJ9ZCAw7PLcp5sNHs8="
+                    Dim clientID As String = "6ee932cc-aba1-46b2-9b1e-e2f60dd239de"
+                    url = "https://api.send-sms.in.th/api/v2/SendSMS?SenderID=WeTell&Message=" & "OTP code for Wetest : " & OTPNum & "&MobileNumbers=" + MobileNo + "&ApiKey=" & apiKey & "&ClientId=" & clientID & "&is_unicode=true"
+                    MyReq = WebRequest.Create(url)
+                    MyReq.ContentLength = 0
+                    MyReq.Method = "GET"
+                    MyReq.ContentType = "application/json; charset=utf-8"
+                    MyRes = MyReq.GetResponse
+                    Rec = MyRes.GetResponseStream
+                    Reader = New StreamReader(Rec, Encoding.UTF8)
+                    Content = Reader.ReadToEnd
+                    Pos = Content.IndexOf("Success", 0)
 
-                    objList.ResultStatus = "error"
-                    objList.Resulttxt = "Can not Send OTP please try again"
+                    If Pos > 0 Then
+                        cmdMsSql = cmdSQL(cn, "insert into tblOTPStatus(OSId,OTPCode,ReferenceId)values(@OSId,@OTPNum,@StudentID);")
+                        With cmdMsSql
+                            .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = Session("StudentID")
+                            .Parameters.Add("@OTPNum", SqlDbType.VarChar).Value = OTPNum
+                            .Parameters.Add("@OSId", SqlDbType.VarChar).Value = OSId
+                            .ExecuteNonQuery()
+                        End With
+                        Dim OTPAgainTime = ConfigurationManager.AppSettings("OTPAgainTime")
+                        objList.ResultStatus = "success"
+                        objList.ReponseTime = OTPAgainTime
+                        objList.OSId = OSId
 
+                    Else
+                        cmdMsSql = cmdSQL(cn, "insert into tblOTPStatus(OTPCode,ReferenceId,SendStatus)values(@OTPNum,@StudentID,0)")
+                        With cmdMsSql
+                            .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = Session("StudentID")
+                            .Parameters.Add("@OTPNum", SqlDbType.VarChar).Value = OTPNum
+                            .ExecuteNonQuery()
+                        End With
+
+                        objList.ResultStatus = "error"
+                        objList.Resulttxt = "Can not Send OTP. Please try again"
+
+                    End If
                 End If
+
                 L1.Add(objList)
                 objList = Nothing
 
@@ -1119,7 +1133,6 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-
         <AcceptVerbs(HttpVerbs.Post)>
         Function checkAnsweredFromReport()
             Dim L1 As New List(Of clsMain)
@@ -1142,7 +1155,54 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+        '20240730 -- ดึง Logo และ text ตามเมนูที่เข้าทำ Quiz
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function GetQuizLogo()
+            Dim L1 As New List(Of clsQuizData)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As New DataTable, dtQuiz As New DataTable
+            Dim objList As New clsQuizData()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
 
+                cmdMsSql = cmdSQL(cn, "select q.QuizMode,q.QuizName, sum(qs.score) as AnsweredNum,q.FullScore from tblQuizScore qs inner join tblquiz q 
+                                        on qs.QuizId = q.QuizId where qs.QuizId = @QuizId group by q.FullScore,q.QuizMode,q.QuizName;")
+                With cmdMsSql
+                    .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
+                End With
+
+                dtQuiz = getDataTable(cmdMsSql)
+
+                objList.resultType = "success"
+
+                Select Case dtQuiz(0)("QuizMode")
+                    Case "1"
+                        objList.QuizName = "Placement Test"
+                        objList.QuizMode = "logoPT"
+                    Case "2"
+                        objList.QuizName = dtQuiz(0)("QuizName")
+                        objList.QuizMode = "logoP"
+                    Case "3"
+                        objList.QuizName = "Mock-up Exam"
+                        objList.QuizMode = "logoM"
+                End Select
+
+                L1.Add(objList)
+                objList = Nothing
+            Catch ex As Exception
+                objList.resultType = "error"
+                objList.resultMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
         Function CreateNewQuiz(QuizData As clsQuizData) As clsQuizData
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim L1 As New List(Of clsMain)
@@ -2176,6 +2236,12 @@ Namespace Controllers
                                     objList.VocabScorePercent = Format(i("skillPercent"), "N2") & "%"
                             End Select
                         Next
+                    Else
+                        objList.ReadingScorePercent = "0%"
+                        objList.ListeningScorePercent = "0%"
+                        objList.GrammarScorePercent = "0%"
+                        objList.VocabScorePercent = "0%"
+                        objList.SituationScorePercent = "0%"
                     End If
 
                 Else
@@ -2206,7 +2272,7 @@ Namespace Controllers
         Function GetLesson()
             Dim L1 As New List(Of clsPracticeSet)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
-
+            Dim LevelId As String = Request.Form("LevelId")
             Try
                 ' ================ Check Permission ================
                 cn = New SqlConnection(sqlCon("Wetest"))
@@ -2221,13 +2287,14 @@ Namespace Controllers
 
                     Dim Skn As String = skillName(i)
 
-                    cmdMsSql = cmdSQL(cn, "Select row_number() over(order by testsetid)As TestsetNo,TestsetId
-                                            From tblTestset t inner Join tbllevel l on t.LevelId = l.LevelId
-                                            Where testsetname Like '%' + @skillName + '%' and levelno <= (select top 1 levelno from tbllevel l left join tblStudentLevel sl on l.LevelId = sl.LevelId 
-                                            where studentId = @stdId)  and t.isactive = 1 and l.isactive = 1 order by TestsetId")
+                    cmdMsSql = cmdSQL(cn, "select row_number() over(order by t.testsetid)As TestsetNo,t.TestsetId,qrs.QuizId 
+                                            from tblTestset t left join (select TestSetId,q.quizid from tblquiz q inner join tblQuizSession qs on q.QuizId = qs.QuizId 
+                                            where StudentId = @stdId and q.QuizMode = 2)qrs on t.TestsetId = qrs.TestSetId where t.testsetname Like '%' + @skillName + '%'
+                                            and t.levelId = @LevelId and t.isactive = 1 and t.IsPractice = 1;")
                     With cmdMsSql
                         .Parameters.Add("@skillName", SqlDbType.VarChar).Value = Skn
-                        .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
+                        .Parameters.Add("@LevelId", SqlDbType.VarChar).Value = LevelId
+                        .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId")
                         .ExecuteNonQuery()
                     End With
 
@@ -2240,7 +2307,15 @@ Namespace Controllers
                         skilltxt = ""
                         skilltxtShort = ""
                         For j = 0 To dt.Rows.Count() - 1
-                            skilltxt &= "<div id=" & dt.Rows(j)("TestsetId").ToString & " class=""Lessondiv Lesson" & Skn & """>" & dt.Rows(j)("TestsetNo").ToString & "</div>"
+
+                            skilltxt &= "<div id=" & dt.Rows(j)("TestsetId").ToString & " class=""Lessondiv Lesson" & Skn & """>" & dt.Rows(j)("TestsetNo").ToString
+
+                            If dt.Rows(j)("QuizId").ToString <> "" Then
+                                skilltxt &= "<div class='CheckQuiz'></div>"
+                            End If
+
+                            skilltxt &= "</div>"
+
                             If j = 4 Then
                                 skilltxtShort = skilltxt
                             End If
@@ -2265,7 +2340,7 @@ Namespace Controllers
 
             Catch ex As Exception
                 Dim objList As New clsPracticeSet()
-                objList.skillSet = "error"
+                objList.skillSet = "Error"
                 objList.skillTxtAll = ex.Message
                 L1.Add(objList)
                 objList = Nothing
@@ -2305,7 +2380,7 @@ Namespace Controllers
                 objList = Nothing
 
             Catch ex As Exception
-                objList.dataType = "error"
+                objList.dataType = "Error"
                 objList.errorMsg = ex.Message
                 L1.Add(objList)
                 objList = Nothing
@@ -2330,7 +2405,7 @@ Namespace Controllers
                 ' ==================================================
                 'Insert tblTestset tblTestsetQuestionSet tblTestsetQuestionDetail แล้ว return Testset Id ไปส่งให้ทำข้อสอบ practice
 
-                cmdMsSql1 = cmdSQL(cn, "Insert Into tbltestset select @testsetid,'RandomExam',sl.LevelId,0,1,0,0,0,@stdId,1,getdate() 
+                cmdMsSql1 = cmdSQL(cn, "Insert Into tbltestset Select @testsetid,'RandomExam',sl.LevelId,0,1,0,0,0,@stdId,1,getdate() 
                                         from tblstudent s inner join tblStudentLevel sl on s.studentId = sl.StudentId where s.studentId = @stdId;")
                 With cmdMsSql1
                     .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
@@ -2417,8 +2492,50 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
 
         End Function
+        '20240730 -- 20240730 สร้าง Dropdown สำหรับเลือกระดับชั้นที่ต้องการให้แสดงชุดข้อสอบ
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function GetLevel()
+            Dim L1 As New List(Of clsPracticeLevel)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsPracticeLevel()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
 
 
+                cmdMsSql = cmdSQL(cn, "select LevelId,LevelName from tbllevel where levelno <= (select top 1 levelno from tbllevel l 
+                                        left join tblStudentLevel sl on l.LevelId = sl.LevelId where studentId = @stdId order by sl.lastupdate desc) order by levelno desc;")
+                With cmdMsSql
+                    .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
+                    .ExecuteNonQuery()
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                For i = 0 To dt.Rows().Count() - 1
+                    Dim objList2 As New clsPracticeLevel()
+                    objList2.result = "success"
+                    objList2.LevelId = dt.Rows(i)("LevelId").ToString
+                    objList2.LevelName = dt.Rows(i)("LevelName").ToString
+                    L1.Add(objList2)
+                    objList2 = Nothing
+                Next
+
+
+            Catch ex As Exception
+                objList.result = "error"
+                objList.LevelName = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
 #End Region
 
 #Region "Report"
@@ -2706,7 +2823,8 @@ Namespace Controllers
             , Result As String, Msg As String, UserLevel As String, ExpiredDate As String _
             , TotalGoal As String, TotalGoalAmount As String, ReadingGoal As String, ReadingGoalAmount As String, ListeningGoal As String, ListeningGoalAmount As String _
             , VocabGoal As String, VocabGoalAmount As String, GrammarGoal As String, GrammarGoalAmount As String, SituationGoal As String, SituationGoalAmount As String _
-            , TotalGoalDatePercent As String, TotalGoalScorePercent As String, GrammarScorePercent As String, VocabScorePercent As String
+            , TotalGoalDatePercent As String, TotalGoalScorePercent As String, ReadingScorePercent As String, ListeningScorePercent As String, GrammarScorePercent As String _
+            , VocabScorePercent As String, SituationScorePercent As String
         End Class
         Private Class clsItemQAndA
             Inherits clsMain
@@ -2719,6 +2837,10 @@ Namespace Controllers
         Public Class clsPracticeSet
             Inherits clsMain
             Public skillSet As String, skillTxtShort As String, skillTxtAll As String, skillAmount As String
+        End Class
+        Public Class clsPracticeLevel
+            Inherits clsMain
+            Public result As String, LevelId As String, LevelName As String
         End Class
         Public Class clsLeapChoiceData
             Inherits clsMain
