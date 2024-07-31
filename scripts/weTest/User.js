@@ -121,6 +121,7 @@ $(document)
            }
        });
    })
+
 // ========================= Goal ============================= //
 //20240715 -- Set Total Goal
     .on('click', '#TimesUsedPercent', function (e, data) {
