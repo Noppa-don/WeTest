@@ -14,7 +14,7 @@
         <div id="divTopControlBar">
             <div id="divTestsetIcon">
                 <div id="divIcon"></div>
-                <span id="ptLogo">Placement Test</span>
+                <span id="Icontxt"></span>
             </div>
             <div id="divRunningBar">
                 <div id="divIconRun"></div>
