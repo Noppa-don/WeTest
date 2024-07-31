@@ -50,3 +50,31 @@
 #UserType{text-align: center!important;}
 .btnStart{background: url(/images/Wetest/btnStart.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;    width: 125px;
     height: 60px;}
+
+select {border-style: solid;
+    border-radius: 1em;
+    line-height: 30px;
+    padding: 10px;
+    height:  56px;
+    color: #0a3820;
+    border-color: #0a3820;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;
+    width: fit-content;
+    margin: auto;
+    min-width: 20%;
+    border-width: 3px;
+}
+
+#SelectLevel {margin-left: 45px;}
+
+.CheckQuiz {    background: url(/images/Wetest/star.png);
+    float: right;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: left;
+    width: 25px;
+    height: 25px;
+    margin-right: 11px;
+     display: inline-flex;}
