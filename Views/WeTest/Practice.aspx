@@ -28,6 +28,11 @@
         </div>
 
         <div id="LessonType" class="ui-hide">
+            <div id="ChooseLevel" class="flexDiv">
+                choose Level
+             <div id="SelectLevel"></div>
+            </div>
+            
             <div id="skillReading" class="flexDiv skilldiv">
                 <div class="iconReading"></div>
                 <div id="ReadingLesson" class="flexDiv">
@@ -67,7 +72,8 @@
                 <div class="btn btnAmount" id="btn30">30</div>
                 <div class="btn btnAmount" id="btn50">50</div>
                 <div class="btn btnAmount" id="btn100">100</div>
-                <div class="btn btnAmount" id="btnUserType"><input type='text' id='UserType' /></div>
+                <div class="btn btnAmount" id="btnUserType">
+                    <input type='text' id='UserType' /></div>
             </div>
         </div>
         <div id="skillRandom" class="ui-hide">
