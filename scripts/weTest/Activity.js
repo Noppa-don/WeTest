@@ -4,9 +4,8 @@ var sec = 0;
 // ========================= Page Load ======================== //
 $(function () {
     $('div[data-role=page]').page({ theme: 'c', });
-
     checkAnsweredFromReport();
-
+    SetLogo();
 });
 
 // ============================================================ //
@@ -436,6 +435,22 @@ function checkAnsweredFromReport() {
                     QuizTimer()
                     setProgressbar();
                     PageNum = 1
+                }
+            }
+        }
+    });
+}
+//20240730 -- ปรับ Logo ที่ Menu Bar ตามชุดข้อสอบที่กำลังทำ
+function SetLogo() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/GetQuizLogo',
+        success: function (data) {
+
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].resultType == 'success') {
+                    $('#divIcon').addClass(data[i].QuizMode)
+                    $('#Icontxt').html(data[i].QuizName)
                 }
             }
         }
