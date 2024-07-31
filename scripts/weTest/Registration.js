@@ -3,6 +3,7 @@
 // ========================= Page Load ======================== //
 $(function () { $('div[data-role=page]').page({ theme: 'c', }); $('#Firstname').focus(); });
 checkEditMode();
+
 // ============================================================ //
 // ======================= Object Event ======================= //
 $(document)
@@ -118,7 +119,7 @@ $(document)
         UpdateTrialDate();
 
     })
-    .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel', function (e, data) {
+    .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel,#btnOKOTP,.btnAcceptPolicy.btnActive', function (e, data) {
         popupClose($(this).closest('.my-popup'));
     })
     .on('click', '.ui-icon.close ', function (e, data) {
@@ -139,11 +140,27 @@ $(document)
         popupClose($(this).closest('.my-popup'));
         window.location = '/Wetest/User';
     })
-//20240716 -- Browse Slip file
+    //20240716 -- Browse Slip file
     .on('click', '.btnSlipPhoto', function (e, data) {
         event.preventDefault();
         $("#fileSlip").click();
     })
+    //20240730 -- cancelPolicy
+    .on('click', '.btncancelPolicy', function (e, data) {
+        window.location = '/Wetest/User';
+    })
+    .on('click', '.btnAcceptPolicy.btnUnActive', function (e, data) {
+        return 0;
+    })
+   .on('change', '#chkAccept', function (e, data) {
+       if ($('.btnAcceptPolicy').hasClass('btnUnActive')) {
+           $('.btnAcceptPolicy').removeClass('btnUnActive');
+           $('.btnAcceptPolicy').addClass('btnActive');
+       } else {
+           $('.btnAcceptPolicy').removeClass('btnActive');
+           $('.btnAcceptPolicy').addClass('btnUnActive');
+       }
+   })
 // ============================================================ //
 
 // ========================= Function ========================= //
@@ -298,6 +315,13 @@ function sendOTP() {
                 switch (data[i].ResultStatus) {
                     case 'error':
                         console.log(data[i].Resulttxt);
+                        break;
+                    case 'over':
+                        console.log(data[i].Resulttxt);
+                        $('#dialogConfirmOTP').attr('action', 'focus');
+                        $('#dialogConfirmOTP .ui-text').html(data[i].Resulttxt);
+                        popupOpen($('#dialogConfirmOTP'), 99999);
+                        break;
                     case 'success':
                         $('#btnConfirm').attr('OSId', data[i].OSId);
                         var startTime = new Date().getTime()
@@ -313,6 +337,7 @@ function sendOTP() {
                                 $('#btnSendAgain').removeClass('btnUnActive');
                             }
                         }, data[i].ReponseTime);
+                        break;
                 }
             }
         }
@@ -470,6 +495,7 @@ function checkEditMode() {
                     EditMode = true;
                 } else if (data[i].Result == 'add') {
                     EditMode = false;
+                    OpenPolicy();
                 }
             }
         }
@@ -497,3 +523,11 @@ function SaveEditUser() {
         }
     });
 }
+//20240730 -- Open Policy Dialog
+function OpenPolicy() {
+    console.log('OpenPolicy');
+    $('#dialogPolicy').attr('action', 'focus');
+    popupOpen($('#dialogPolicy'), 99999);
+}
+
+
