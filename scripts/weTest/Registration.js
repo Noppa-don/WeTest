@@ -97,7 +97,7 @@ $(document)
     })
 
 // ======================= Payment ======================= //
-     .on('focus keypress', '#txtDiscountCode', function (e, data) {
+    .on('focus keypress', '#txtDiscountCode', function (e, data) {
          $(this).removeClass("InvalidData");
          $('#dialogDiscount .ui-Warning-red').addClass('ui-hide');
      })
@@ -117,7 +117,6 @@ $(document)
     //20240723 -- Update UpdateTrialDate skip
     .on('click', '#btnskip', function (e, data) {
         UpdateTrialDate();
-
     })
     .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel,#btnOKOTP,.btnAcceptPolicy.btnActive', function (e, data) {
         popupClose($(this).closest('.my-popup'));
@@ -152,7 +151,7 @@ $(document)
     .on('click', '.btnAcceptPolicy.btnUnActive', function (e, data) {
         return 0;
     })
-   .on('change', '#chkAccept', function (e, data) {
+    .on('change', '#chkAccept', function (e, data) {
        if ($('.btnAcceptPolicy').hasClass('btnUnActive')) {
            $('.btnAcceptPolicy').removeClass('btnUnActive');
            $('.btnAcceptPolicy').addClass('btnActive');
@@ -160,7 +159,15 @@ $(document)
            $('.btnAcceptPolicy').removeClass('btnActive');
            $('.btnAcceptPolicy').addClass('btnUnActive');
        }
-   })
+    })
+       //20240731 -- เลือก Package
+    .on('click', '.btnChoosePackage', function (e, data) {
+        var PPrice = $(this).attr('price');
+        $('#PackagePrice').html(PPrice);
+        $('.package').addClass("ui-hide");
+        $('.payment').removeClass("ui-hide");
+    })
+
 // ============================================================ //
 
 // ========================= Function ========================= //
@@ -344,6 +351,7 @@ function sendOTP() {
     });
 }
 //20240723 -- ปรับวิธีการตรวจสอบ OTP และเพิ่มการบันทึกการตอบกลับ OTP
+//20240731 -- ตรวจสอบ OTP ผ่านแล้วให้ไปทำ Placement Test
 function CheckAndUpdateOTPStatus(OTPNum, OSId) {
     var post1 = 'OTPNum=' + OTPNum + '&OSId=' + OSId
     $.ajax({
@@ -357,9 +365,13 @@ function CheckAndUpdateOTPStatus(OTPNum, OSId) {
                         console.log(data[i].Resulttxt);
                         break;
                     case 'success':
-                        $('.otp ,.footerOTP').addClass('ui-hide');
-                        $('.payment ,.footerPayment').removeClass('ui-hide');
-                        GetPackagePrice();
+                        //$('.otp ,.footerOTP').addClass('ui-hide');
+                        //$('.payment ,.footerPayment').removeClass('ui-hide');
+                        //GetPackagePrice();
+                        //break;
+                        $('#dialogSelect').attr('action', 'focus');
+                        $('#dialogSelect .ui-text').html('Register Done!<br /> Do you want go to Placement Test now ?.');
+                        popupOpen($('#dialogSelect'), 99999);
                         break;
                     default:
                         $('#dialogConfirm').attr('action', 'focus');
@@ -457,6 +469,7 @@ function CheckDiscount() {
 
 }
 //20240723 -- Update ExpiredDate case กด skip
+//20240731 -- Update แล้วให้ไปหน้าเมนูเลย
 function UpdateTrialDate() {
     $.ajax({
         type: 'POST',
@@ -465,9 +478,7 @@ function UpdateTrialDate() {
             for (var i = 0; i < data.length; i++) {
 
                 if (data[i].dataType == 'success') {
-                    $('#dialogSelect').attr('action', 'focus');
-                    $('#dialogSelect .ui-text').html('Do you want go to Placement Test now ?.');
-                    popupOpen($('#dialogSelect'), 99999);
+                    window.location = '/Wetest/User';
                 } else {
                     $('#dialogDiscount .ui-Warning-red').html(data[i].errorMsg);
                     $('#dialogDiscount .ui-Warning-red').removeClass('ui-hide');
@@ -496,8 +507,12 @@ function checkEditMode() {
                 } else if (data[i].Result == 'add') {
                     EditMode = false;
                     OpenPolicy();
+                } else if (data[i].Result == 'purchess') {
+                    EditMode = false;
+                    $('.package').removeClass('ui-hide');
+                    $('.register').addClass('ui-hide');
                 }
-            }
+            } 
         }
     });
 }
