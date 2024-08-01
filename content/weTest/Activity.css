@@ -3,11 +3,11 @@
 
 #divTopControlBar {width: 100%;height: 100px;background-color: #0a3820;}
 
-#divTestsetIcon {margin-left:15px;width:fit-content;float:left;width: 10%}
+#divTestsetIcon {margin-left:15px;width:fit-content;float:left;width: 10%;height: 100px;}
 
-.logoPT {background: url(/images/Wetest/PlacementTest.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 70px;position: relative;}
-.logoP {background: url(/images/Wetest/Listening.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 70px;position: relative;}
-.logoM {background: url(/images/Wetest/Exam.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 70px;position: relative;}
+.LogoPT {background: url(/images/Wetest/PlacementTest.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 50px;position: relative;}
+.logoP {background: url(/images/Wetest/Listening.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 50px;position: relative;}
+.logoM {background: url(/images/Wetest/Exam.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 50px;position: relative;}
 
 #Icontxt {color:white; text-shadow:none;}
 #divRunningBar {margin-left:15px;float:left;width: 80%;display: flex;padding-top: 15px;}
@@ -111,3 +111,6 @@
 .runningAmount { z-index:999;position: absolute;width: 70%;height: 45px;line-height: 45px;font-size: 25px;text-align: center;color: #ef9f73;}
 
 .divAnswerbar .fistflexdiv,.divAnswerbarAns .fistflexdiv,#divQuestion .fistflexdiv {padding-right: 15px;}
+#divIcon {padding-top: 15px;    height: 50px;}
+.Logovocab{background: url(/images/Wetest/vocab.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 30px;height:30px;margin-left: 5px;cursor:pointer;}
+.Logogrammar{background: url(/images/Wetest/gramma.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 30px;height:30px;margin-left: 5px;cursor:pointer;}
