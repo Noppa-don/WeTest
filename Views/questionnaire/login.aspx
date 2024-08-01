@@ -20,9 +20,9 @@
 		</div>
 		<div name='alert' class='my-popup alert ui-popup-container ui-popup-hidden'>
 			<div class='ui-content ui-body-c ui-corner-all ui-shadow'>
-				<div class='ui-icon warning'></div>
+				<div class='ui-icon Wrong'></div>
 				<div class='ui-text'></div>
-				<button class='ui-btn ui-shadow ui-corner-all ui-mini close'>ตกลง</button>
+				<button class='btn btnActive'>ตกลง</button>
 			</div>
 		</div>
 	</div>
