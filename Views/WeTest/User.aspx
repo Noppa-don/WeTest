@@ -224,5 +224,15 @@
             </div>
         </div>
     </div>
+    <div name='select' id="dialogPurchase" class='my-popup confirm ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon done'></div>
+            <div class='ui-text'>You have not purchased and Wetest  package! <br /><br /> Please press 'Buy now' or 'Later' for exit program.</div>
+            <div class="ui-twoButton">
+                <div class='btn btnCancel btnlater'>Later</div>
+                <div class='btn btnSelected btnbuy'>Buy now</div>
+            </div>
+        </div>
+    </div>
 
 </asp:Content>
