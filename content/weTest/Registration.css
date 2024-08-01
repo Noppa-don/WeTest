@@ -46,8 +46,25 @@
     border-style: solid;
     border-width: 1px;
     border-radius: 10px;font-size: 12px;}
-
 .checktxt {margin-left: 40px;}
 
 #divcheck {margin-top: 30px;
     margin-bottom: 30px;}
+
+.divPackage {    background-color: #0a3820;
+    color: white;width: 10%;
+    height: 330px;
+    border-style: solid;
+    border-radius: 10px;
+    margin-right: 10px;    padding: 10px;    text-align: center;
+}
+.detailpackage {
+    background-color: #ffffff;
+    color: #0a3820;
+    height: 200px;
+    border-style: solid;
+    border-radius: 10px;
+    margin-right: 10px;    padding: 10px;    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.divpackagecon {justify-content: center;}
