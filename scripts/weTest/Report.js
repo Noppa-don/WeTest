@@ -140,7 +140,8 @@ $(document)
  .on('click', '#dialogSelectAgain .btnSelected', function (e, data) {
 
      popupClose($(this).closest('.my-popup'));
-     GotoPracticeAgain($(this).attr('testsetid'));
+     console.log($(this).attr('testsetname'));
+     GotoPracticeAgain($(this).attr('testsetid'), $(this).attr('testsetname'));
  })
  .on('click', '#dialogSelectAgain .btnCancel', function (e, data) {
 
@@ -257,8 +258,8 @@ function SearchReport() {
     });
 }
 //20240722 -- Play Again
-function GotoPracticeAgain(TestsetId) {
-    var post1 = 'TestsetId=' + TestsetId;
+function GotoPracticeAgain(TestsetId, TestsetName) {
+    var post1 = 'TestsetId=' + TestsetId + '&TestsetName=' + TestsetName;
 
     $.ajax({
         type: 'POST',
