@@ -5,7 +5,7 @@ var sec = 0;
 $(function () {
     $('div[data-role=page]').page({ theme: 'c', });
     checkAnsweredFromReport();
-    SetLogo();
+
 });
 
 // ============================================================ //
@@ -436,6 +436,7 @@ function checkAnsweredFromReport() {
                     setProgressbar();
                     PageNum = 1
                 }
+                SetLogo();
             }
         }
     });
@@ -449,7 +450,7 @@ function SetLogo() {
 
             for (var i = 0; i < data.length; i++) {
                 if (data[i].resultType == 'success') {
-                    $('#divIcon').addClass(data[i].QuizMode)
+                    $('#divIcon').html(data[i].QuizMode)
                     $('#Icontxt').html(data[i].QuizName)
                 }
             }
