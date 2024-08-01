@@ -517,10 +517,22 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
+                cmdMsSql = cmdSQL(cn, "select KeyCodeId,ExpiredDate from tblstudent where StudentId = @stdid;")
+                With cmdMsSql
+                    .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentId")
+                End With
 
-                If Session("EditUserData") IsNot Nothing Then
-                    objList = GetUserData(Session("studentid"))
-                    objList.Result = "edit"
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows.Count <> 0 Then
+                    If dt.Rows(0)("KeyCodeId").ToString = "" And dt.Rows(0)("ExpiredDate").ToString = "" Then
+                        objList.Result = "purchess"
+                    Else
+                        If Session("EditUserData") IsNot Nothing Then
+                            objList = GetUserData(Session("studentid"))
+                            objList.Result = "edit"
+                        End If
+                    End If
                 Else
                     objList.Result = "add"
                 End If
@@ -1156,10 +1168,11 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
         '20240730 -- ดึง Logo และ text ตามเมนูที่เข้าทำ Quiz
+        '20240731 -- ปรับการดึง Icon ตามสกิลที่เลือกสร้างชุดข้อสอบ
         <AcceptVerbs(HttpVerbs.Post)>
         Function GetQuizLogo()
             Dim L1 As New List(Of clsQuizData)
-            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As New DataTable, dtQuiz As New DataTable
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As New DataTable, dtQuiz As New DataTable, dtSkill As DataTable
             Dim objList As New clsQuizData()
             Try
                 ' ================ Check Permission ================
@@ -1167,8 +1180,9 @@ Namespace Controllers
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
 
-                cmdMsSql = cmdSQL(cn, "select q.QuizMode,q.QuizName, sum(qs.score) as AnsweredNum,q.FullScore from tblQuizScore qs inner join tblquiz q 
-                                        on qs.QuizId = q.QuizId where qs.QuizId = @QuizId group by q.FullScore,q.QuizMode,q.QuizName;")
+                cmdMsSql = cmdSQL(cn, "select q.QuizMode,q.QuizName, sum(qs.score) as AnsweredNum,q.FullScore,IsStandart from tblQuizScore qs inner join tblquiz q 
+                                        on qs.QuizId = q.QuizId  inner join tblTestset t on q.TestSetId = t.testsetid
+                                        where qs.QuizId = @QuizId group by q.FullScore,q.QuizMode,q.QuizName,IsStandart;")
                 With cmdMsSql
                     .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
                 End With
@@ -1179,20 +1193,50 @@ Namespace Controllers
 
                 Select Case dtQuiz(0)("QuizMode")
                     Case "1"
+                        objList.QuizMode = "<div class=""LogoPT""></div>"
                         objList.QuizName = "Placement Test"
-                        objList.QuizMode = "logoPT"
                     Case "2"
-                        objList.QuizName = dtQuiz(0)("QuizName")
-                        objList.QuizMode = "logoP"
+                        cmdMsSql = cmdSQL(cn, "Select distinct pei.EI_id,pei.EI_Code from tblQuizQuestion qq inner join tblQuestionEvaluationIndexItem qei 
+                                                On qq.QuestionId = qei.Question_Id inner Join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id 
+                                                inner join tblEvaluationIndex pei on ei.Parent_Id = pei.ei_id                                                        
+                                                And pei.EI_Id in('31667BAB-89FF-43B3-806F-174774C8DFBF','5BBD801D-610F-40EB-89CB-5957D05C4A0B',
+                                                'FB4B4A71-B777-4164-BA4D-5C1EA9522226','25DA1FAB-EB20-4B1D-8409-C2FB08FC61B3') where qq.QuizId = @QuizId 
+                                                and qq.isactive = 1 and qei.IsActive = 1;")
+                        With cmdMsSql
+                            .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
+                        End With
+
+                        dtSkill = getDataTable(cmdMsSql)
+
+                        Dim skilltxt As String = ""
+                        For i = 0 To dtSkill.Rows.Count - 1
+                            Select Case dtSkill(i)("Ei_Id").ToString.ToUpper
+                                Case "31667BAB-89FF-43B3-806F-174774C8DFBF"
+                                    skilltxt &= " <div Class='Logovocab'></div>"
+                                Case "5BBD801D-610F-40EB-89CB-5957D05C4A0B"
+                                    skilltxt &= " <div Class='Logogrammar'></div>"
+                            End Select
+                            If i = 1 Then
+                                skilltxt &= "<br />"
+                            End If
+                        Next
+
+                        objList.QuizMode = skilltxt
+                        If dtQuiz(0)("IsStandart").ToString.ToLower = "true" Then
+                            objList.QuizName = dtSkill(0)("EI_Code") & " " & dtQuiz(0)("QuizName")
+                        Else
+                            objList.QuizName = ""
+                        End If
+
                     Case "3"
+                        objList.QuizMode = "<div class=""logoM""></div>"
                         objList.QuizName = "Mock-up Exam"
-                        objList.QuizMode = "logoM"
                 End Select
 
                 L1.Add(objList)
                 objList = Nothing
             Catch ex As Exception
-                objList.resultType = "error"
+                objList.resultType = "Error"
                 objList.resultMsg = ex.Message
                 L1.Add(objList)
                 objList = Nothing
@@ -1215,7 +1259,7 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-                cmdMsSql = cmdSQL(cn, "select sum(a.answerScore) as fullscore from tblanswer a 
+                cmdMsSql = cmdSQL(cn, "Select sum(a.answerScore) As fullscore from tblanswer a 
                                             inner join tblquestion q on a.questionid = q.questionid 
                                             inner join tbltestsetquestionDetail tsqd on q.questionId = tsqd.questionId
                                             inner join tbltestsetquestionSet tsqs on tsqs.tsqsid = tsqd.tsqsid
@@ -1836,8 +1880,6 @@ Namespace Controllers
                 Else
                     Session("studentid") = dt.Rows(0)(0).ToString
                     objList = GetUserData(Session("studentid"))
-                    objList.Result = "success"
-                    objList.Msg = ""
                 End If
 
                 L1.Add(objList)
@@ -1864,8 +1906,6 @@ Namespace Controllers
             Try
                 If Session("studentid") IsNot Nothing Then
                     objList = GetUserData(Session("studentid"))
-                    objList.Result = "success"
-                    objList.Msg = ""
                 Else
                     objList.Result = "sessionlost"
                     objList.Msg = ""
@@ -2125,8 +2165,20 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
+                'check keycode or trial
 
-                cmdMsSql = cmdSQL(cn, "select top 1 s.StudentId,Firstname,Surname,MobileNo,Email,Username,l.LevelShortName,CONVERT (varchar(10),s.ExpiredDate , 103) AS expiredDate
+                cmdMsSql = cmdSQL(cn, "select KeyCodeId,ExpiredDate from tblstudent where StudentId = @stdid")
+                With cmdMsSql
+                    .Parameters.Add("@stdid", SqlDbType.VarChar).Value = stdId
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows(0)("KeyCodeId").ToString = "" And dt.Rows(0)("ExpiredDate").ToString = "" Then
+                    objList.Result = "not"
+                ElseIf dt.Rows(0)("KeyCodeId").ToString = "" And dt.Rows(0)("ExpiredDate").ToString <> "" Then
+                    objList.Result = "trial"
+                    cmdMsSql = cmdSQL(cn, "select top 1 s.StudentId,Firstname,Surname,MobileNo,Email,Username,l.LevelShortName,CONVERT (varchar(10),s.ExpiredDate , 103) AS expiredDate
                                         ,CONVERT(varchar(10), sg.TotalGoalDate, 103) as TotalGoal,datediff(day,getdate(),sg.TotalGoalDate) as TotalGoalAmount
                                         ,CONVERT(varchar(10), sg.ReadingGoal, 103) as ReadingGoal,datediff(day,getdate(),sg.ReadingGoal) as ReadingGoalAmount
                                         ,CONVERT(varchar(10), sg.ListeningGoal, 103) as ListeningGoal,datediff(day,getdate(),sg.ListeningGoal) as ListeningGoalAmount 
@@ -2137,81 +2189,81 @@ Namespace Controllers
                                         inner join tblLevel l on sl.levelId = l.LevelId left join tblstudentGoal sg on s.StudentId = sg.StudentId 
                                         and sg.IsActive = 1 and getdate() <= sg.TotalGoalDate where s.studentId = @stdid and s.IsActive = 1 and sl.IsActive = 1  
                                         order by sl.lastupdate desc;")
-                With cmdMsSql
-                    .Parameters.Add("@stdid", SqlDbType.VarChar).Value = stdId
-                End With
-
-                dt = getDataTable(cmdMsSql)
-
-                If dt.Rows.Count <> 0 Then
-                    objList.UserPhoto = "<div class=""UserPhoto"" style=""background: url(../WetestPhoto/UserPhoto/" & dt(0)("StudentId").ToString & ".png);"">"
-                    objList.Firstname = dt(0)("Firstname").ToString
-                    objList.Surname = dt(0)("Surname").ToString
-                    objList.MobileNo = dt(0)("MobileNo").ToString
-                    objList.Email = dt(0)("Email").ToString
-                    objList.Username = dt(0)("Username").ToString
-                    objList.ExpiredDate = "Your account expire date is : " & dt(0)("expiredDate").ToString
-                    objList.UserLevel = dt(0)("LevelShortName").ToString
-                    objList.TotalGoal = dt(0)("TotalGoal").ToString
-                    objList.TotalGoalAmount = dt.Rows(0)("TotalGoalAmount").ToString
-                    objList.ReadingGoal = dt(0)("ReadingGoal").ToString
-                    objList.ReadingGoalAmount = dt(0)("ReadingGoalAmount").ToString
-                    objList.ListeningGoal = dt(0)("ListeningGoal").ToString
-                    objList.ListeningGoalAmount = dt(0)("ListeningGoalAmount").ToString
-                    objList.VocabGoal = dt(0)("VocabGoal").ToString
-                    objList.VocabGoalAmount = dt(0)("VocabGoalAmount").ToString
-                    objList.GrammarGoal = dt(0)("GrammarGoal").ToString
-                    objList.GrammarGoalAmount = dt(0)("GrammarGoalAmount").ToString
-                    objList.SituationGoal = dt(0)("SituationGoal").ToString
-                    objList.SituationGoalAmount = dt(0)("SituationGoalAmount").ToString
-                End If
-
-                cmdMsSql = cmdSQL(cn, "select (100 - ((DATEDIFF(DAY,getdate(),totalgoaldate)*100) / DATEDIFF(DAY,LastUpdate,totalgoaldate))) as DatePercent
-                                            from tblStudentGoal where StudentId = @stdid and isactive = 1;")
-                With cmdMsSql
-                    .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentid").ToString
-                End With
-
-                dt = getDataTable(cmdMsSql)
-
-                Dim TotalScore As Integer
-                Dim UserScore As Integer
-
-                '-- ส่วนของการ Set Percent เป้าหมาย
-                If dt.Rows.Count <> 0 Then
-                    objList.TotalGoalDatePercent = dt(0)("DatePercent").ToString & "%"
-
-                    cmdMsSql = cmdSQL(cn, "select sum(a.AnswerScore) as TotalScore 
-                                            from tbltestset t inner join tblTestSetQuestionSet ts on t.TestSetId = ts.TestSetId 
-                                            inner join tblTestSetQuestionDetail td on ts.TSQSId = td.TSQSId inner join tblAnswer a on td.QuestionId = a.QuestionId
-                                            where t.LevelId = (select top 1 LevelId from tblstudentLevel order by lastupdate desc) and t.IsActive = 1 
-                                            and ts.IsActive = 1 and td.IsActive = 1 and td.IsActive = 1 and a.IsActive = 1 and t.IsPractice = 1;")
+                    With cmdMsSql
+                        .Parameters.Add("@stdid", SqlDbType.VarChar).Value = stdId
+                    End With
 
                     dt = getDataTable(cmdMsSql)
 
-                    TotalScore = CInt(dt.Rows(0)("TotalScore"))
+                    If dt.Rows.Count <> 0 Then
+                        objList.UserPhoto = "<div class=""UserPhoto"" style=""background: url(../WetestPhoto/UserPhoto/" & dt(0)("StudentId").ToString & ".png);"">"
+                        objList.Firstname = dt(0)("Firstname").ToString
+                        objList.Surname = dt(0)("Surname").ToString
+                        objList.MobileNo = dt(0)("MobileNo").ToString
+                        objList.Email = dt(0)("Email").ToString
+                        objList.Username = dt(0)("Username").ToString
+                        objList.ExpiredDate = "Your account expire date is : " & dt(0)("expiredDate").ToString
+                        objList.UserLevel = dt(0)("LevelShortName").ToString
+                        objList.TotalGoal = dt(0)("TotalGoal").ToString
+                        objList.TotalGoalAmount = dt.Rows(0)("TotalGoalAmount").ToString
+                        objList.ReadingGoal = dt(0)("ReadingGoal").ToString
+                        objList.ReadingGoalAmount = dt(0)("ReadingGoalAmount").ToString
+                        objList.ListeningGoal = dt(0)("ListeningGoal").ToString
+                        objList.ListeningGoalAmount = dt(0)("ListeningGoalAmount").ToString
+                        objList.VocabGoal = dt(0)("VocabGoal").ToString
+                        objList.VocabGoalAmount = dt(0)("VocabGoalAmount").ToString
+                        objList.GrammarGoal = dt(0)("GrammarGoal").ToString
+                        objList.GrammarGoalAmount = dt(0)("GrammarGoalAmount").ToString
+                        objList.SituationGoal = dt(0)("SituationGoal").ToString
+                        objList.SituationGoalAmount = dt(0)("SituationGoalAmount").ToString
+                    End If
 
-                    cmdMsSql = cmdSQL(cn, "select case when sum(q.totalscore) is null then 0 else sum(q.totalscore) end as UserScore 
-                                            from tblQuiz q inner join tblquizSession qs on q.quizId = qs.QuizId 
-                                            inner join tblstudentGoal sg on qs.studentId = sg.StudentId
-                                            where qs.StudentId = @stdid and q.starttime between sg.lastupdate and sg.TotalGoalDate and sg.isactive = 1")
+                    cmdMsSql = cmdSQL(cn, "select (100 - ((DATEDIFF(DAY,getdate(),totalgoaldate)*100) / DATEDIFF(DAY,LastUpdate,totalgoaldate))) as DatePercent
+                                            from tblStudentGoal where StudentId = @stdid and isactive = 1;")
                     With cmdMsSql
                         .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentid").ToString
                     End With
 
                     dt = getDataTable(cmdMsSql)
 
-                    UserScore = CInt(dt.Rows(0)("UserScore"))
+                    Dim TotalScore As Integer
+                    Dim UserScore As Integer
 
-                    Dim SPercent As Decimal = ((UserScore * 100) / TotalScore)
-                    If SPercent <> 0 Then
-                        SPercent = Format(SPercent, "N2")
-                    End If
+                    '-- ส่วนของการ Set Percent เป้าหมาย
+                    If dt.Rows.Count <> 0 Then
+                        objList.TotalGoalDatePercent = dt(0)("DatePercent").ToString & "%"
 
-                    objList.TotalGoalScorePercent = SPercent.ToString & "%"
+                        cmdMsSql = cmdSQL(cn, "select sum(a.AnswerScore) as TotalScore 
+                                            from tbltestset t inner join tblTestSetQuestionSet ts on t.TestSetId = ts.TestSetId 
+                                            inner join tblTestSetQuestionDetail td on ts.TSQSId = td.TSQSId inner join tblAnswer a on td.QuestionId = a.QuestionId
+                                            where t.LevelId = (select top 1 LevelId from tblstudentLevel order by lastupdate desc) and t.IsActive = 1 
+                                            and ts.IsActive = 1 and td.IsActive = 1 and td.IsActive = 1 and a.IsActive = 1 and t.IsPractice = 1;")
 
-                    '20240722 เพิ่มการคำนวน % แบบแยกสกิล
-                    cmdMsSql = cmdSQL(cn, "select ei_id,(userscore * 100)/answerscore as skillPercent from (
+                        dt = getDataTable(cmdMsSql)
+
+                        TotalScore = CInt(dt.Rows(0)("TotalScore"))
+
+                        cmdMsSql = cmdSQL(cn, "select case when sum(q.totalscore) is null then 0 else sum(q.totalscore) end as UserScore 
+                                            from tblQuiz q inner join tblquizSession qs on q.quizId = qs.QuizId 
+                                            inner join tblstudentGoal sg on qs.studentId = sg.StudentId
+                                            where qs.StudentId = @stdid and q.starttime between sg.lastupdate and sg.TotalGoalDate and sg.isactive = 1")
+                        With cmdMsSql
+                            .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentid").ToString
+                        End With
+
+                        dt = getDataTable(cmdMsSql)
+
+                        UserScore = CInt(dt.Rows(0)("UserScore"))
+
+                        Dim SPercent As Decimal = ((UserScore * 100) / TotalScore)
+                        If SPercent <> 0 Then
+                            SPercent = Format(SPercent, "N2")
+                        End If
+
+                        objList.TotalGoalScorePercent = SPercent.ToString & "%"
+
+                        '20240722 เพิ่มการคำนวน % แบบแยกสกิล
+                        cmdMsSql = cmdSQL(cn, "select ei_id,(userscore * 100)/answerscore as skillPercent from (
                                             select EI_Id,case when sum(totalscore) is null then 0 else sum(totalscore) end as UserScore ,answerScore from(
                                             select distinct pei.EI_Id,qz.totalscore,sum(a.AnswerScore) as answerScore
                                             from tblQuiz qz inner join tblquizSession qs on qz.quizId = qs.QuizId 
@@ -2223,32 +2275,32 @@ Namespace Controllers
                                             inner join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id inner join tblEvaluationIndex pei on ei.Parent_Id = pei.ei_id 
                                             and pei.EI_Id in('31667BAB-89FF-43B3-806F-174774C8DFBF','5BBD801D-610F-40EB-89CB-5957D05C4A0B','FB4B4A71-B777-4164-BA4D-5C1EA9522226','25DA1FAB-EB20-4B1D-8409-C2FB08FC61B3')
                                             where qs.StudentId = @stdid and qz.starttime between sg.lastupdate and sg.TotalGoalDate and sg.isactive = 1 group by pei.ei_id,qz.totalscore)a group by ei_id,answerScore)b;")
-                    With cmdMsSql
-                        .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentid").ToString
-                    End With
-                    Dim dtTotal = getDataTable(cmdMsSql)
-                    If dtTotal.Rows.Count <> 0 Then
-                        For Each i In dtTotal.Rows
-                            Select Case i("EI_Id").ToString.ToUpper
-                                Case "5BBD801D-610F-40EB-89CB-5957D05C4A0B"
-                                    objList.GrammarScorePercent = Format(i("skillPercent"), "N2") & "%"
-                                Case "31667BAB-89FF-43B3-806F-174774C8DFBF"
-                                    objList.VocabScorePercent = Format(i("skillPercent"), "N2") & "%"
-                            End Select
-                        Next
+                        With cmdMsSql
+                            .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentid").ToString
+                        End With
+                        Dim dtTotal = getDataTable(cmdMsSql)
+                        If dtTotal.Rows.Count <> 0 Then
+                            For Each i In dtTotal.Rows
+                                Select Case i("EI_Id").ToString.ToUpper
+                                    Case "5BBD801D-610F-40EB-89CB-5957D05C4A0B"
+                                        objList.GrammarScorePercent = Format(i("skillPercent"), "N2") & "%"
+                                    Case "31667BAB-89FF-43B3-806F-174774C8DFBF"
+                                        objList.VocabScorePercent = Format(i("skillPercent"), "N2") & "%"
+                                End Select
+                            Next
+                        Else
+                            objList.ReadingScorePercent = "0%"
+                            objList.ListeningScorePercent = "0%"
+                            objList.GrammarScorePercent = "0%"
+                            objList.VocabScorePercent = "0%"
+                            objList.SituationScorePercent = "0%"
+                        End If
+
                     Else
-                        objList.ReadingScorePercent = "0%"
-                        objList.ListeningScorePercent = "0%"
-                        objList.GrammarScorePercent = "0%"
-                        objList.VocabScorePercent = "0%"
-                        objList.SituationScorePercent = "0%"
+                        objList.TotalGoalDatePercent = "0%"
+                        objList.TotalGoalScorePercent = "0%"
                     End If
-
-                Else
-                    objList.TotalGoalDatePercent = "0%"
-                    objList.TotalGoalScorePercent = "0%"
                 End If
-
             Catch ex As Exception
                 objList.Result = "Error"
                 objList.Msg = ex.Message
@@ -2683,7 +2735,8 @@ Namespace Controllers
                                         "</div><div class='divEndTime reportItem " & ItemClass & "'>" & i("endtime") &
                                         "</div><div Class='divTestsetName reportItem " & ItemClass & "'>" & i("QuizName") &
                                         "</div><div Then Class='divScore reportItem " & ItemClass & "'>" & i("Score") &
-                                        "</div><div class='divAnswered reportItem " & ItemClass & "' QuizId='" & i("quizId").ToString & "'></div><div class='divAgain reportItem' testsetId='" & i("testsetId").ToString & "'></div></div>"
+                                        "</div><div class='divAnswered reportItem " & ItemClass & "' QuizId='" & i("quizId").ToString & "'></div>" &
+                                        "<div Class='divAgain reportItem' testsetId='" & i("testsetId").ToString & "' testsetname='" & i("QuizName").ToString & "'></div></div>"
 
                     Next
                 End If
