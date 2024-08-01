@@ -187,6 +187,10 @@ $(document)
         GoalType = 'Situation'
         Goaldate();
     })
+//20240731 -- ไปหน้าจอแพกเกจ
+    .on('click', '.btnbuy', function (e, data) {
+        window.location = '/Wetest/Registration';
+    })
 
 // ========================================================================================================== //
 
@@ -308,7 +312,8 @@ function SaveGoal() {
 //20240716 -- Set User Data
 function SetUserData(data) {
     for (var i = 0; i < data.length; i++) {
-        if (data[i].Result == 'success') {
+        console.log(data[i].Result);
+        if (data[i].Result == 'trial') {
             $('.login').addClass('ui-hide');
             $('.UserData,.MainMenu').removeClass('ui-hide');
             $('.pagename').html('');
@@ -367,6 +372,9 @@ function SetUserData(data) {
             if ($('.login').hasClass('ui-hide') == true) {
                 window.location = '/Wetest/User';
             }
+        } else if (data[i].Result == 'not') {
+                $('#dialogPurchase').attr('action', 'focus');
+                popupOpen($('#dialogPurchase'), 99999);
         } else {
             $('#dialogAlert').attr('action', 'focus');
             $('#dialogAlert .ui-text').html(data[i].Msg);
