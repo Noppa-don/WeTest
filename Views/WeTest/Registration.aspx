@@ -109,6 +109,8 @@
             </div>
         </div>
 
+
+
         <div class="payment ui-hide">
             <span>You must have a Wetest Key for register<br />
                 <br />
@@ -154,6 +156,36 @@
         </div>
 
     </div>
+
+            <div class="package ui-hide">
+
+            <div class="flexDiv divpackagecon">
+                <div class="divPackage">
+                    <span>Wetest for Practice</span>
+                    <br />
+                    <div class="detailpackage"><span>500 THB</span></div>
+                    <div class="btn btnChoosePackage" id="btnPack1" price="500">Got it</div>
+                </div>
+                <div class="divPackage">
+                    <span>Exam only</span>
+                    <br />
+                    <div class="detailpackage"><span>Price 750 THB</span><br /><br /><span>- 1 User / 1 Exam.</span></div>
+                    <div class="btn btnChoosePackage" id="btnPack2" price="750">Got it</div>
+                </div>
+                <div class="divPackage">
+                    <span>Exam and 3 certificates</span>
+                    <br />
+                    <div class="detailpackage"><span>Price 900 THB</span><br /><br /><span>- 1 User / 1 Exam.</span><br /><span>- 3 certificates.</span></div>
+                    <div class="btn btnChoosePackage" id="btnPack3" price="900">Got it</div>
+                </div>
+                <div class="divPackage">
+                    <span>Exam and 5 certificates</span>
+                    <br />
+                    <div class="detailpackage"><span>Price 1250 THB</span><br /><br /><span>- 1 User / 1 Exam.</span><br /><span>- 5 certificates.</span><br /><span>- Free 1 photo.</span></div>
+                    <div class="btn btnChoosePackage" id="btnPack4" price="1250">Got it</div>
+                </div>
+            </div>
+        </div>
 
     <div class="footer">
         <div class='footerButton footerRegister'>
@@ -221,17 +253,19 @@
             <div id="btnCheckDiscountCode" class='btn btnSelected'>Apply Code</div>
         </div>
     </div>
-     <div name='confirm' id="dialogConfirmSaveUser" class='my-popup alert ui-popup-container ui-popup-hidden'>
+    <div name='confirm' id="dialogConfirmSaveUser" class='my-popup alert ui-popup-container ui-popup-hidden'>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
             <div class='ui-icon done'></div>
             <div class='ui-text'>Update Complete !</div>
             <div id="btnComplete" class='btn btnSelected'>OK</div>
         </div>
     </div>
-    
+
     <div name='policy' id="dialogPolicy" class='my-popup confirm ui-popup-container ui-popup-hidden'>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
-             <div class='ui-text'><h3>Privacy &Policy Wetest</h3></div>
+            <div class='ui-text'>
+                <h3>Privacy &Policy Wetest</h3>
+            </div>
             <div class='ui-paragraph'>
                 <div id="divPolicyEng">
                     <br />
@@ -459,7 +493,9 @@
                 </div>
             </div>
             <div id="divcheck" class="flexDiv">
-                <div class="firstflexdiv"><input type="checkbox" id="chkAccept" /></div><div class="checktxt">I Understand and agree to all of the above terms.</div> 
+                <div class="firstflexdiv">
+                    <input type="checkbox" id="chkAccept" /></div>
+                <div class="checktxt">I Understand and agree to all of the above terms.</div>
             </div>
             <div class="ui-twoButton">
                 <div class='btn btnCancel btncancelPolicy'>No</div>
