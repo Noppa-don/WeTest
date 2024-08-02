@@ -1223,7 +1223,7 @@ Namespace Controllers
 
                         objList.QuizMode = skilltxt
                         If dtQuiz(0)("IsStandart").ToString.ToLower = "true" Then
-                            objList.QuizName = dtSkill(0)("EI_Code") & " " & dtQuiz(0)("QuizName")
+                            objList.QuizName = dtSkill(0)("EI_Code").Replace("Skills ", "") & " " & dtQuiz(0)("QuizName")
                         Else
                             objList.QuizName = ""
                         End If
@@ -1447,6 +1447,7 @@ Namespace Controllers
 
                 For i = 0 To dtAnswer.Rows.Count - 1
                     Dim IsAnswered As String = ""
+                    Dim UserAns As String = ""
                     Dim divName As String = ""
                     If Session("QuizState") IsNot Nothing Then
                         If CInt(dtAnswer(i)("AnswerScore")) > 0 Then
@@ -1457,6 +1458,9 @@ Namespace Controllers
                             IsAnswered = "WrongAns"
                         End If
                         divName = "Ans"
+                        If dtAnswer(i)("AnswerId").ToString = dtAnswer(i)("UserAnswered").ToString Then
+                            UserAns = "UserAns"
+                        End If
                     Else
                         If dtAnswer(i)("AnswerId").ToString = dtAnswer(i)("UserAnswered").ToString Then
                             IsAnswered = "Answered"
@@ -1476,10 +1480,10 @@ Namespace Controllers
                     If i Mod 2 = 0 Then
                         AnsHtml &= "<div Class=""divAnswerRow"">
                                     <div Class=""divAnswerbar" & divName & " flexdiv Left " & IsAnswered & """ QId=""" & QuestionId & """ AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
-                          "<div class=""fistflexdiv"">" & ArrChoicetxt(i) & ".</div><div>" & Aname & "</div></div>"
+                          "<div class=""fistflexdiv " & UserAns & """>" & ArrChoicetxt(i) & ".</div><div>" & Aname & "</div></div>"
                     Else
                         AnsHtml &= "<div Class=""divAnswerbar" & divName & " flexdiv Right " & IsAnswered & """ QId=""" & QuestionId & """ AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
-                            "<div class=""fistflexdiv""> " & ArrChoicetxt(i) & ".</div><div>" & Aname & "</div></div></div>"
+                            "<div class=""fistflexdiv " & UserAns & """> " & ArrChoicetxt(i) & ".</div><div>" & Aname & "</div></div></div>"
                     End If
 
                     objList2.ItemType = "2"
@@ -1847,14 +1851,13 @@ Namespace Controllers
             Return objList
         End Function
 
-
-
 #End Region
 
 #Region "User"
         Function User() As ActionResult
             Return View()
         End Function
+
         <AcceptVerbs(HttpVerbs.Post)>
         Function CheckUserLogin()
             Dim L1 As New List(Of clsStudentData)
@@ -2311,7 +2314,59 @@ Namespace Controllers
             End Try
             Return objList
         End Function
+        '20240801 -- CheckExamAgain
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function CheckExamAgain()
 
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsMain()
+            Try
+
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ================================================== 
+                Dim ExamAgainDay = ConfigurationManager.AppSettings("ExamAgainDay")
+
+                cmdMsSql = cmdSQL(cn, "select top 1  datediff(day,StartTime,getdate()) as LastExamDayAmount from tblQuiz q 
+                                        inner join tblquizsession qs on q.quizid = qs.quizId 
+                                        where q.QuizMode = 3 and qs.StudentId = @StudentID order by q.lastupdate desc")
+                With cmdMsSql
+                    .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = Session("StudentID")
+                    .ExecuteNonQuery()
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows.Count = 0 Or ExamAgainDay = 0 Then
+                    objList.dataType = "ok"
+                    objList.errorMsg = "Do you want to start exam for up level ?"
+                Else
+                    If (CInt(dt.Rows(0)("LastExamDayAmount")) > ExamAgainDay) Then
+                        objList.dataType = "ok"
+                        objList.errorMsg = "Do you want to start exam for up level ?"
+                    Else
+                        objList.dataType = "no"
+                        objList.errorMsg = "You cannot start exam."
+                    End If
+                End If
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+
+        End Function
 
 #End Region
 
@@ -2319,7 +2374,6 @@ Namespace Controllers
         Function Practice() As ActionResult
             Return View()
         End Function
-
         <AcceptVerbs(HttpVerbs.Post)>
         Function GetLesson()
             Dim L1 As New List(Of clsPracticeSet)
@@ -2403,7 +2457,6 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-
         <AcceptVerbs(HttpVerbs.Post)>
         Function CreatePractice()
             Dim L1 As New List(Of clsMain)
@@ -2628,7 +2681,6 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-
         <AcceptVerbs(HttpVerbs.Post)>
         Function SetSeesionAnswered()
             Dim L1 As New List(Of clsMain)
@@ -2700,7 +2752,7 @@ Namespace Controllers
                         sqlBuilder.Append(" AND q.starttime between @StartDate and @EndDate ")
                 End Select
 
-                sqlBuilder.Append("  order by Quizdate,starttime;")
+                sqlBuilder.Append("  order by Quizdate,starttime desc;")
 
 
                 cmdMsSql = cmdSQL(cn, sqlBuilder.ToString())
@@ -2799,7 +2851,7 @@ Namespace Controllers
                         sqlBuilder.Append(" AND q.starttime between @StartDate and @EndDate ")
                 End Select
 
-                sqlBuilder.Append("  order by Quizdate;")
+                sqlBuilder.Append("  order by Quizdate desc;")
 
 
                 cmdMsSql = cmdSQL(cn, sqlBuilder.ToString())
