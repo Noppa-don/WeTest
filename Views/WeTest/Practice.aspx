@@ -27,42 +27,44 @@
             <div class="btn ui-Left" id="btnRandom">Random</div>
         </div>
 
-        <div id="LessonType" class="ui-hide">
-            <div id="ChooseLevel" class="flexDiv">
+        <div id="LessonType">
+            <div id="ChooseLevel" class="flexDiv ui-hide">
                 choose Level
              <div id="SelectLevel"></div>
             </div>
-            
-            <div id="skillReading" class="flexDiv skilldiv">
-                <div class="iconReading"></div>
-                <div id="ReadingLesson" class="flexDiv">
+            <div id="Lessondivcon" class="ui-hide">
+                <div id="skillReading" class="flexDiv skilldiv">
+                    <div class="iconReading"></div>
+                    <div id="ReadingLesson" class="flexDiv">
+                    </div>
+                    <div id="ReadingOther" class="otherButton"></div>
                 </div>
-                <div id="ReadingOther" class="otherButton"></div>
-            </div>
-            <div id="skillListen" class="flexDiv skilldiv">
-                <div class="iconListen"></div>
-                <div id="ListeningLesson" class="flexDiv">
+                <div id="skillListen" class="flexDiv skilldiv">
+                    <div class="iconListen"></div>
+                    <div id="ListeningLesson" class="flexDiv">
+                    </div>
+                    <div id="ListeningOther" class="otherButton"></div>
                 </div>
-                <div id="ListeningOther" class="otherButton"></div>
-            </div>
-            <div id="skillVocab" class="flexDiv skilldiv">
-                <div class="iconVocab"></div>
-                <div id="VocabularyLesson" class="flexDiv">
+                <div id="skillVocab" class="flexDiv skilldiv">
+                    <div class="iconVocab"></div>
+                    <div id="VocabularyLesson" class="flexDiv">
+                    </div>
+                    <div id="VocabularyOther" class="otherButton"></div>
                 </div>
-                <div id="VocabularyOther" class="otherButton"></div>
-            </div>
-            <div id="skillGrammar" class="flexDiv skilldiv">
-                <div class="iconGrammar"></div>
-                <div id="GrammarLesson" class="flexDiv">
+                <div id="skillGrammar" class="flexDiv skilldiv">
+                    <div class="iconGrammar"></div>
+                    <div id="GrammarLesson" class="flexDiv">
+                    </div>
+                    <div id="GrammarOther" class="otherButton"></div>
                 </div>
-                <div id="GrammarOther" class="otherButton"></div>
-            </div>
-            <div id="skillSituation" class="flexDiv skilldiv">
-                <div class="iconSituation"></div>
-                <div id="SituationLesson" class="flexDiv">
+                <div id="skillSituation" class="flexDiv skilldiv">
+                    <div class="iconSituation"></div>
+                    <div id="SituationLesson" class="flexDiv">
+                    </div>
+                    <div id="SituationOther" class="otherButton"></div>
                 </div>
-                <div id="SituationOther" class="otherButton"></div>
             </div>
+
         </div>
 
         <div id="RandomType" class="ui-hide">
@@ -73,7 +75,8 @@
                 <div class="btn btnAmount" id="btn50">50</div>
                 <div class="btn btnAmount" id="btn100">100</div>
                 <div class="btn btnAmount" id="btnUserType">
-                    <input type='text' id='UserType' /></div>
+                    <input type='text' id='UserType' />
+                </div>
             </div>
         </div>
         <div id="skillRandom" class="ui-hide">
