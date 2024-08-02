@@ -34,10 +34,8 @@ $(document)
 
 // ======================= MainMenu =========================== //
     .on('click', '#btnMockUpExam', function (e, data) {
-
-        $('#dialogSelect').attr('action', 'focus');
-        $('#dialogSelect .ui-text').html('Do you want to start exam for up level ?');
-        popupOpen($('#dialogSelect'), 99999);
+        CheckExamAgain();
+       
     })
     .on('click', '#btnPracticeMenu', function (e, data) {
         window.location = '/Wetest/Practice';
@@ -397,6 +395,28 @@ function ClearGoalDate() {
                     $('.btnSetDetailGoal').addClass('unActive');
                     $('#TimesUsedPercent,#PracticeScorePercent').html('0%');
                 }
+            }
+        }
+    });
+}
+//20240801 -- Check Exam Again Day
+function CheckExamAgain() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/CheckExamAgain',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].dataType == 'ok') {
+                    $('#dialogSelect').attr('action', 'focus');
+                    $('#dialogSelect .ui-text').html(data[i].errorMsg);
+                    popupOpen($('#dialogSelect'), 99999);
+                } else {
+                    $('#dialogAlert').attr('action', 'focus');
+                    $('#dialogAlert .ui-text').html(data[i].errorMsg);
+                    popupOpen($('#dialogAlert'), 99999);
+                    
+                }
+           
             }
         }
     });
