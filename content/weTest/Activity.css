@@ -23,7 +23,7 @@
 
 #divQuestion {background-color:white;width:97%; border-radius:0.5em;padding:20px;}
 .divAnswerRow {display:flex;width:100%;margin-top:15px; border-radius:0.5em;}
-.divAnswerbar,.divAnswerbarAns{width:50%;margin-top:5px;background-color:white; border-radius:0.5em;padding:20px;cursor:pointer;}
+.divAnswerbar,.divAnswerbarAns{width:50%;margin-top:5px;background-color:white; border-radius:0.5em;padding:20px;cursor:pointer;line-height: 30px;}
 .divAnswerbar.Left,.divAnswerbarAns.Left {margin-right:5px;}
 .divAnswerbar.Right,.divAnswerbarAns.Right{margin-left:5px;}
 
@@ -114,3 +114,5 @@
 #divIcon {padding-top: 15px;    height: 50px;}
 .Logovocab{background: url(/images/Wetest/vocab.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 30px;height:30px;margin-left: 5px;cursor:pointer;}
 .Logogrammar{background: url(/images/Wetest/gramma.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 30px;height:30px;margin-left: 5px;cursor:pointer;}
+
+.UserAns{background: url(/images/Wetest/circle.png);background-repeat: no-repeat!important;background-size: contain!important;text-align: center; width: 33px;}
