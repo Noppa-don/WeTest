@@ -5,7 +5,6 @@ var sec = 0;
 $(function () {
     $('div[data-role=page]').page({ theme: 'c', });
     checkAnsweredFromReport();
-
 });
 
 // ============================================================ //
@@ -182,7 +181,7 @@ $(document)
      window.location = '/Wetest/User';
  })
 
-// ======================= Dialog ข้อข้าม =========================== //
+// ==== Dialog ข้อข้าม ========================================================================================= //
  .on('click', '#divAllLeapChoice ,#btnAllChoice', function (e, data) {
      GetLeapChoicePanel(1);
  })
@@ -226,7 +225,7 @@ $(document)
     window.location = '/Wetest/Activity';
 })
 
-// ======================= Dialog เฉลย =========================== //
+// ==== Dialog เฉลย ========================================================================================= //
  //20240715 -- แสดง Dialog เฉลย
 .on('click', '#divAllQuestion', function (e, data) {
     GetAnswerChoicePanel(1)
@@ -276,7 +275,22 @@ $(document)
 .on('click', '.AllAnswer', function (e, data) {
     GetAnswerChoicePanel(1);
 })
+ //20240801 -- กดรูปภาพแล้วขยาย
+.on('click', '#divQuestionAndAnswer img', function (e, data) {
+    var img = $(this);
+    var bigImg = $('<img />').css({ 'max-width': '80%', 'max-height': '80%', 'display': 'inline', 'margin-top': '10px' });
+    bigImg.attr({ src: img.attr('src'), alt: img.attr('alt'), title: img.attr('title') });
 
+    var over = $('<div />').text(' ').css({ 'height': '100%', 'width': '100%', 'background': 'rgba(0,0,0,.82)', 'position': 'fixed', 'top': 0, 'left': 0,
+        'opacity': 0.0, 'cursor': 'pointer', 'z-index': 9999, 'text-align': 'center'
+    }).append(bigImg).bind('click', function () {
+        $(this).fadeOut(300, function () {
+            $(this).remove();
+        });
+    }).insertAfter(this).animate({
+        'opacity': 1
+    }, 300);
+});
 // ========================================================================================================== //
 
 // ================================================ Function ================================================ //
@@ -459,3 +473,4 @@ function SetLogo() {
 }
 
 // ========================================================================================================== //
+
