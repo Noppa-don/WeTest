@@ -51,13 +51,7 @@
 #divcheck {margin-top: 30px;
     margin-bottom: 30px;}
 
-.divPackage {    background-color: #0a3820;
-    color: white;width: 10%;
-    height: 330px;
-    border-style: solid;
-    border-radius: 10px;
-    margin-right: 10px;    padding: 10px;    text-align: center;
-}
+.divPackage {background-color: #0a3820; color: white;width: 10%; height: 330px; border-style: solid; border-radius: 10px; margin-right: 10px; padding: 10px; text-align: center;}
 .detailpackage {
     background-color: #ffffff;
     color: #0a3820;
