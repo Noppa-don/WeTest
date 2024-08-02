@@ -9,7 +9,6 @@
     <script src="../scripts/Wetest/jquery.button-audio-player.js" type="text/javascript"></script>
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="MainContent" runat="server">
-
     <div id="divActivity">
         <div id="divTopControlBar">
             <div id="divTestsetIcon">
