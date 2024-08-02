@@ -130,9 +130,11 @@ $(document)
  .on('click', '.divAgain', function (e, data) {
 
      var TestsetId = $(this).attr('testsetId');
+     var TestsetName = $(this).attr('testsetname');
      $('#dialogSelectAgain').attr('action', 'focus');
      $('#dialogSelectAgain .ui-text').html('Do you want to do this practice again ?');
      $('#dialogSelectAgain .btnSelected').attr('testsetid', TestsetId);
+     $('#dialogSelectAgain .btnSelected').attr('testsetname', TestsetName);
 
      popupOpen($('#dialogSelectAgain'), 99999);
 
