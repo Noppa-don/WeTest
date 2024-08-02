@@ -2,7 +2,6 @@
 // ========================= Page Load ======================== //
 $(function () { $('div[data-role=page]').page({ theme: 'c', }); });
 CheckLoginStatus();
-GetLevel();
 // ============================================================ //
 // ======================= Object Event ======================= //
 $(document)
@@ -11,15 +10,15 @@ $(document)
      $('#btnLesson').addClass('btnSelected');
      $('#btnRandom').removeClass('btnSelected');
 
-
-     $('#LessonType').removeClass("ui-hide");
+     $('#LessonType, #ChooseLevel').removeClass("ui-hide");
      $('#RandomType,#skillRandom,.btnStart').addClass("ui-hide");
+     GetLevel();
  })
  .on('click', '#btnRandom', function (e, data) {
      $('#btnLesson').removeClass('btnSelected');
      $('#btnRandom').addClass('btnSelected');
 
-     $('#LessonType').addClass("ui-hide");
+     $('#LessonType, #ChooseLevel, #Lessondivcon').addClass("ui-hide");
      $('#RandomType ,#skillRandom,.btnStart').removeClass("ui-hide");
  })
  .on('click', '#ReadingOther', function (e, data) {
@@ -132,10 +131,7 @@ $(document)
  })
 //20240730 Select Dropdown
  .on('click', '#ddlLevel', function (e, data) {
-     console.log(this.value);
-     var optionSelected = $("option:selected", this);
-     console.log('----');
-     console.log(optionSelected);
+
      var post1 = 'LevelId=' + this.value;
      $.ajax({
          type: 'POST',
@@ -155,6 +151,8 @@ $(document)
                          $('#' + data[i].skillSet + 'Other').removeClass('ui-hide');
                          $('#All' + data[i].skillSet).html(data[i].skillTxtAll);
                      }
+
+                     $('#Lessondivcon').removeClass('ui-hide');
                  }
              }
          }
