@@ -1323,6 +1323,7 @@ Namespace Controllers
             End Try
             Return QuizData
         End Function
+        '20240805 -- เพิ่มการดึงไฟล์เสียงแบบ Slow และคำอธิบาย
         Function GetQuestionAndAnswer()
             Dim objList As New clsItemQAndA()
             Dim L1 As New List(Of clsItemQAndA)
@@ -1390,7 +1391,12 @@ Namespace Controllers
                 objListQuestion.ItemId = dtQuestion(0)("QuestionId").ToString
                 objListQuestion.Itemtxt = QName
 
-                cmdMsSql = cmdSQL(cn, "select MultimediaObjId,MfileName from tblMultimediaObject where ReferenceId = @QuestionId and ReferenceType = 1 and isactive = 1;")
+                '------------------Get MultimediaFile----------------------
+                Dim FullPath As String
+
+                FullPath = GetFullPath(QSetId).Replace("\", "/")
+
+                cmdMsSql = cmdSQL(cn, "select MultimediaObjId,MfileName,MFileExplain from tblMultimediaObject where ReferenceId = @QuestionId and ReferenceType = 1 and MFileLevel = 1 and isactive = 1;")
 
                 With cmdMsSql
                     .Parameters.Add("@QuestionId", SqlDbType.VarChar).Value = QuestionId
@@ -1400,14 +1406,30 @@ Namespace Controllers
 
                 If dtmulti.Rows.Count <> 0 Then
 
-                    Dim FullPath As String
-
-                    FullPath = GetFullPath(QSetId).Replace("\", "/")
-
                     Dim FPath As String = "../file" & FullPath & "/" & dtmulti(0)("MfileName").ToString
 
                     objListQuestion.multiname = dtmulti(0)("MultimediaObjId").ToString
                     objListQuestion.multipath = FPath
+
+                    If dtmulti.Rows(0)("MFileExplain").ToString <> "" Then
+                        objListQuestion.multitxt = dtmulti.Rows(0)("MFileExplain").ToString
+                    End If
+                End If
+
+                cmdMsSql = cmdSQL(cn, "select MultimediaObjId,MfileName from tblMultimediaObject where ReferenceId = @QuestionId and ReferenceType = 1 and MFileLevel = 2 and isactive = 1;")
+
+                With cmdMsSql
+                    .Parameters.Add("@QuestionId", SqlDbType.VarChar).Value = QuestionId
+                End With
+
+                Dim dtmultiSlow As DataTable = getDataTable(cmdMsSql)
+
+                If dtmultiSlow.Rows.Count <> 0 Then
+
+                    Dim FPath As String = "../file" & FullPath & "/" & dtmulti(0)("MfileName").ToString
+
+                    objListQuestion.multiSlowname = dtmulti(0)("MultimediaObjId").ToString
+                    objListQuestion.multiSlowpath = FPath
                 End If
 
 
@@ -1498,10 +1520,6 @@ Namespace Controllers
                     Dim dtAmulti As DataTable = getDataTable(cmdMsSql)
 
                     If dtAmulti.Rows.Count <> 0 Then
-
-                        Dim FullPath As String
-
-                        FullPath = GetFullPath(QSetId).Replace("\", "/")
 
                         Dim FPath As String = "../file" & FullPath & "/" & dtmulti(0)("MfileName").ToString
 
@@ -2315,6 +2333,7 @@ Namespace Controllers
             Return objList
         End Function
         '20240801 -- CheckExamAgain
+        '20240805 -- CheckExamAgain เพิ่มเวลาเล่นได้อีกครั้ง
         <AcceptVerbs(HttpVerbs.Post)>
         Function CheckExamAgain()
 
@@ -2329,7 +2348,7 @@ Namespace Controllers
                 ' ================================================== 
                 Dim ExamAgainDay = ConfigurationManager.AppSettings("ExamAgainDay")
 
-                cmdMsSql = cmdSQL(cn, "select top 1  datediff(day,StartTime,getdate()) as LastExamDayAmount from tblQuiz q 
+                cmdMsSql = cmdSQL(cn, "select top 1  datediff(day,StartTime,getdate()) as LastExamDayAmount,CONVERT (varchar(10), DATEADD(day,5, StartTime), 103) as  DateNextime from tblQuiz q 
                                         inner join tblquizsession qs on q.quizid = qs.quizId 
                                         where q.QuizMode = 3 and qs.StudentId = @StudentID order by q.lastupdate desc")
                 With cmdMsSql
@@ -2348,7 +2367,7 @@ Namespace Controllers
                         objList.errorMsg = "Do you want to start exam for up level ?"
                     Else
                         objList.dataType = "no"
-                        objList.errorMsg = "You cannot start exam."
+                        objList.errorMsg = "You can't make Mock Up Exam. Plase try again at " & dt.Rows(0)("DateNextime") & "."
                     End If
                 End If
                 L1.Add(objList)
@@ -2933,7 +2952,8 @@ Namespace Controllers
         End Class
         Private Class clsItemQAndA
             Inherits clsMain
-            Public ItemType As String, ItemNo As String, ItemId As String, Itemtxt As String, ItemStatus As String, multiname As String, multipath As String
+            Public ItemType As String, ItemNo As String, ItemId As String, Itemtxt As String, ItemStatus As String _
+                , multiname As String, multipath As String, multiSlowname As String, multiSlowpath As String, multitxt As String
         End Class
         Public Class clsQuizData
             Inherits clsMain
