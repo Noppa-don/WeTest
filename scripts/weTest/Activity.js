@@ -1,6 +1,7 @@
 ﻿var OTPNum,counterId, PageNum, AllPage;
 
 var sec = 0;
+var MultiFileCount = 0;
 // ========================= Page Load ======================== //
 $(function () {
     $('div[data-role=page]').page({ theme: 'c', });
@@ -290,7 +291,27 @@ $(document)
     }).insertAfter(this).animate({
         'opacity': 1
     }, 300);
-});
+})
+ //20240805 -- กดฟังไฟล์เสียง multiQuestion
+.on('click', '#multiQuestion', function (e, data) {
+    MultiFileCount += 1
+    if (MultiFileCount == 3) {
+        MultiFileCount = 0
+        $('#multiQuestion').addClass('ui-hide');
+        $('multiSlowQuestion').removeClass('ui-hide');
+    }
+})
+ //20240805 -- กดฟังไฟล์เสียง multiSlowQuestion
+.on('click', '#multiSlowQuestion', function (e, data) {
+    MultiFileCount += 1
+    if (MultiFileCount == 3) {
+        MultiFileCount = 0
+        $('#multiSlowQuestion').addClass('ui-hide');
+        $('multitxt').removeClass('ui-hide');
+    }
+})
+
+
 // ========================================================================================================== //
 
 // ================================================ Function ================================================ //
@@ -314,8 +335,17 @@ function GetQuestionAndAnswer(ActionType, QuestionNo) {
                     $('#divQuestion').attr('Qid', data[i].ItemId);
 
                     if (data[i].multiname != null) {
-                        $('#divQuestion').append("<br><br><div id='" + data[i].multiname + "'></div>");
-                        setbuttonAudioPlayer(data[i].multiname, data[i].multipath);
+                        $('#divQuestion').append("<br><br><div id='multiQuestion' mid='" + data[i].multiname + "'></div>");
+                        setbuttonAudioPlayer('multiQuestion', data[i].multipath);
+                    }
+
+                    if (data[i].multiSlowname != null) {
+                        console.log(data[i].multiSlowname);
+                        $('#divQuestion').append("<br><br><div id='multiSlowQuestion' class='ui-hide' mid='" + data[i].multiSlowname + "'></div>");
+                        setbuttonAudioPlayer('multiSlowQuestion', data[i].multiSlowpath);
+                    }
+                    if (data[i].multitxt != null) {
+                        $('#divQuestion').append("<br><br><div id='multitxt' class='ui-hide'>" + data[i].multitxt + "</div>");
                     }
 
                     if (data[i].ItemStatus == 'first') { $('.btnBack').addClass("UnActive"); }
@@ -391,6 +421,7 @@ function GetLeapChoicePanel(ChoiceMode) {
 }
 //20240726 -- เพิ่มการตั้งค่าไม่ให้เล่นไฟล์ซ้ำ
 function setbuttonAudioPlayer(divname, FilePath) {
+    console.log(divname);
     $('#' + divname).buttonAudioPlayer({
         type: 'default',
         loop:false,
