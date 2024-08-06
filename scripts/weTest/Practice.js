@@ -198,21 +198,53 @@ function CheckLoginStatus() {
     });
 }
 //20240730 สร้าง Dropdown สำหรับเลือกระดับชั้นที่ต้องการให้แสดงชุดข้อสอบ
+//20240805 ปรับการแสดงผล
 function GetLevel() {
-  
+
     $.ajax({
         type: 'POST',
         url: '/weTest/GetLevel',
         success: function (data) {
             var selectHTML = "";
             if (data[0].result == 'success') {
-                selectHTML = '<select id="ddlLevel">';
+                if (data.length > 1) {
+                    selectHTML = '<select id="ddlLevel">';
 
-                for (var i = 0; i < data.length; i++) {
-                    selectHTML += "<option value='" + data[i].LevelId + "'>" + data[i].LevelName + "</option>";
+                    for (var i = 0; i < data.length; i++) {
+                        selectHTML += "<option value='" + data[i].LevelId + "'>" + data[i].LevelName + "</option>";
+                    }
+                    selectHTML += "</select>";
+                    $('#SelectLevel').html(selectHTML);
                 }
-                selectHTML += "</select>";
-                $('#SelectLevel').html(selectHTML);
+
+            } else {
+                for (var i = 0; i < data.length; i++) {
+                    var post1 = 'LevelId=' + data[i].LevelId;
+                    $.ajax({
+                        type: 'POST',
+                        url: '/weTest/GetLesson',
+                        data: post1,
+                        success: function (data) {
+                            for (var i = 0; i < data.length; i++) {
+                                if (data[i].skillSet == 'error') {
+                                    //console.log(data[i].skillTxtAll);
+                                } else {
+
+                                    $('#' + data[i].skillSet + 'Lesson').html(data[i].skillTxtShort);
+
+                                    if (data[i].skillAmount < 6) {
+                                        $('#' + data[i].skillSet + 'Other').addClass('ui-hide');
+                                    } else {
+                                        $('#' + data[i].skillSet + 'Other').removeClass('ui-hide');
+                                        $('#All' + data[i].skillSet).html(data[i].skillTxtAll);
+                                    }
+
+                                    $('#Lessondivcon').removeClass('ui-hide');
+                                }
+                            }
+                        }
+                    });
+                }
             }
         }
     });
