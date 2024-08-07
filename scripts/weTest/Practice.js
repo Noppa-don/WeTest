@@ -10,7 +10,7 @@ $(document)
      $('#btnLesson').addClass('btnSelected');
      $('#btnRandom').removeClass('btnSelected');
 
-     $('#LessonType, #ChooseLevel').removeClass("ui-hide");
+     $('#LessonType').removeClass("ui-hide");
      $('#RandomType,#skillRandom,.btnStart').addClass("ui-hide");
      GetLevel();
  })
@@ -24,31 +24,37 @@ $(document)
  .on('click', '#ReadingOther', function (e, data) {
 
      $('#PracticeType,#LessonType').addClass('ui-hide');
-     $('#AllReading,.footer').removeClass('ui-hide');
+     $('#AllReading,.footer,.AllPracticeSet').removeClass('ui-hide');
 
  })
  .on('click', '#ListeningOther', function (e, data) {
 
      $('#PracticeType,#LessonType').addClass('ui-hide');
-     $('#AllListening,.footer').removeClass('ui-hide');
+     $('#AllListening,.footer,.AllPracticeSet').removeClass('ui-hide');
  })
  .on('click', '#GrammarOther', function (e, data) {
 
      $('#PracticeType,#LessonType').addClass('ui-hide');
-     $('#AllGrammar,.footer').removeClass('ui-hide');
+     $('#AllGrammar,.footer,.AllPracticeSet').removeClass('ui-hide');
  })
  .on('click', '#SituationOther', function (e, data) {
 
      $('#PracticeType,#LessonType').addClass('ui-hide');
-     $('#AllSituation,.footer').removeClass('ui-hide');
+     $('#AllSituation,.footer,.AllPracticeSet').removeClass('ui-hide');
  })
  .on('click', '#VocabularyOther', function (e, data) {
 
      $('#PracticeType,#LessonType').addClass('ui-hide');
-     $('#AllVocabulary,.footer').removeClass('ui-hide');
+     $('#AllVocabulary,.footer,.AllPracticeSet').removeClass('ui-hide');
  })
  .on('click', '.btnBack', function (e, data) {
-     window.location = '/Wetest/User';
+     if ($('.AllPracticeSet').hasClass('ui-hide')) {
+         window.location = '/Wetest/User';
+     } else {
+         $('.AllPracticeSet').addClass('ui-hide');
+         $('#PracticeType,#LessonType').removeClass("ui-hide");
+     }
+    
  })
  .on('click', '.Lessondiv', function (e, data) {
 
@@ -215,10 +221,11 @@ function GetLevel() {
                     }
                     selectHTML += "</select>";
                     $('#SelectLevel').html(selectHTML);
-                }
+                    $('#ChooseLevel').removeClass('ui-hide');
+                } else {
+                
+                    for (var i = 0; i < data.length; i++) {
 
-            } else {
-                for (var i = 0; i < data.length; i++) {
                     var post1 = 'LevelId=' + data[i].LevelId;
                     $.ajax({
                         type: 'POST',
@@ -246,11 +253,11 @@ function GetLevel() {
                     });
                 }
             }
+
+            } 
         }
     });
 }
-
-
 
 
 
