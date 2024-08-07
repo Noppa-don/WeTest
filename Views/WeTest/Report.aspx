@@ -45,12 +45,12 @@
                         <label for="rdbChooseDate" class="rdb">Choose from date</label><input type="radio" name="radio-1" id="rdbChooseDate" />
                     </div>
                     <div>
-                        <input type='text' id='StartDate' />
+                        <input type='text' class="filterdate ui-hide" id='StartDate' />
                     </div>
                     <div class="calendarlogo unActive" id="btnStartDate"></div>
 
                     <div>
-                        <input type='text' id='EndDate' />
+                        <input type='text' class="filterdate ui-hide" id='EndDate' />
                     </div>
                     <div class="calendarlogo unActive" id="btnEndDate"></div>
                 </div>
