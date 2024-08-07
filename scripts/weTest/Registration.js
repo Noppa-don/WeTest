@@ -95,15 +95,20 @@ $(document)
             CheckAndUpdateOTPStatus(ttb, OSId)
         }
     })
-
+    .on('click', '.footerOTP .btnBack', function (e, data) {
+        EditMode = true;
+        $('.register').removeClass('ui-hide');
+        $('#captionConfirmPassword, #captionPassword,.txtData,#btnStudent, #btnOther,.footerRegister').removeClass('ui-hide');
+        $('.spnData,.otp,.footerOTP').addClass('ui-hide');
+    })
 // ======================= Payment ======================= //
     .on('focus keypress', '#txtDiscountCode', function (e, data) {
          $(this).removeClass("InvalidData");
          $('#dialogDiscount .ui-Warning-red').addClass('ui-hide');
      })
-
     .on('click', '#btnCheckKey', function (e, data) {
-        CheckKeycode();
+        //CheckKeycode();
+        popupOpen($('#dialogDiscount'), 99999);
     })
     .on('click', '#btnPayment', function (e, data) {
         $(this).addClass("ui-hide");
@@ -160,14 +165,19 @@ $(document)
            $('.btnAcceptPolicy').addClass('btnUnActive');
        }
     })
-       //20240731 -- เลือก Package
+    //20240731 -- เลือก Package
     .on('click', '.btnChoosePackage', function (e, data) {
         var PPrice = $(this).attr('price');
         $('#PackagePrice').html(PPrice);
-        $('.package').addClass("ui-hide");
-        $('.payment').removeClass("ui-hide");
+        $('.package,.footerRegister').addClass("ui-hide");
+        $('.payment,.footerPayment').removeClass("ui-hide");
     })
-
+    .on('click', 'btnSendSlip', function (e, data) {
+        var PPrice = $(this).attr('price');
+        $('#PackagePrice').html(PPrice);
+        $('.package,.footerRegister').addClass("ui-hide");
+        $('.payment,.footerPayment').removeClass("ui-hide");
+    })
 // ============================================================ //
 
 // ========================= Function ========================= //
@@ -246,12 +256,15 @@ function UploadStudentPhoto() {
                     switch (data[i].dataType) {
                         case 'error':
                             console.log(data[i].errorMsg);
-                        case 'success':
-                            console.log(data[i].errorMsg);
-                            $('.otp').removeClass('ui-hide');
-                            $('.register').addClass('ui-hide');
-                            $('.footerRegister').addClass('ui-hide');
+                            break;
+                        case 'nototp':
+                            $('.otp,.footerOTP').removeClass('ui-hide');
+                            $('.register,.footerRegister').addClass('ui-hide');
                             sendOTP();
+                            break;
+                        case 'success':
+                            window.location = '/Wetest/User';
+                            break;
                     }
                 }
             }
@@ -268,12 +281,15 @@ function UploadStudentPhoto() {
                     switch (data[i].dataType) {
                         case 'error':
                             console.log(data[i].errorMsg);
-                        case 'success':
-                            console.log(data[i].errorMsg);
-                            $('.otp').removeClass('ui-hide');
-                            $('.register').addClass('ui-hide');
-                            $('.footerRegister').addClass('ui-hide');
+                            break;
+                        case 'nototp':
+                            $('.otp,.footerOTP').removeClass('ui-hide');
+                            $('.register,.footerRegister').addClass('ui-hide');
                             sendOTP();
+                            break;
+                        case 'success':
+                            window.location = '/Wetest/User';
+                            break;
                     }
                 }
             }
@@ -288,9 +304,8 @@ function UploadSlip() {
     var files = $("#fileSlip").get(0).files;
 
     if (files.length > 0) {
-        console.log(0);
         data.append("UploadedImage", files[0]);
-
+        $('#SlipName').val(files[0].name);
         $.ajax({
             type: 'POST',
             url: '/weTest/UploadSlipFile',
@@ -488,6 +503,25 @@ function UpdateTrialDate() {
         }
     });
 }
+//20240731 -- Update แล้วให้ไปหน้าเมนูเลย
+function UpdateWaitApproveSlip() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/UpdateWaitApproveSlip',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+
+                if (data[i].dataType == 'success') {
+                    window.location = '/Wetest/User';
+                } else {
+                    $('#dialogDiscount .ui-Warning-red').html(data[i].errorMsg);
+                    $('#dialogDiscount .ui-Warning-red').removeClass('ui-hide');
+                }
+
+            }
+        }
+    });
+}
 //20240723 -- Check EditMode And Get User Data
 function checkEditMode() {
     $.ajax({
@@ -529,9 +563,9 @@ function SaveEditUser() {
                 switch (data[i].dataType) {
                     case 'error':
                         console.log(data[i].errorMsg);
+                        break;
                     case 'success':
-                        $('#dialogConfirmSaveUser').attr('action', 'focus');
-                        popupOpen($('#dialogConfirmSaveUser'), 99999);
+                        UploadStudentPhoto()
                         break;
                 }
             }
