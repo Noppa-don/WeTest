@@ -194,11 +194,11 @@
         </div>
         <div class='footerButton footerOTP ui-hide'>
             <div class="Imagebtn btnBack"></div>
-            <div class="Imagebtn btnNext"></div>
         </div>
         <div class='footerButton footerPayment  ui-hide'>
             <div class="Imagebtn btnBack"></div>
-            <div class="btn btnSelected" id="btnDiscount">Have discount?</div>
+            <div class="btn btnSelected ui-hide" id="btnDiscount">Have discount?</div>
+            <div class="Imagebtn btnSendSlip"></div>
         </div>
     </div>
 
