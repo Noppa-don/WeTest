@@ -46,6 +46,7 @@ $(document)
          $('.calendarlogo').addClass('unActive');
          $('#StartDate').val('');
          $('#EndDate').val('');
+         $('.filterdate').addClass('ui-hide');
          if (typeof IsLesson != 'undefined') { $('#btnSearch').removeClass('unActive') }
      }
  })
@@ -55,6 +56,7 @@ $(document)
          $('.calendarlogo').addClass('unActive');
          $('#StartDate').val('');
          $('#EndDate').val('');
+         $('.filterdate').addClass('ui-hide');
          if (typeof IsLesson != 'undefined') { $('#btnSearch').removeClass('unActive') }
      }
  })
@@ -62,6 +64,7 @@ $(document)
      if (this.checked) {
          selectedStartDate = 'manual';
          $('.calendarlogo').removeClass('unActive');
+         $('.filterdate').removeClass('ui-hide');
          $('#btnSearch').addClass('unActive')
      }
  
