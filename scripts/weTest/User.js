@@ -1,4 +1,5 @@
 ﻿var xobjClick, xobjAlert, OTPNum, selectedGoalDate, formatSelectedGoalDate, GoalType;
+var totalGoalAmount = 365;
 // ========================= Page Load ====================================================================== //
 $(function () {
     $('div[data-role=page]').page({ theme: 'c', });
@@ -119,6 +120,14 @@ $(document)
            }
        });
    })
+//20240731 -- ไปหน้าจอแพกเกจ
+    .on('click', '.btnbuy', function (e, data) {
+        window.location = '/Wetest/Registration';
+    })
+//20240731 -- ไปหน้าจอแพกเกจ
+    .on('click', '.btnlater', function (e, data) {
+        UpdateTrialDate();
+})
 
 // ========================= Goal ============================= //
 //20240715 -- Set Total Goal
@@ -185,10 +194,7 @@ $(document)
         GoalType = 'Situation'
         Goaldate();
     })
-//20240731 -- ไปหน้าจอแพกเกจ
-    .on('click', '.btnbuy', function (e, data) {
-        window.location = '/Wetest/Registration';
-    })
+
 
 // ========================================================================================================== //
 
@@ -242,7 +248,6 @@ function CheckLoginStatus() {
 }
 //20240715 -- Set Datepicker And Open Dialog
 function Goaldate() {
-
     $('.btnSaveGoal').addClass('unActive');
 
     if (GoalType == 'total') {
@@ -250,9 +255,10 @@ function Goaldate() {
     } else {
         $('#spnGoalName').html('Set goal for ' + GoalType);
     }
-
+    console.log('+'+totalGoalAmount+'D');
     var options = $.extend(global.datepickerOption, {
         minDate: 1,
+        maxDate: totalGoalAmount,
         onSelect: function () {
             var selectedDate = $("#SelectGoalDate").datepicker("getDate");
             selectedGoalDate = selectedDate.getFullYear() + '-' + (selectedDate.getMonth() + 1) + '-' + selectedDate.getDate();
@@ -293,9 +299,9 @@ function SaveGoal() {
                         $('#' + GoalType + 'PS').removeClass('PS');
 
                     }
-
+                    if (GoalType == 'total') {totalGoalAmount = data[i].TotalGoalAmount}
+                  
                     popupClose($('#dialogGoalDate').closest('.my-popup'));
-
 
                 } else {
                     $('#dialogAlert').attr('action', 'focus');
@@ -417,6 +423,22 @@ function CheckExamAgain() {
                     
                 }
            
+            }
+        }
+    });
+}
+//20240806 -- Update trial date เมื่อกด Later
+function UpdateTrialDate() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/UpdateTrialDate',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+
+                if (data[i].dataType == 'success') {
+                    window.location = '/Wetest/User';
+                }
+
             }
         }
     });
