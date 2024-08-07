@@ -124,8 +124,8 @@
                 You can use Mobile Banking for this.</span>
             <br />
             <br />
-            <div class="btn" id="btnPayment">Payment</div>
-            <div class="Imagebtn btnQR ui-hide"></div>
+            <div class="btn ui-hide" id="btnPayment">Payment</div>
+            <div class="Imagebtn btnQR"></div>
             <br />
             <br />
 
@@ -143,7 +143,7 @@
                     <br />
                     <div class="flexDiv">
                         <input type='text' id='SlipName' />
-                        <input type='file' id='fileSlip' class="ui-hide" />
+                        <input type='file' id='fileSlip' class="ui-hide notborder" />
                         <div class='Imagebtn btnSlipPhoto'></div>
                     </div>
                 </div>
@@ -197,8 +197,7 @@
         </div>
         <div class='footerButton footerPayment  ui-hide'>
             <div class="Imagebtn btnBack"></div>
-            <div class="btn btnSelected ui-hide" id="btnDiscount">Have discount?</div>
-            <div class="Imagebtn btnSendSlip"></div>
+            <div class="btn btnSelected" id="btnConfirmPayment">Confirm Payment</div>
         </div>
     </div>
 
@@ -260,7 +259,13 @@
             <div id="btnComplete" class='btn btnSelected'>OK</div>
         </div>
     </div>
-
+    <div name='confirm' id="dialogConfirmUploadSlip" class='my-popup alert ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon done'></div>
+            <div class='ui-text'>Upload Your slip done Please wait for Approve and you can use trial version</div>
+            <div id="btnGotoMainMenu" class='btn btnSelected'>OK</div>
+        </div>
+    </div>
     <div name='policy' id="dialogPolicy" class='my-popup confirm ui-popup-container ui-popup-hidden'>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
             <div class='ui-text'>
