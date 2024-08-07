@@ -67,11 +67,15 @@ Namespace Controllers
         End Function
         <AcceptVerbs(HttpVerbs.Post)>
         Function UploadStudentPhoto()
-
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim L1 As New List(Of clsMain)
             Dim objList As New clsMain()
             Dim fileName As String, fiInfo As FileInfo, filePath As String, oriImage As Image, reImage As Image
             Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
                 For i = 0 To Request.Files.Count - 1
                     Dim file As HttpPostedFileBase = Request.Files(i)
                     If Not file Is Nothing Then
@@ -96,7 +100,24 @@ Namespace Controllers
                     End If
                 Next
 
-                objList.dataType = "success"
+                cmdMsSql = cmdSQL(cn, "Select os.ResponseStatus from tblstudent s inner join tblOTPStatus os 
+                                        On s.StudentId = os.ReferenceId And s.studentid = @StdId")
+                With cmdMsSql
+                    .Parameters.Add("@StdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows.Count <> 0 Then
+                    If dt.Rows(0)("ResponseStatus") = 1 Then
+                        objList.dataType = "success"
+                    Else
+                        objList.dataType = "nototp"
+                    End If
+                Else
+                    objList.dataType = "nototp"
+                End If
+
                 objList.errorMsg = ""
                 L1.Add(objList)
                 objList = Nothing
@@ -111,16 +132,37 @@ Namespace Controllers
         End Function
         <AcceptVerbs(HttpVerbs.Post)>
         Function UploadDummyStudentPhoto()
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim L1 As New List(Of clsMain)
             Dim objList As New clsMain()
             Try
-
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
                 Dim copyToPath = Server.MapPath("~/WetestPhoto/UserPhoto/" & Session("StudentId").ToString.ToLower & ".png")
                 Dim fullFilePath = Server.MapPath("~/WetestPhoto/UserPhoto/dummyUser.png")
 
                 System.IO.File.Copy(fullFilePath, copyToPath)
 
-                objList.dataType = "success"
+                cmdMsSql = cmdSQL(cn, "Select os.ResponseStatus from tblstudent s inner join tblOTPStatus os 
+                                        On s.StudentId = os.ReferenceId And s.studentid = @StdId")
+                With cmdMsSql
+                    .Parameters.Add("@StdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows.Count <> 0 Then
+                    If dt.Rows(0)("ResponseStatus") = 3 Then
+                        objList.dataType = "success"
+                    Else
+                        objList.dataType = "nototp"
+                    End If
+                Else
+                    objList.dataType = "nototp"
+                End If
+
                 objList.errorMsg = ""
                 L1.Add(objList)
                 objList = Nothing
@@ -149,7 +191,7 @@ Namespace Controllers
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
                 '20240730 เพิ่มการจำกัดจำนวนการส่ง otp ตาม web.config
-                Dim OTPPerDay = ConfigurationManager.AppSettings("OTPPerDay")
+                Dim OTPPerDay = Getconfig("OTPPerDay")
                 cmdMsSql = cmdSQL(cn, "select count(osid) + 1 as otpToday from tblOTPStatus where ReferenceId = @StudentID;")
                 With cmdMsSql
                     .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = Session("StudentID")
@@ -190,7 +232,7 @@ Namespace Controllers
                             .Parameters.Add("@OSId", SqlDbType.VarChar).Value = OSId
                             .ExecuteNonQuery()
                         End With
-                        Dim OTPAgainTime = ConfigurationManager.AppSettings("OTPAgainTime")
+                        Dim OTPAgainTime = Getconfig("OTPAgainTime")
                         objList.ResultStatus = "success"
                         objList.ReponseTime = OTPAgainTime
                         objList.OSId = OSId
@@ -238,7 +280,7 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-                Dim OTPAgainTime = ConfigurationManager.AppSettings("OTPResponseTime")
+                Dim OTPAgainTime = Getconfig("OTPResponseTime")
 
                 cmdMsSql = cmdSQL(cn, "select OTPCode,DATEDIFF(ms,sendtime,getdate()) as SendTime from tblOTPStatus where OSId = @OSId and isactive = 1;")
 
@@ -302,7 +344,7 @@ Namespace Controllers
         Function GetPackagePrice()
             Dim L1 As New List(Of clsMain)
             Dim objList As New clsMain()
-            Dim PackagePrice = ConfigurationManager.AppSettings("PackagePrice")
+            Dim PackagePrice = Getconfig("PackagePrice")
             objList.dataType = PackagePrice
             L1.Add(objList)
             objList = Nothing
@@ -377,7 +419,7 @@ Namespace Controllers
                 Else
                     objList.dataType = "Success"
                     Dim NetPrice As String = "0"
-                    Dim PackagePrice = ConfigurationManager.AppSettings("PackagePrice")
+                    Dim PackagePrice = Getconfig("PackagePrice")
 
                     If dt.Rows(0)("DiscountType").ToString = "1" Then
                         NetPrice = (CInt(PackagePrice) - CInt(dt.Rows(0)("DiscountAmount"))).ToString
@@ -449,7 +491,7 @@ Namespace Controllers
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim objList As New clsMain()
             Dim stdId As String = Session("studentid").ToString
-            Dim TrialTime = ConfigurationManager.AppSettings("TrialTime")
+            Dim TrialTime = Getconfig("TrialTime")
             Try
                 ' ================ Check Permission ================
                 cn = New SqlConnection(sqlCon("Wetest"))
@@ -478,6 +520,44 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+        '20240806 -- Update ExpiredDate case Upload Slip แล้ว
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function UpdateWaitApproveSlip()
+
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsMain()
+            Dim stdId As String = Session("studentid").ToString
+            Dim TrialTime = Getconfig("ApproveSlipDay")
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                cmdMsSql = cmdSQL(cn, "update tblStudent set ExpiredDate =  DATEADD(HH, 168, getdate()) where StudentId = @stdId;")
+
+                With cmdMsSql
+                    .Parameters.Add("@stdId", SqlDbType.VarChar).Value = stdId
+                    .ExecuteNonQuery()
+                End With
+
+                objList.dataType = "success"
+                L1.Add(objList)
+                objList = Nothing
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
         <AcceptVerbs(HttpVerbs.Post)>
         Function SaveFirstPlacementTest()
             Dim L1 As New List(Of clsMain)
@@ -579,7 +659,6 @@ Namespace Controllers
                     cmdMsSql = cmdSQL(cn, "Update Password = @Password where studentId = @StudentID;")
                     With cmdMsSql
                         .Parameters.Add("@Password", SqlDbType.VarChar).Value = oneWayKN(Request.Form("Password"))
-                        .ExecuteNonQuery()
                     End With
                 End If
 
@@ -660,6 +739,31 @@ Namespace Controllers
                 If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
                 If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
             End Try
+        End Function
+        '20240806 -- Getconfig from db
+        Function Getconfig(ConfigName As String)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+                cmdMsSql = cmdSQL(cn, "select SettingValue from tblsetting where SettingName = @ConfigName and isactive = 1;")
+                With cmdMsSql
+                    .Parameters.Add("@ConfigName", SqlDbType.VarChar).Value = ConfigName
+                    .ExecuteNonQuery()
+                End With
+
+                dt = getDataTable(cmdMsSql)
+                Return dt(0)(0)
+            Catch ex As Exception
+
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+
         End Function
 #End Region
 
@@ -1812,7 +1916,7 @@ Namespace Controllers
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
 
-                Dim PassExamScore As Integer = CInt(ConfigurationManager.AppSettings("PassExamPercent"))
+                Dim PassExamScore As Integer = CInt(Getconfig("PassExamPercent"))
 
                 cmdMsSql = cmdSQL(cn, "Select q.PercentScore,t.LevelId from tblquiz q inner join tbltestset t on q.TestSetId = t.TestsetId  where q.quizid = @QuizId")
 
@@ -2302,6 +2406,9 @@ Namespace Controllers
                         Dim dtTotal = getDataTable(cmdMsSql)
                         If dtTotal.Rows.Count <> 0 Then
                             For Each i In dtTotal.Rows
+
+                                If i("skillPercent") Is Nothing Then i("skillPercent") = "0"
+
                                 Select Case i("EI_Id").ToString.ToUpper
                                     Case "5BBD801D-610F-40EB-89CB-5957D05C4A0B"
                                         objList.GrammarScorePercent = Format(i("skillPercent"), "N2") & "%"
@@ -2346,7 +2453,7 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ================================================== 
-                Dim ExamAgainDay = ConfigurationManager.AppSettings("ExamAgainDay")
+                Dim ExamAgainDay = Getconfig("ExamAgainDay")
 
                 cmdMsSql = cmdSQL(cn, "select top 1  datediff(day,StartTime,getdate()) as LastExamDayAmount,CONVERT (varchar(10), DATEADD(day,5, StartTime), 103) as  DateNextime from tblQuiz q 
                                         inner join tblquizsession qs on q.quizid = qs.quizId 
