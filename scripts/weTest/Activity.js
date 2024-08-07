@@ -15,17 +15,25 @@ $(document)
 
  .on('focus', '.txtDetail,.ui-select', function (e, data) { $(this).removeClass("InvalidData") })
  //20240726 -- เพิ่มการกดหยุดไฟล์เสียง
+ //20240807 -- ปรับการกดหยุดไฟล์เสียง
  .on('click', '.btnNext', function (e, data) {
-     if ($('.bap-icon').children().hasClass('bap-icon-on')) { $('.bap-btn').click()}
-    
+     if ($('.bap-icon').children().hasClass('bap-icon-on')) {
+         $('.bap-btn').click()
+         if ($('.bap-icon').children().hasClass('bap-icon-on')) { $('.bap-btn').click() }
+     }
      if ($('.btnNext').hasClass('UnActive') == false) {
          GetQuestionAndAnswer('next', '');
          setProgressbar();
      }
+
  })
 //20240726 -- เพิ่มการกดหยุดไฟล์เสียง
+//20240807 -- เพิ่มการกดหยุดไฟล์เสียง
  .on('click', '.btnBack', function (e, data) {
-     if ($('.bap-icon').children().hasClass('bap-icon-on')) { $('.bap-btn').click()}
+     if ($('.bap-icon').children().hasClass('bap-icon-on')) {
+         $('.bap-btn').click()
+         if ($('.bap-icon').children().hasClass('bap-icon-on')) { $('.bap-btn').click() }
+     }
 
      if ($('.btnBack').hasClass('UnActive') == false) {
          GetQuestionAndAnswer('back', '');
