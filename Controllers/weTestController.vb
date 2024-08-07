@@ -444,6 +444,63 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+        '20240807 -- check slip upload amount and update expired date
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function CheckSlipAmount()
+            Dim L1 As New List(Of clsMain)
+            Dim objList As New clsMain()
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+                cmdMsSql = cmdSQL(cn, "select top 1 RegisterAmount from tblregister where studentId = @stdid order by lastupdate desc;")
+                With cmdMsSql
+                    .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("StudentId")
+                    .ExecuteNonQuery()
+                End With
+                dt = getDataTable(cmdMsSql)
+                Dim UploadAmount As Integer
+                If dt.Rows.Count <> 0 Then
+                    UploadAmount = CInt(dt.Rows(0)(0)) + 1
+                Else
+                    UploadAmount = 1
+                End If
+
+                Dim ConfigAmount As Integer = CInt(Getconfig("ApproveSlipAmount"))
+
+                If UploadAmount <= ConfigAmount Then
+                    cmdMsSql = cmdSQL(cn, "insert into tblRegister(studentId,PackageId,RegisterStatus,RegisterAmount,DiscountId,
+                                            NetPrice) values(@stdid,'1702F1EF-8FD5-443A-A68D-4599BC9F9E54',1,@RegisAmount,
+                                            @DiscountId,@NetPrice);")
+                    With cmdMsSql
+                        .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("StudentId")
+                        .Parameters.Add("@RegisAmount", SqlDbType.VarChar).Value = UploadAmount.ToString
+                        .Parameters.Add("@DiscountId", SqlDbType.VarChar).Value = Request.Form("DiscountId")
+                        .Parameters.Add("@NetPrice", SqlDbType.VarChar).Value = Request.Form("NetPrice")
+                        .ExecuteNonQuery()
+                    End With
+                    objList.dataType = "success"
+                    objList.errorMsg = ""
+
+                Else
+                    objList.dataType = "limit"
+                    objList.errorMsg = ""
+                End If
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
+
         <AcceptVerbs(HttpVerbs.Post)>
         Function UploadSlipFile()
 
