@@ -92,7 +92,7 @@
         </div>
     </div>
 
-    <div class='wrapper'>
+    <div class='wrapper AllPracticeSet ui-hide'>
         <div id="AllReading" class="ui-hide"></div>
         <div id="AllListening" class="ui-hide"></div>
         <div id="AllGrammar" class="ui-hide"></div>
