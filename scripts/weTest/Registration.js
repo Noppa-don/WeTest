@@ -76,7 +76,8 @@ $(document)
             image = new Image();
             image.onload = function () {
                 src = this.src;
-                UploadSlip();
+                var filesUpload = $("#fileSlip").get(0).files;
+                $('#SlipName').val(filesUpload[0].name);
                 e.preventDefault();
             }
         };
@@ -108,7 +109,8 @@ $(document)
      })
     .on('click', '#btnCheckKey', function (e, data) {
         //CheckKeycode();
-        popupOpen($('#dialogDiscount'), 99999);
+        //popupOpen($('#dialogDiscount'), 99999);
+        CheckDiscount();
     })
     .on('click', '#btnPayment', function (e, data) {
         $(this).addClass("ui-hide");
@@ -172,11 +174,17 @@ $(document)
         $('.package,.footerRegister').addClass("ui-hide");
         $('.payment,.footerPayment').removeClass("ui-hide");
     })
-    .on('click', 'btnSendSlip', function (e, data) {
-        var PPrice = $(this).attr('price');
+    .on('click', '#btnConfirmPayment', function (e, data) {
+        //var PPrice = $(this).attr('price');
         $('#PackagePrice').html(PPrice);
-        $('.package,.footerRegister').addClass("ui-hide");
-        $('.payment,.footerPayment').removeClass("ui-hide");
+        //$('.package,.footerRegister').addClass("ui-hide");
+        //$('.payment,.footerPayment').removeClass("ui-hide");
+        console.log($('#SlipName').val())
+        if ($('#SlipName').val() == '') { $('#SlipName').addClass("InvalidData"); } else {
+            UploadSlip();
+            window.location = '/Wetest/User';
+        }
+       
     })
 // ============================================================ //
 
@@ -305,7 +313,7 @@ function UploadSlip() {
 
     if (files.length > 0) {
         data.append("UploadedImage", files[0]);
-        $('#SlipName').val(files[0].name);
+        var post1 = 'DiscountCode=' + $('#txtKeyCode').val();
         $.ajax({
             type: 'POST',
             url: '/weTest/UploadSlipFile',
@@ -317,6 +325,9 @@ function UploadSlip() {
                     switch (data[i].dataType) {
                         case 'error':
                             console.log(data[i].errorMsg);
+                            break;
+                        case 'success':
+
                     }
                 }
             }
@@ -455,8 +466,8 @@ function GotoQuiz() {
 
 }
 function CheckDiscount() {
-    if ($('#txtDiscountCode').val() == '') { $('#txtDiscountCode').addClass("InvalidData"); } else {
-        var post1 = 'DiscountCode=' + $('#txtDiscountCode').val();
+    if ($('#txtKeyCode').val() == '') { $('#txtKeyCode').addClass("InvalidData"); } else {
+        var post1 = 'DiscountCode=' + $('#txtKeyCode').val();
         $.ajax({
             type: 'POST',
             url: '/weTest/CheckDiscount',
@@ -465,16 +476,18 @@ function CheckDiscount() {
                 for (var i = 0; i < data.length; i++) {
 
                     if (data[i].dataType == 'Success') {
-                        $('#txtDiscountCode').val('');
+                        $('#txtKeyCode').val('');
                         $('#dialogDiscount .ui-Warning-red').addClass('ui-hide');
                         $('#spnWarningDiscount').removeClass('ui-hide')
                         $('#PackagePrice').html(data[i].errorMsg);
-                        popupClose($('#dialogDiscount'), 99999);
+                        //popupClose($('#dialogDiscount'), 99999);
 
                     } else {
-                        $('#dialogDiscount .ui-Warning-red').html(data[i].errorMsg);
-                        $('#dialogDiscount .ui-Warning-red').removeClass('ui-hide');
-
+                        //$('#dialogDiscount .ui-Warning-red').html(data[i].errorMsg);
+                        //$('#dialogDiscount .ui-Warning-red').removeClass('ui-hide');
+                        $('#dialogConfirm').attr('action', 'focus');
+                        $('#dialogConfirm .ui-text').html(data[i].errorMsg);
+                        popupOpen($('#dialogConfirm'), 99999);
                     }
 
                 }
@@ -503,7 +516,7 @@ function UpdateTrialDate() {
         }
     });
 }
-//20240731 -- Update แล้วให้ไปหน้าเมนูเลย
+//20240806 -- Update วันที่รอ Approvee Slip
 function UpdateWaitApproveSlip() {
     $.ajax({
         type: 'POST',
@@ -578,5 +591,7 @@ function OpenPolicy() {
     $('#dialogPolicy').attr('action', 'focus');
     popupOpen($('#dialogPolicy'), 99999);
 }
+
+
 
 
