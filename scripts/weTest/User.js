@@ -1,5 +1,6 @@
 ﻿var xobjClick, xobjAlert, OTPNum, selectedGoalDate, formatSelectedGoalDate, GoalType;
-var totalGoalAmount = 365;
+var totalGoalAmount;
+var ExpiredDateAmount;
 // ========================= Page Load ====================================================================== //
 $(function () {
     $('div[data-role=page]').page({ theme: 'c', });
@@ -36,14 +37,14 @@ $(document)
 // ======================= MainMenu =========================== //
     .on('click', '#btnMockUpExam', function (e, data) {
         CheckExamAgain();
-       
+
     })
     .on('click', '#btnPracticeMenu', function (e, data) {
         window.location = '/Wetest/Practice';
     })
 //20240715 -- Menu Goal
     .on('click', '#btnGoalMenu', function (e, data) {
-        $('.MainMenu').addClass('ui-hide');
+        $('.MainMenu,.Assignment').addClass('ui-hide');
         $('.Goal,.footerGoal').removeClass('ui-hide');
         $('.pagename').html('- Goal');
     })
@@ -69,26 +70,26 @@ $(document)
     })
 //20240723 Confirm Logout
     .on('click', '.btnConfirmLogout', function (e, data) {
-       $.ajax({
-           type: 'POST',
-           url: '/weTest/Logout',
-           success: function (data) {
-               for (var i = 0; i < data.length; i++) {
-                   if (data[i].Result == 'success') {
-                       popupClose($('#dialogLogout').closest('.my-popup'));
-                       $('.UserData,.UserMenu,.MainMenu,.Goal,.DetailGoal,.footer,.UserPhoto').addClass('ui-hide');
-                       $('.login').removeClass('ui-hide');
-                       $('#userName,#userPass').val('');
-                   }
-               }
-           }
-       });
-   })
+        $.ajax({
+            type: 'POST',
+            url: '/weTest/Logout',
+            success: function (data) {
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].Result == 'success') {
+                        popupClose($('#dialogLogout').closest('.my-popup'));
+                        $('.UserData,.UserMenu,.MainMenu,.Goal,.DetailGoal,.footer,.UserPhoto,.Assignment').addClass('ui-hide');
+                        $('.login').removeClass('ui-hide');
+                        $('#userName,#userPass').val('');
+                    }
+                }
+            }
+        });
+    })
 //20240723 Delete Account
    .on('click', '.btnAccountMenu.DeleteAccount', function (e, data) {
-        $('#dialogDeleteAccount').attr('action', 'focus');
-        popupOpen($('#dialogDeleteAccount'), 99999);
-    })
+       $('#dialogDeleteAccount').attr('action', 'focus');
+       popupOpen($('#dialogDeleteAccount'), 99999);
+   })
 //20240723 Confirm Delete Account
    .on('click', '.btnConfirmDelete', function (e, data) {
        $.ajax({
@@ -127,7 +128,12 @@ $(document)
 //20240731 -- ไปหน้าจอแพกเกจ
     .on('click', '.btnlater', function (e, data) {
         UpdateTrialDate();
-})
+    })
+//20240813 -- ไปหน้าจอ Assignment
+    .on('click', '.Assignment', function (e, data) {
+        window.location = '/Wetest/Assignment';
+    })
+
 
 // ========================= Goal ============================= //
 //20240715 -- Set Total Goal
@@ -140,7 +146,7 @@ $(document)
         popupClose($(this).closest('.my-popup'));
     })
 //20240715 -- Save Goal
-    .on('click', '#btnSaveGoal', function (e, data) {
+    .on('click', '#btnSaveGoal,#btnSaveSkillGoal', function (e, data) {
         SaveGoal();
     })
 //20240716 -- Go to set detail GOAL
@@ -151,7 +157,7 @@ $(document)
 //20240716 -- Back Button
     .on('click', '.btnBack', function (e, data) {
         if ($('.Goal').hasClass('ui-hide') == false) {
-            $('.MainMenu').removeClass('ui-hide');
+            $('.MainMenu,.Assignment').removeClass('ui-hide');
             $('.Goal,.footerGoal').addClass('ui-hide');
             $('.pagename').html('');
         } else if ($('.DetailGoal').hasClass('ui-hide') == false) {
@@ -172,27 +178,27 @@ $(document)
 //20240716 -- Set Reading Goal
     .on('click', '#ReadingTime', function (e, data) {
         GoalType = 'Reading'
-        Goaldate();
+        SkillGoaldate();
     })
 //20240716 -- Set Listening Goal
     .on('click', '#ListeningTime', function (e, data) {
         GoalType = 'Listening'
-        Goaldate();
+        SkillGoaldate();
     })
 //20240716 -- Set Vocab Goal
     .on('click', '#VocabTime', function (e, data) {
         GoalType = 'Vocabulary'
-        Goaldate();
+        SkillGoaldate();
     })
 //20240716 -- Set Grammar Goal
     .on('click', '#GrammarTime', function (e, data) {
         GoalType = 'Grammar'
-        Goaldate();
+        SkillGoaldate();
     })
 //20240716 -- Set Situation Goal
     .on('click', '#SituationTime', function (e, data) {
         GoalType = 'Situation'
-        Goaldate();
+        SkillGoaldate();
     })
 
 
@@ -247,18 +253,15 @@ function CheckLoginStatus() {
     });
 }
 //20240715 -- Set Datepicker And Open Dialog
+//20240813 -- Set Max Date
 function Goaldate() {
-    $('.btnSaveGoal').addClass('unActive');
-
-    if (GoalType == 'total') {
-        $('#spnGoalName').html('Set goal from date');
-    } else {
-        $('#spnGoalName').html('Set goal for ' + GoalType);
-    }
-    console.log('+'+totalGoalAmount+'D');
+    $('#btnSaveGoal').addClass('unActive');
+    var MaxDate
+    $('#spnGoalName').html('Set goal from date');
+    MaxDate = ExpiredDateAmount
     var options = $.extend(global.datepickerOption, {
         minDate: 1,
-        maxDate: totalGoalAmount,
+        maxDate: '"+' + MaxDate + 'd"',
         onSelect: function () {
             var selectedDate = $("#SelectGoalDate").datepicker("getDate");
             selectedGoalDate = selectedDate.getFullYear() + '-' + (selectedDate.getMonth() + 1) + '-' + selectedDate.getDate();
@@ -275,6 +278,34 @@ function Goaldate() {
 
     $('#dialogGoalDate').attr('action', 'focus');
     popupOpen($('#dialogGoalDate'), 99999);
+
+}
+//20240813 -- เพิ่ม Function สำหรัขบสร้าง calendar ของแต่ละ Skill
+function SkillGoaldate() {
+    $('#btnSaveSkillGoal').addClass('unActive');
+    var MaxDate
+    $('#spnGoalName').html('Set goal for ' + GoalType);
+    MaxDate = totalGoalAmount
+    console.log(MaxDate);
+    var options = $.extend(global.datepickerOption, {
+        minDate: 1,
+        maxDate: '"+' + MaxDate + 'd"',
+        onSelect: function () {
+            var selectedDate = $("#SelectSkillGoalDate").datepicker("getDate");
+            selectedGoalDate = selectedDate.getFullYear() + '-' + (selectedDate.getMonth() + 1) + '-' + selectedDate.getDate();
+            formatSelectedGoalDate = selectedDate.getDate() + '/' + (selectedDate.getMonth() + 1) + '/' + selectedDate.getFullYear();
+
+            $('#spnShowSkilldate').html('Your Goal Date : ' + formatSelectedGoalDate)
+            $('#btnSaveSkillGoal').removeProp("goaltype");
+            $('#btnSaveSkillGoal').attr('goaltype', GoalType);
+            $('#btnSaveSkillGoal').removeClass('unActive');
+        }
+    });
+
+    $("#SelectSkillGoalDate").datepicker(options);
+
+    $('#dialogSkillGoalDate').attr('action', 'focus');
+    popupOpen($('#dialogSkillGoalDate'), 99999);
 
 }
 //20240715 -- Save Goal Date
@@ -299,10 +330,11 @@ function SaveGoal() {
                         $('#' + GoalType + 'PS').removeClass('PS');
 
                     }
-                    if (GoalType == 'total') {totalGoalAmount = data[i].TotalGoalAmount}
-                  
-                    popupClose($('#dialogGoalDate').closest('.my-popup'));
+                    if (GoalType == 'total') { totalGoalAmount = data[i].TotalGoalAmount }
 
+                    popupClose($('#dialogGoalDate').closest('.my-popup'));
+                    popupClose($('#dialogSkillGoalDate').closest('.my-popup'));
+                    totalGoalAmount = data[i].TotalGoalAmount
                 } else {
                     $('#dialogAlert').attr('action', 'focus');
                     $('#dialogAlert .ui-text').html(data[i].Msg);
@@ -319,11 +351,13 @@ function SetUserData(data) {
         console.log(data[i].Result);
         if (data[i].Result == 'trial') {
             $('.login').addClass('ui-hide');
-            $('.UserData,.MainMenu').removeClass('ui-hide');
+            $('.UserData,.MainMenu,.Assignment').removeClass('ui-hide');
             $('.pagename').html('');
             //20240716 -- ดึงข้อมูล User เพิ่มเติม
             $('.UserNameandLevel').html('Welcome, ' + data[i].Firstname + '<br />' + data[i].UserLevel);
             $('.expiredDate').html(data[i].ExpiredDate)
+            console.log(data[i].ExpiredDateAmount);
+            ExpiredDateAmount = data[i].ExpiredDateAmount;
             $('.UserData').append(data[i].UserPhoto);
             $('#UserLevel').html('Your Level : ' + data[i].UserLevel + '<br />');
 
@@ -332,6 +366,7 @@ function SetUserData(data) {
                 $('#lastestBigGOAL').html('Your lastest A BIG GOAL : ' + data[i].TotalGoal + ' ( Time left ' + data[i].TotalGoalAmount + ' days )');
                 $('.btnSetDetailGoal').removeClass('unActive');
                 $('.btnClear').removeClass('ui-hide');
+                totalGoalAmount = data[i].TotalGoalAmount
             } else {
                 $('.btnClear').addClass('ui-hide');
             }
@@ -375,10 +410,11 @@ function SetUserData(data) {
         } else if (data[i].Result == 'sessionlost') {
             if ($('.login').hasClass('ui-hide') == true) {
                 window.location = '/Wetest/User';
+                $('.Assignment').addClass('ui-hide');
             }
         } else if (data[i].Result == 'not') {
-                $('#dialogPurchase').attr('action', 'focus');
-                popupOpen($('#dialogPurchase'), 99999);
+            $('#dialogPurchase').attr('action', 'focus');
+            popupOpen($('#dialogPurchase'), 99999);
         } else {
             $('#dialogAlert').attr('action', 'focus');
             $('#dialogAlert .ui-text').html(data[i].Msg);
@@ -420,9 +456,9 @@ function CheckExamAgain() {
                     $('#dialogAlert').attr('action', 'focus');
                     $('#dialogAlert .ui-text').html(data[i].errorMsg);
                     popupOpen($('#dialogAlert'), 99999);
-                    
+
                 }
-           
+
             }
         }
     });
