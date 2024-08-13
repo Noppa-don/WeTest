@@ -38,7 +38,7 @@
             </div>
         </div>
     </div>
-
+    <div class="Assignment ui-hide"></div>
     <div class='wrapper'>
         <div class="login">
             <div>
@@ -190,6 +190,21 @@
             <br />
             <br />
             <div id="btnSaveGoal" class="btnSaveGoal unActive"></div>
+
+        </div>
+    </div>
+     <div name='GoalDate' id="dialogSkillGoalDate" class='my-popup confirm ui-popup-container ui-popup-hidden'>
+        <div class='ui-icon close'></div>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <span id="spnSkillGoalName"></span>
+            <br />
+            <br />
+            <div id="SelectSkillGoalDate"></div>
+            <br />
+            <span id="spnShowSkilldate"></span>
+            <br />
+            <br />
+            <div id="btnSaveSkillGoal" class="btnSaveGoal unActive"></div>
 
         </div>
     </div>
