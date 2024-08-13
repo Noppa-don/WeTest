@@ -1,3 +1,19 @@
 ﻿.ui-page {background-color: #f7eee9;}
 .wrapper {margin-top: 130px;}
 .btnBack {background: url(/images/Wetest/Previous.png);}
+
+.redAssignment {background: url(/images/Wetest/RedBook.png); width:60px; height: 60px;background-repeat: no-repeat;
+                background-size: contain;background-position: left;padding-right: 20px;}
+.orangeAssignment {background: url(/images/Wetest/OrangeBook.png); width:60px; height: 60px;background-repeat: no-repeat;
+                   background-size: contain;background-position: left;padding-right: 20px;}
+.greenAssignment {background: url(/images/Wetest/GreenBook.png); width:60px; height: 60px;background-repeat: no-repeat;
+                  background-size: contain;background-position: left;padding-right: 20px;}
+
+.redContainer {height: 70px; border-bottom: #ec2027; border-bottom-style: solid; border-bottom-width: 4px; margin-bottom: 30px;width: 82%;padding-left: 10px;}
+.orangeContainer {height: 70px; border-bottom: #f79421; border-bottom-style: solid; border-bottom-width: 4px; margin-bottom: 30px;width: 82%;padding-left: 10px;}
+.greenContainer {height: 70px; border-bottom: #7cc245; border-bottom-style: solid; border-bottom-width: 4px; margin-bottom: 30px;width: 82%;padding-left: 10px;}
+
+.redTypeName {color:#ec2027;width:18%;}
+.orangeTypeName {color:#f79421;width:18%;}
+.greenTypeName {color:#7cc245;width:18%;}
+ 
