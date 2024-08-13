@@ -23,28 +23,28 @@ $(document)
  })
  .on('click', '#ReadingOther', function (e, data) {
 
-     $('#PracticeType,#LessonType').addClass('ui-hide');
+     $('#PracticeType,#LessonType,.AllPSkill').addClass('ui-hide');
      $('#AllReading,.footer,.AllPracticeSet').removeClass('ui-hide');
 
  })
  .on('click', '#ListeningOther', function (e, data) {
 
-     $('#PracticeType,#LessonType').addClass('ui-hide');
+     $('#PracticeType,#LessonType,.AllPSkill').addClass('ui-hide');
      $('#AllListening,.footer,.AllPracticeSet').removeClass('ui-hide');
  })
  .on('click', '#GrammarOther', function (e, data) {
 
-     $('#PracticeType,#LessonType').addClass('ui-hide');
+     $('#PracticeType,#LessonType,.AllPSkill').addClass('ui-hide');
      $('#AllGrammar,.footer,.AllPracticeSet').removeClass('ui-hide');
  })
  .on('click', '#SituationOther', function (e, data) {
 
-     $('#PracticeType,#LessonType').addClass('ui-hide');
+     $('#PracticeType,#LessonType,.AllPSkill').addClass('ui-hide');
      $('#AllSituation,.footer,.AllPracticeSet').removeClass('ui-hide');
  })
  .on('click', '#VocabularyOther', function (e, data) {
 
-     $('#PracticeType,#LessonType').addClass('ui-hide');
+     $('#PracticeType,#LessonType,.AllPSkill').addClass('ui-hide');
      $('#AllVocabulary,.footer,.AllPracticeSet').removeClass('ui-hide');
  })
  .on('click', '.btnBack', function (e, data) {
@@ -243,6 +243,7 @@ function GetLevel() {
                                         $('#' + data[i].skillSet + 'Other').addClass('ui-hide');
                                     } else {
                                         $('#' + data[i].skillSet + 'Other').removeClass('ui-hide');
+                                        $('#All' + data[i].skillSet).html('');
                                         $('#All' + data[i].skillSet).html(data[i].skillTxtAll);
                                     }
 
