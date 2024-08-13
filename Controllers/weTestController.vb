@@ -2354,6 +2354,7 @@ Namespace Controllers
         End Function
         '20240722 เพิ่ม ExpiredDate
         '20240723 เพิ่ม User Data สำหรับแก้ไข
+        '20240813 select จำนวนวันที่จะหมดอายุเพื่อเอาไปใช้กำหนด Max Date ของ calendar
         Function GetUserData(stdId As String)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim objList As New clsStudentData()
@@ -2377,7 +2378,7 @@ Namespace Controllers
                         objList.Result = "not"
                     ElseIf dt.Rows(0)("KeyCodeId").ToString = "" And dt.Rows(0)("ExpiredDate").ToString <> "" Then
                         objList.Result = "trial"
-                        cmdMsSql = cmdSQL(cn, "select top 1 s.StudentId,Firstname,Surname,MobileNo,Email,Username,l.LevelShortName,CONVERT (varchar(10),s.ExpiredDate , 103) AS expiredDate
+                        cmdMsSql = cmdSQL(cn, "select top 1 s.StudentId,Firstname,Surname,MobileNo,Email,Username,l.LevelShortName,CONVERT (varchar(10),s.ExpiredDate , 103) AS expiredDate,DATEDIFF(DAY,getdate(),ExpiredDate) as ExpiredDateAmount
                                         ,CONVERT(varchar(10), sg.TotalGoalDate, 103) as TotalGoal,datediff(day,getdate(),sg.TotalGoalDate) as TotalGoalAmount
                                         ,CONVERT(varchar(10), sg.ReadingGoal, 103) as ReadingGoal,datediff(day,getdate(),sg.ReadingGoal) as ReadingGoalAmount
                                         ,CONVERT(varchar(10), sg.ListeningGoal, 103) as ListeningGoal,datediff(day,getdate(),sg.ListeningGoal) as ListeningGoalAmount 
@@ -2402,6 +2403,7 @@ Namespace Controllers
                             objList.Email = dt(0)("Email").ToString
                             objList.Username = dt(0)("Username").ToString
                             objList.ExpiredDate = "Your account expire date is : " & dt(0)("expiredDate").ToString
+                            objList.ExpiredDateAmount = dt(0)("ExpiredDateAmount").ToString
                             objList.UserLevel = dt(0)("LevelShortName").ToString
                             objList.TotalGoal = dt(0)("TotalGoal").ToString
                             objList.TotalGoalAmount = dt.Rows(0)("TotalGoalAmount").ToString
@@ -3130,13 +3132,79 @@ Namespace Controllers
         Function Assignment() As ActionResult
             Return View()
         End Function
+        '20240813 Get Assignment
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function GetAssignment()
+
+            Dim L1 As New List(Of clsAssignment)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsAssignment()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ================================================== 
+
+                cmdMsSql = cmdSQL(cn, "select a.AssignmentId,AssignmentName,CONVERT (varchar(10), EndDate, 103) as EndDate,datediff(day,getdate(),enddate) as EndDateAmount
+                                        from tblAssignment a inner join tblAssignmentDetail ad on a.AssignmentId = ad.AssignmentId 
+                                        where assignto = @stdId and a.IsActive = 1 and ad.IsActive = 1 order by enddate")
+                With cmdMsSql
+                    .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentID")
+                    .ExecuteNonQuery()
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows.Count <> 0 Then
+                    objList.Result = "success"
+                    For i As Integer = 0 To dt.Rows.Count - 1
+                        Select Case CInt(dt(i)("EndDateAmount"))
+                            Case < 0
+                                objList.OverDue &= "<div class = ""assignItem""><div class=""redAssignment""></div>
+                                                    <div>" & dt(i)("AssignmentName") & "</div>
+                                                    <div class=""assignDate"">" & dt(i)("EndDate") & "</div>"
+                            Case = 0
+                                objList.Today &= "<div class = ""assignItem""><div class=""orangeAssignment""></div>
+                                                  <div>" & dt(i)("AssignmentName") & "</div>
+                                                  <div class=""assignDate"">" & dt(i)("EndDate") & "</div>"
+                            Case 1 To 6
+                                objList.ThisWeek &= "<div class = ""assignItem""><div class=""greenAssignment""></div>
+                                                    <div>" & dt(i)("AssignmentName") & "</div>
+                                                    <div class=""assignDate"">" & dt(i)("EndDate") & "</div>"
+                            Case > 6
+                                objList.NextWeek &= "<div class = ""assignItem""><div class=""greenAssignment""></div>
+                                                    <div>" & dt(i)("AssignmentName") & "</div>
+                                                    <div class=""assignDate"">" & dt(i)("EndDate") & "</div>"
+                        End Select
+                    Next
+                Else
+                    objList.Result = "nodata"
+                End If
+
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.Result = "error"
+                objList.ResultTxt = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+
+        End Function
+
 #End Region
 
 #Region "Class"
         Private Class clsStudentData
             Inherits clsMain
             Public Firstname As String, Surname As String, MobileNo As String, Email As String, Username As String, UserPhoto As String _
-            , Result As String, Msg As String, UserLevel As String, ExpiredDate As String _
+            , Result As String, Msg As String, UserLevel As String, ExpiredDate As String, ExpiredDateAmount As String _
             , TotalGoal As String, TotalGoalAmount As String, ReadingGoal As String, ReadingGoalAmount As String, ListeningGoal As String, ListeningGoalAmount As String _
             , VocabGoal As String, VocabGoalAmount As String, GrammarGoal As String, GrammarGoalAmount As String, SituationGoal As String, SituationGoalAmount As String _
             , TotalGoalDatePercent As String, TotalGoalScorePercent As String, ReadingScorePercent As String, ListeningScorePercent As String, GrammarScorePercent As String _
@@ -3175,6 +3243,11 @@ Namespace Controllers
         Public Class clsProgressbar
             Inherits clsMain
             Public Result As String, ResultTxt As String, AnsweredAmount As String, AnsweredPercent As String
+        End Class
+        '20240813 -- Assignment Data
+        Public Class clsAssignment
+            Inherits clsMain
+            Public Result As String, ResultTxt As String, OverDue As String, Today As String, ThisWeek As String, NextWeek As String
         End Class
 #End Region
 
