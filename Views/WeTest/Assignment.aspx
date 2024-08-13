@@ -21,20 +21,32 @@
 
     <div class='wrapper'>
         <div id="OverDue" class="flexDiv">
-           <div>Over due</div>
-           <div id="OverdueItem"></div>
+           <div class="redTypeName">Over due</div>
+           <div id="OverdueItem" class="redContainer flexDiv">
+                 <div class="redAssignment"></div>
+                 <div class="redAssignment"></div>
+                 <div class="redAssignment"></div>
+                 <div class="redAssignment"></div>
+                 <div class="redAssignment"></div>
+           </div>
         </div>
-        <div id="Today" class="flexDiv">
-           <div>Today</div>
-           <div id="TodayItem"></div>
+        <div id="Today" class=" flexDiv">
+           <div class="orangeTypeName">Today</div>
+           <div id="TodayItem" class="orangeContainer flexDiv">
+               <div class="orangeAssignment"></div>
+           </div>
         </div>
         <div id="ThisWeek" class="flexDiv">
-           <div>2 - 7 days</div>
-           <div id="ThisWeekItem"></div>
+           <div class="greenTypeName">2 - 7 days</div>
+           <div id="ThisWeekItem" class="greenContainer flexDiv">
+                <div class="greenAssignment"></div>
+           </div>
         </div>
         <div id="NextWeek" class="flexDiv">
-           <div>Next Week</div>
-           <div id="NextWeekItem"></div>
+           <div class="greenTypeName">Next Week</div>
+           <div id="NextWeekItem" class="greenContainer flexDiv">
+                <div class="greenAssignment"></div>
+           </div>
         </div>
     </div>
       <div class="footer">
