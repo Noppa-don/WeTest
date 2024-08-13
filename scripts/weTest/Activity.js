@@ -112,6 +112,8 @@ $(document)
                  } else if (data[i].dataType == 'showanswer') {
                      $('#divRunningBar, #divAllLeapChoice, #divTime').addClass("ui-hide");
                      $('#divAllQuestion, #divShowExplain').removeClass("ui-hide");
+                     $('.btnNext').removeClass('UnActive');
+                     $('#divSendQuiz').removeClass('SendQuiz').addClass('FinishQuiz');
                      GetQuestionAndAnswer('select', 1);
                  } else if (data[i].dataType == 'gotoreport') {
                      window.location = '/Wetest/Report';
@@ -189,6 +191,41 @@ $(document)
  .on('click', '#divGotoMainMenu', function (e, data) {
      window.location = '/Wetest/User';
  })
+ //20240801 -- กดรูปภาพแล้วขยาย
+.on('click', '#divQuestionAndAnswer img', function (e, data) {
+    var img = $(this);
+    var bigImg = $('<img />').css({ 'max-width': '80%', 'max-height': '80%', 'display': 'inline', 'margin-top': '10px' });
+    bigImg.attr({ src: img.attr('src'), alt: img.attr('alt'), title: img.attr('title') });
+
+    var over = $('<div />').text(' ').css({
+        'height': '100%', 'width': '100%', 'background': 'rgba(0,0,0,.82)', 'position': 'fixed', 'top': 0, 'left': 0,
+        'opacity': 0.0, 'cursor': 'pointer', 'z-index': 9999, 'text-align': 'center'
+    }).append(bigImg).bind('click', function () {
+        $(this).fadeOut(300, function () {
+            $(this).remove();
+        });
+    }).insertAfter(this).animate({
+        'opacity': 1
+    }, 300);
+})
+ //20240805 -- กดฟังไฟล์เสียง multiQuestion
+.on('click', '#multiQuestion', function (e, data) {
+    MultiFileCount += 1
+    if (MultiFileCount == 3) {
+        MultiFileCount = 0
+        $('#multiQuestion').addClass('ui-hide');
+        $('multiSlowQuestion').removeClass('ui-hide');
+    }
+})
+ //20240805 -- กดฟังไฟล์เสียง multiSlowQuestion
+.on('click', '#multiSlowQuestion', function (e, data) {
+    MultiFileCount += 1
+    if (MultiFileCount == 3) {
+        MultiFileCount = 0
+        $('#multiSlowQuestion').addClass('ui-hide');
+        $('multitxt').removeClass('ui-hide');
+    }
+})
 
 // ==== Dialog ข้อข้าม ========================================================================================= //
  .on('click', '#divAllLeapChoice ,#btnAllChoice', function (e, data) {
@@ -284,41 +321,6 @@ $(document)
 .on('click', '.AllAnswer', function (e, data) {
     GetAnswerChoicePanel(1);
 })
- //20240801 -- กดรูปภาพแล้วขยาย
-.on('click', '#divQuestionAndAnswer img', function (e, data) {
-    var img = $(this);
-    var bigImg = $('<img />').css({ 'max-width': '80%', 'max-height': '80%', 'display': 'inline', 'margin-top': '10px' });
-    bigImg.attr({ src: img.attr('src'), alt: img.attr('alt'), title: img.attr('title') });
-
-    var over = $('<div />').text(' ').css({ 'height': '100%', 'width': '100%', 'background': 'rgba(0,0,0,.82)', 'position': 'fixed', 'top': 0, 'left': 0,
-        'opacity': 0.0, 'cursor': 'pointer', 'z-index': 9999, 'text-align': 'center'
-    }).append(bigImg).bind('click', function () {
-        $(this).fadeOut(300, function () {
-            $(this).remove();
-        });
-    }).insertAfter(this).animate({
-        'opacity': 1
-    }, 300);
-})
- //20240805 -- กดฟังไฟล์เสียง multiQuestion
-.on('click', '#multiQuestion', function (e, data) {
-    MultiFileCount += 1
-    if (MultiFileCount == 3) {
-        MultiFileCount = 0
-        $('#multiQuestion').addClass('ui-hide');
-        $('multiSlowQuestion').removeClass('ui-hide');
-    }
-})
- //20240805 -- กดฟังไฟล์เสียง multiSlowQuestion
-.on('click', '#multiSlowQuestion', function (e, data) {
-    MultiFileCount += 1
-    if (MultiFileCount == 3) {
-        MultiFileCount = 0
-        $('#multiSlowQuestion').addClass('ui-hide');
-        $('multitxt').removeClass('ui-hide');
-    }
-})
-
 
 // ========================================================================================================== //
 
