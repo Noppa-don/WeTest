@@ -93,11 +93,11 @@
     </div>
 
     <div class='wrapper AllPracticeSet ui-hide'>
-        <div id="AllReading" class="ui-hide"></div>
-        <div id="AllListening" class="ui-hide"></div>
-        <div id="AllGrammar" class="ui-hide"></div>
-        <div id="AllSituation" class="ui-hide"></div>
-        <div id="AllVocabulary" class="ui-hide"></div>
+        <div id="AllReading" class="AllPSkill ui-hide"></div>
+        <div id="AllListening" class="AllPSkill ui-hide"></div>
+        <div id="AllGrammar" class="AllPSkill ui-hide"></div>
+        <div id="AllSituation" class="AllPSkill ui-hide"></div>
+        <div id="AllVocabulary" class="AllPSkill ui-hide"></div>
     </div>
 
     <div class="footer">
