@@ -47,7 +47,7 @@
                 <div class="Imagebtn btnBack"></div>
                 <div class="Imagebtn btnNext"></div>
             </div>
-            <div id="divSendQuiz"></div>
+            <div id="divSendQuiz" class="SendQuiz"></div>
         </div>
     </div>
 
