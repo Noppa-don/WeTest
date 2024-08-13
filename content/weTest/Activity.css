@@ -48,7 +48,8 @@
 .btnBackPage.UnActive {background: url(/images/Wetest/PreviousUnactive.png);padding-left:20px;cursor:not-allowed;}
 .btnNextPage.UnActive {background: url(/images/Wetest/NextUnactive.png);padding-right:20px;cursor:not-allowed;}
 
-#divSendQuiz {background: url(/images/Wetest/SendQuiz.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 70px;height: 70px;  margin: auto;cursor:pointer;}
+.SendQuiz{background: url(/images/Wetest/SendQuiz.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 70px;height: 70px;  margin: auto;cursor:pointer;}
+.FinishQuiz{background: url(/images/Wetest/exit.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 70px;height: 70px;  margin: auto;cursor:pointer;}
 .wrapper {margin-top: 130px;}
 
 .divLevelRecommend {background-repeat: no-repeat!important;background-size: contain!important;background-position: left!important;width:120px;height:300px;margin: auto;float:left;}
