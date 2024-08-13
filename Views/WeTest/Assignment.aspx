@@ -12,7 +12,7 @@
     <div class="banner">
         <div class="AppData">
             <div class="logo"></div>
-            <div class='pagename'>- Practice</div>
+            <div class='pagename'>- Assignment</div>
         </div>
         <div class="UserData flexDiv">
             <div class="UserNameandLevel"></div>
@@ -22,37 +22,24 @@
     <div class='wrapper'>
         <div id="OverDue" class="flexDiv">
            <div class="redTypeName">Over due</div>
-           <div id="OverdueItem" class="redContainer flexDiv">
-                 <div class="redAssignment"></div>
-                 <div class="redAssignment"></div>
-                 <div class="redAssignment"></div>
-                 <div class="redAssignment"></div>
-                 <div class="redAssignment"></div>
-           </div>
+           <div id="OverdueItem" class="redContainer flexDiv"></div>
         </div>
         <div id="Today" class=" flexDiv">
            <div class="orangeTypeName">Today</div>
-           <div id="TodayItem" class="orangeContainer flexDiv">
-               <div class="orangeAssignment"></div>
-           </div>
+           <div id="TodayItem" class="orangeContainer flexDiv"></div>
         </div>
         <div id="ThisWeek" class="flexDiv">
            <div class="greenTypeName">2 - 7 days</div>
-           <div id="ThisWeekItem" class="greenContainer flexDiv">
-                <div class="greenAssignment"></div>
-           </div>
+           <div id="ThisWeekItem" class="greenContainer flexDiv"></div>
         </div>
         <div id="NextWeek" class="flexDiv">
            <div class="greenTypeName">Next Week</div>
-           <div id="NextWeekItem" class="greenContainer flexDiv">
-                <div class="greenAssignment"></div>
-           </div>
+           <div id="NextWeekItem" class="greenContainer flexDiv"></div>
         </div>
     </div>
       <div class="footer">
         <div class='footerButton footerAlldiv'>
             <div class="Imagebtn btnBack"></div>
-            <div class="Imagebtn btnStart ui-hide"></div>
         </div>
     </div>
 </asp:Content>
