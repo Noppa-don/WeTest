@@ -175,14 +175,14 @@ $(document)
         $('.payment,.footerPayment').removeClass("ui-hide");
     })
     .on('click', '#btnConfirmPayment', function (e, data) {
-        //var PPrice = $(this).attr('price');
+        var PPrice = $(this).attr('price');
         $('#PackagePrice').html(PPrice);
         //$('.package,.footerRegister').addClass("ui-hide");
         //$('.payment,.footerPayment').removeClass("ui-hide");
         console.log($('#SlipName').val())
         if ($('#SlipName').val() == '') { $('#SlipName').addClass("InvalidData"); } else {
             UploadSlip();
-            window.location = '/Wetest/User';
+          
         }
        
     })
@@ -327,7 +327,7 @@ function UploadSlip() {
                             console.log(data[i].errorMsg);
                             break;
                         case 'success':
-
+                            window.location = '/Wetest/User';
                     }
                 }
             }
