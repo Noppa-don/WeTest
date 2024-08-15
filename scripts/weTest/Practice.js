@@ -169,7 +169,6 @@ $(document)
 function GotoPractice(TestsetId, TestsetName) {
 
     var post1 = 'TestsetId=' + TestsetId + '&TestsetName=' + TestsetName;
-    console.log(TestsetName);
     $.ajax({
         type: 'POST',
         url: '/weTest/CreatePractice',
@@ -205,6 +204,7 @@ function CheckLoginStatus() {
 }
 //20240730 สร้าง Dropdown สำหรับเลือกระดับชั้นที่ต้องการให้แสดงชุดข้อสอบ
 //20240805 ปรับการแสดงผล
+//20240814 ปรับการแสดงผล
 function GetLevel() {
 
     $.ajax({
@@ -215,43 +215,20 @@ function GetLevel() {
             if (data[0].result == 'success') {
                 if (data.length > 1) {
                     selectHTML = '<select id="ddlLevel">';
-
+                    var LevelId;
                     for (var i = 0; i < data.length; i++) {
                         selectHTML += "<option value='" + data[i].LevelId + "'>" + data[i].LevelName + "</option>";
+                        LevelId = data[i].LevelId
                     }
                     selectHTML += "</select>";
                     $('#SelectLevel').html(selectHTML);
                     $('#ChooseLevel').removeClass('ui-hide');
+                    BindPracticeItem(LevelId)
                 } else {
                 
                     for (var i = 0; i < data.length; i++) {
 
-                    var post1 = 'LevelId=' + data[i].LevelId;
-                    $.ajax({
-                        type: 'POST',
-                        url: '/weTest/GetLesson',
-                        data: post1,
-                        success: function (data) {
-                            for (var i = 0; i < data.length; i++) {
-                                if (data[i].skillSet == 'error') {
-                                    //console.log(data[i].skillTxtAll);
-                                } else {
-
-                                    $('#' + data[i].skillSet + 'Lesson').html(data[i].skillTxtShort);
-
-                                    if (data[i].skillAmount < 6) {
-                                        $('#' + data[i].skillSet + 'Other').addClass('ui-hide');
-                                    } else {
-                                        $('#' + data[i].skillSet + 'Other').removeClass('ui-hide');
-                                        $('#All' + data[i].skillSet).html('');
-                                        $('#All' + data[i].skillSet).html(data[i].skillTxtAll);
-                                    }
-
-                                    $('#Lessondivcon').removeClass('ui-hide');
-                                }
-                            }
-                        }
-                    });
+                        BindPracticeItem(data[i].LevelId)
                 }
             }
 
@@ -259,6 +236,36 @@ function GetLevel() {
         }
     });
 }
+//20240814 ย้าย Function สร้างชุดข้อสอบฝึกฝน
+function BindPracticeItem(LevelId) {
+    var post1 = 'LevelId=' + LevelId;
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/GetLesson',
+        data: post1,
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].skillSet == 'error') {
+                    //console.log(data[i].skillTxtAll);
+                } else {
+
+                    $('#' + data[i].skillSet + 'Lesson').html(data[i].skillTxtShort);
+
+                    if (data[i].skillAmount < 6) {
+                        $('#' + data[i].skillSet + 'Other').addClass('ui-hide');
+                    } else {
+                        $('#' + data[i].skillSet + 'Other').removeClass('ui-hide');
+                        $('#All' + data[i].skillSet).html('');
+                        $('#All' + data[i].skillSet).html(data[i].skillTxtAll);
+                    }
+
+                    $('#Lessondivcon').removeClass('ui-hide');
+                }
+            }
+        }
+    });
+}
+
 
 
 
