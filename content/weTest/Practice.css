@@ -78,3 +78,5 @@ select {border-style: solid;
     height: 25px;
     margin-right: 11px;
      display: inline-flex;}
+
+.ui-popup-screen {opacity: 0.97!important;}
