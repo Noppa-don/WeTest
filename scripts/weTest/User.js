@@ -107,7 +107,7 @@ $(document)
            }
        });
    })
-//20240723 Confirm Delete Account
+//20240723 Edit Account
    .on('click', '.btnAccountMenu.EditAccount', function (e, data) {
        $.ajax({
            type: 'POST',
@@ -134,6 +134,10 @@ $(document)
         window.location = '/Wetest/Assignment';
     })
 
+//20240723 Setting
+   .on('click', '.btnAccountMenu.Setting', function (e, data) {
+      
+   })
 
 // ========================= Goal ============================= //
 //20240715 -- Set Total Goal
