@@ -2,14 +2,14 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server"></asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
-    <link href="../content/Wetest/Wetest.css?ver=1.1.6" rel="stylesheet" type="text/css" />
-    <link href="../content/Wetest/User.css?ver=1.1.6" rel="stylesheet" type="text/css" />
-    <link href="../content/Wetest/jquery-ui-1.8.18.custom.min" type="text/css" />
+<link href="../content/Wetest/Wetest.css?ver=1.1.6" rel="stylesheet" type="text/css" />
+<link href="../content/Wetest/User.css?ver=1.1.6" rel="stylesheet" type="text/css" />
+<link href="../content/Wetest/jquery-ui-1.8.18.custom.min" type="text/css" />
 
-    <script src="../scripts/Wetest/User.js?ver=1.1.6" type="text/javascript"></script>
-    <script src="../scripts/Wetest/jGlobal.js" type="text/javascript"></script>
-    <script src="../scripts/Wetest/jquery-ui-1.8.10.offset.datepicker.min.js?ver=1.1.3" type="text/javascript"></script>
-    <script src="../scripts/Wetest/jquery-ui-1.10.1.custom.min.js?ver=1.1.3" type="text/javascript"></script>
+<script src="../scripts/Wetest/User.js?ver=1.1.6" type="text/javascript"></script>
+<script src="../scripts/Wetest/jGlobal.js" type="text/javascript"></script>
+<script src="../scripts/Wetest/jquery-ui-1.8.10.offset.datepicker.min.js?ver=1.1.3" type="text/javascript"></script>
+<script src="../scripts/Wetest/jquery-ui-1.10.1.custom.min.js?ver=1.1.3" type="text/javascript"></script>
 
 </asp:Content>
 
@@ -204,7 +204,7 @@
 
         </div>
     </div>
-     <div name='GoalDate' id="dialogSkillGoalDate" class='my-popup confirm ui-popup-container ui-popup-hidden'>
+    <div name='GoalDate' id="dialogSkillGoalDate" class='my-popup confirm ui-popup-container ui-popup-hidden'>
         <div class='ui-icon close'></div>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
             <span id="spnSkillGoalName"></span>
