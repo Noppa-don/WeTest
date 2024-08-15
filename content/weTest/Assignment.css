@@ -4,11 +4,11 @@
 .footer{width:10%!important; padding-left: 20px;}
 
 .redAssignment {background: url(/images/Wetest/RedBook.png); height: 60px;background-repeat: no-repeat;
-                background-size: contain;background-position: center; margin-bottom: 5px;}
+                background-size: contain;background-position: center; margin-bottom: 5px;cursor:pointer;}
 .orangeAssignment {background: url(/images/Wetest/OrangeBook.png); height: 60px;background-repeat: no-repeat;
-                   background-size: contain;background-position: center; margin-bottom: 5px;}
+                   background-size: contain;background-position: center; margin-bottom: 5px;cursor:pointer;}
 .greenAssignment {background: url(/images/Wetest/GreenBook.png); height: 60px;background-repeat: no-repeat;
-                  background-size: contain;background-position: center; margin-bottom: 5px;}
+                  background-size: contain;background-position: center; margin-bottom: 5px;cursor:pointer;}
 
 .redContainer {height: 100px; border-bottom: #ec2027; border-bottom-style: solid; border-bottom-width: 4px; margin-bottom: 30px;width: 82%;padding-left: 10px;}
 .orangeContainer {height: 100px; border-bottom: #f79421; border-bottom-style: solid; border-bottom-width: 4px; margin-bottom: 30px;width: 82%;padding-left: 10px;}
