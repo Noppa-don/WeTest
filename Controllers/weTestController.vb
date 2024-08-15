@@ -3288,6 +3288,12 @@ Namespace Controllers
 
 #End Region
 
+#Region "Admin"
+        Function Admin() As ActionResult
+            Return View()
+        End Function
+#End Region
+
 #Region "Class"
         Private Class clsStudentData
             Inherits clsMain
