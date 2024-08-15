@@ -136,7 +136,6 @@ $(document)
 
 //20240723 Setting
    .on('click', '.btnAccountMenu.Setting', function (e, data) {
-      
    })
 
 // ========================= Goal ============================= //
@@ -155,8 +154,13 @@ $(document)
     })
 //20240716 -- Go to set detail GOAL
     .on('click', '.btnSetDetailGoal', function (e, data) {
-        $('.Goal,.btnSetDetailGoal').addClass('ui-hide');
-        $('.DetailGoal').removeClass('ui-hide');
+        if ($('.btnSetDetailGoal').hasClass('unActive')) {
+            return 0;
+        } else {
+            $('.Goal,.btnSetDetailGoal').addClass('ui-hide');
+            $('.DetailGoal').removeClass('ui-hide');
+        }
+
     })
 //20240716 -- Back Button
     .on('click', '.btnBack', function (e, data) {
