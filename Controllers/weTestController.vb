@@ -573,7 +573,7 @@ Namespace Controllers
 
                 With cmdMsSql
                     .Parameters.Add("@stdId", SqlDbType.VarChar).Value = stdId
-                    .Parameters.Add("@TrialTime", SqlDbType.VarChar).Value = TrialTime
+                    .Parameters.Add("@TrialTime", SqlDbType.Int).Value = CInt(TrialTime)
                     .ExecuteNonQuery()
                 End With
 
@@ -908,6 +908,7 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+        '20240814 - เพิ่ม Assignment
         <AcceptVerbs(HttpVerbs.Post)>
         Function CheckSendDialog()
             Dim L1 As New List(Of clsMain)
@@ -919,16 +920,24 @@ Namespace Controllers
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
                 '20240712 -- เพิ่ม dialog กดจบการทำฝึกฝน
+                '20240814 -- เพิ่ม dialog กดจบการทำ Assignment
                 If Session("QuizMode") IsNot Nothing Then
                     If Session("QuizMode").ToString = 1 Then
                         objList.dataType = "pmt"
                         objList.errorMsg = "Do you want to send placement test ?"
                     ElseIf Session("QuizMode").ToString = 2 Then
                         objList.dataType = "practice"
-                        objList.errorMsg = "Do you want to send Practice ?"
+                        If Session("QuizState") = "showanswer" Then
+                            objList.errorMsg = "Do you want to exit Practice ?"
+                        Else
+                            objList.errorMsg = "Do you want to send Practice ?"
+                        End If
                     ElseIf Session("QuizMode").ToString = 3 Then
                         objList.dataType = "exam"
                         objList.errorMsg = "Do you want to send Exam ?"
+                    ElseIf Session("QuizMode").ToString = 4 Then
+                        objList.dataType = "assignment"
+                        objList.errorMsg = "Do you want to send Assignment ?"
                     End If
                 End If
 
@@ -953,6 +962,7 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+        '20240814 - เพิ่ม Assignment
         <AcceptVerbs(HttpVerbs.Post)>
         Function EndQuiz()
             Dim L1 As New List(Of clsMain)
@@ -1019,6 +1029,11 @@ Namespace Controllers
                 ElseIf Session("QuizMode") = "3" Then
                     'QuizMode 3 : Exam
                     objList = CheckAndUplevel()
+                    Session("QuizId") = Nothing
+                    Session("QuestionNo") = Nothing
+                ElseIf Session("QuizMode") = "4" Then
+                    'QuizMode 4 : Assignment
+                    objList.dataType = "success4"
                     Session("QuizId") = Nothing
                     Session("QuestionNo") = Nothing
                 End If
@@ -1560,7 +1575,7 @@ Namespace Controllers
 
                 Dim QName As String = dtQuestion(0)("QuestionName_Quiz").ToString
                 QName = QName.Replace("___MODULE_URL___", GenFilePath(QSetId))
-                QName = "<div class=""fistflexdiv"">" & dtQuestion(0)("QQNo").ToString & ".</div><div><div>" & QName & "</div>" & QExplain & "</div>"
+                QName = "<div class=""fistflexdiv"">" & dtQuestion(0)("QQNo").ToString & ".</div><div><div class='QName'>" & QName & "<br /><br /></div>" & QExplain & "</div>"
 
                 Dim objListQuestion As New clsItemQAndA()
                 objListQuestion.ItemType = "1"
@@ -2396,6 +2411,7 @@ Namespace Controllers
                         dt = getDataTable(cmdMsSql)
 
                         If dt.Rows.Count <> 0 Then
+                            objList.StudentId = dt(0)("StudentId").ToString
                             objList.UserPhoto = "<div class=""UserPhoto"" style=""background: url(../WetestPhoto/UserPhoto/" & dt(0)("StudentId").ToString & ".png);"">"
                             objList.Firstname = dt(0)("Firstname").ToString
                             objList.Surname = dt(0)("Surname").ToString
@@ -2574,6 +2590,30 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
 
         End Function
+        '20240814 -- ดึง Config จำนวนครั้งในการเล่นไฟล์เสียง
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function GetConfigMultiFile()
+            Dim L1 As New List(Of clsMultiAmount)
+            Dim objList As New clsMultiAmount()
+            Try
+                Dim MultimediaAmount As Integer = CInt(Getconfig("MultimediaAmount"))
+                Dim MultimediaSlowAmount As Integer = CInt(Getconfig("MultimediaSlowAmount"))
+
+                objList.Result = "success"
+                objList.MultiAmount = MultimediaAmount
+                objList.MultiSlowAmount = MultimediaSlowAmount
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.Result = "error"
+                objList.ResultTxt = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
 
 #End Region
 
@@ -2601,8 +2641,10 @@ Namespace Controllers
                     Dim Skn As String = skillName(i)
 
                     cmdMsSql = cmdSQL(cn, "select row_number() over(order by t.testsetid)As TestsetNo,t.TestsetId,qrs.QuizId 
-                                            from tblTestset t left join (select TestSetId,q.quizid from tblquiz q inner join tblQuizSession qs on q.QuizId = qs.QuizId 
-                                            where StudentId = @stdId and q.QuizMode = 2)qrs on t.TestsetId = qrs.TestSetId where t.testsetname Like '%' + @skillName + '%'
+                                            from tblTestset t left join (select TestSetId,count(q.quizid) as quizId 
+                                            from tblquiz q inner join tblQuizSession qs on q.QuizId = qs.QuizId 
+                                            where StudentId = @stdId and q.QuizMode = 2 group by testsetid)qrs 
+                                            on t.TestsetId = qrs.TestSetId where t.testsetname Like '%' + @skillName + '%'
                                             and t.levelId = @LevelId and t.isactive = 1 and t.IsPractice = 1;")
                     With cmdMsSql
                         .Parameters.Add("@skillName", SqlDbType.VarChar).Value = Skn
@@ -3133,6 +3175,7 @@ Namespace Controllers
             Return View()
         End Function
         '20240813 Get Assignment
+        '20240814 ปรับ Get Assignment เพิ่มข้อมูลสำหรับเอาไปสร้าง Quiz
         <AcceptVerbs(HttpVerbs.Post)>
         Function GetAssignment()
 
@@ -3145,7 +3188,8 @@ Namespace Controllers
                 If cn.State = 0 Then cn.Open()
                 ' ================================================== 
 
-                cmdMsSql = cmdSQL(cn, "select a.AssignmentId,AssignmentName,CONVERT (varchar(10), EndDate, 103) as EndDate,datediff(day,getdate(),enddate) as EndDateAmount
+                cmdMsSql = cmdSQL(cn, "select a.AssignmentId,AssignmentName,CONVERT (varchar(10), EndDate, 103) as EndDate
+                                        ,datediff(day,getdate(),enddate) as EndDateAmount,ReferenceId
                                         from tblAssignment a inner join tblAssignmentDetail ad on a.AssignmentId = ad.AssignmentId 
                                         where assignto = @stdId and a.IsActive = 1 and ad.IsActive = 1 order by enddate")
                 With cmdMsSql
@@ -3160,21 +3204,25 @@ Namespace Controllers
                     For i As Integer = 0 To dt.Rows.Count - 1
                         Select Case CInt(dt(i)("EndDateAmount"))
                             Case < 0
-                                objList.OverDue &= "<div class = ""assignItem""><div class=""redAssignment""></div>
+                                objList.OverDue &= "<div class=""assignItem"">
+                                                    <div class=""redAssignment"" refId=""" & dt(i)("ReferenceId").ToString & """ refName=""" & dt(i)("AssignmentName").ToString & """></div>
                                                     <div>" & dt(i)("AssignmentName") & "</div>
-                                                    <div class=""assignDate"">" & dt(i)("EndDate") & "</div>"
+                                                    <div class=""assignDate"">" & dt(i)("EndDate") & "</div></div>"
                             Case = 0
-                                objList.Today &= "<div class = ""assignItem""><div class=""orangeAssignment""></div>
+                                objList.Today &= "<div class=""assignItem"">
+                                                  <div class=""orangeAssignment"" refId=""" & dt(i)("ReferenceId").ToString & """ refName=""" & dt(i)("AssignmentName").ToString & """></div>
                                                   <div>" & dt(i)("AssignmentName") & "</div>
-                                                  <div class=""assignDate"">" & dt(i)("EndDate") & "</div>"
+                                                  <div class=""assignDate"">" & dt(i)("EndDate") & "</div></div>"
                             Case 1 To 6
-                                objList.ThisWeek &= "<div class = ""assignItem""><div class=""greenAssignment""></div>
+                                objList.ThisWeek &= "<div class=""assignItem"">
+                                                    <div class=""greenAssignment"" refId=""" & dt(i)("ReferenceId").ToString & """ refName=""" & dt(i)("AssignmentName").ToString & """></div>
                                                     <div>" & dt(i)("AssignmentName") & "</div>
-                                                    <div class=""assignDate"">" & dt(i)("EndDate") & "</div>"
+                                                    <div class=""assignDate"">" & dt(i)("EndDate") & "</div></div>"
                             Case > 6
-                                objList.NextWeek &= "<div class = ""assignItem""><div class=""greenAssignment""></div>
+                                objList.NextWeek &= "<div class=""assignItem"">
+                                                    <div class=""greenAssignment"" refId=""" & dt(i)("ReferenceId").ToString & """ refName=""" & dt(i)("AssignmentName").ToString & """></div>
                                                     <div>" & dt(i)("AssignmentName") & "</div>
-                                                    <div class=""assignDate"">" & dt(i)("EndDate") & "</div>"
+                                                    <div class=""assignDate"">" & dt(i)("EndDate") & "</div></div>"
                         End Select
                     Next
                 Else
@@ -3197,13 +3245,53 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
 
         End Function
+        '20240814 สร้าง Quiz Assignment
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function CreateAssignment()
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsMain()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                Dim StdId As String = Session("StudentId").ToString
+                Dim TestsetId As String = Request.Form("TestsetId")
+                Dim TestsetName As String = Request.Form("TestsetName")
+
+                Dim QuizData As New clsQuizData
+
+                QuizData.QuizMode = "4"
+                QuizData.TestsetId = TestsetId
+                QuizData.QuizName = TestsetName
+                CreateNewQuiz(QuizData)
+
+                objList.dataType = "success"
+                objList.errorMsg = ""
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.dataType = "Error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
 
 #End Region
 
 #Region "Class"
         Private Class clsStudentData
             Inherits clsMain
-            Public Firstname As String, Surname As String, MobileNo As String, Email As String, Username As String, UserPhoto As String _
+            Public StudentId As String, Firstname As String, Surname As String, MobileNo As String, Email As String, Username As String, UserPhoto As String _
             , Result As String, Msg As String, UserLevel As String, ExpiredDate As String, ExpiredDateAmount As String _
             , TotalGoal As String, TotalGoalAmount As String, ReadingGoal As String, ReadingGoalAmount As String, ListeningGoal As String, ListeningGoalAmount As String _
             , VocabGoal As String, VocabGoalAmount As String, GrammarGoal As String, GrammarGoalAmount As String, SituationGoal As String, SituationGoalAmount As String _
@@ -3248,6 +3336,11 @@ Namespace Controllers
         Public Class clsAssignment
             Inherits clsMain
             Public Result As String, ResultTxt As String, OverDue As String, Today As String, ThisWeek As String, NextWeek As String
+        End Class
+        '20240814 -- Assignment Data
+        Public Class clsMultiAmount
+            Inherits clsMain
+            Public Result As String, ResultTxt As String, MultiAmount As Integer, MultiSlowAmount As Integer
         End Class
 #End Region
 
