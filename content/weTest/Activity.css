@@ -117,3 +117,11 @@
 .Logogrammar{background: url(/images/Wetest/gramma.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 30px;height:30px;margin-left: 5px;cursor:pointer;}
 
 .UserAns{background: url(/images/Wetest/circle.png);background-repeat: no-repeat!important;background-size: contain!important;text-align: center; width: 33px;}
+
+.multifileIcon{background: url(/images/Wetest/MultiFile.png);background-repeat: no-repeat!important;background-size: contain!important;text-align: center; width: 35px; height: 35px;cursor:pointer;}
+.multifileSlowIcon{background: url(/images/Wetest/MultiFileSlow.png);background-repeat: no-repeat!important;background-size: contain!important;text-align: center; width: 35px; height: 35px;cursor:pointer;}
+.multitxtIcon{background: url(/images/Wetest/Multitxt.png);background-repeat: no-repeat!important;background-size: contain!important;text-align: center; width: 35px; height: 35px;cursor:pointer;}
+
+#multitxt {width: 83%; margin-left: 55px; position: absolute; text-align: left; padding-top: 2px; color: #f2777d;}
+
+.ui-popup-screen.ui-overlay-b.in.pause{opacity: 0.95; background-color: black;}
