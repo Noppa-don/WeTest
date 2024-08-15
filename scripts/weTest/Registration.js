@@ -104,9 +104,9 @@ $(document)
     })
 // ======================= Payment ======================= //
     .on('focus keypress', '#txtDiscountCode', function (e, data) {
-         $(this).removeClass("InvalidData");
-         $('#dialogDiscount .ui-Warning-red').addClass('ui-hide');
-     })
+        $(this).removeClass("InvalidData");
+        $('#dialogDiscount .ui-Warning-red').addClass('ui-hide');
+    })
     .on('click', '#btnCheckKey', function (e, data) {
         //CheckKeycode();
         //popupOpen($('#dialogDiscount'), 99999);
@@ -159,13 +159,13 @@ $(document)
         return 0;
     })
     .on('change', '#chkAccept', function (e, data) {
-       if ($('.btnAcceptPolicy').hasClass('btnUnActive')) {
-           $('.btnAcceptPolicy').removeClass('btnUnActive');
-           $('.btnAcceptPolicy').addClass('btnActive');
-       } else {
-           $('.btnAcceptPolicy').removeClass('btnActive');
-           $('.btnAcceptPolicy').addClass('btnUnActive');
-       }
+        if ($('.btnAcceptPolicy').hasClass('btnUnActive')) {
+            $('.btnAcceptPolicy').removeClass('btnUnActive');
+            $('.btnAcceptPolicy').addClass('btnActive');
+        } else {
+            $('.btnAcceptPolicy').removeClass('btnActive');
+            $('.btnAcceptPolicy').addClass('btnUnActive');
+        }
     })
     //20240731 -- เลือก Package
     .on('click', '.btnChoosePackage', function (e, data) {
@@ -182,9 +182,9 @@ $(document)
         console.log($('#SlipName').val())
         if ($('#SlipName').val() == '') { $('#SlipName').addClass("InvalidData"); } else {
             UploadSlip();
-          
+
         }
-       
+
     })
 // ============================================================ //
 
@@ -278,30 +278,34 @@ function UploadStudentPhoto() {
             }
         });
     } else {
+        if (EditMode) {
+            window.location = '/Wetest/User';
+        } else {
 
-        $.ajax({
-            type: 'POST',
-            url: '/weTest/UploadDummyStudentPhoto',
-            contentType: false,
-            processData: false,
-            success: function (data) {
-                for (var i = 0; i < data.length; i++) {
-                    switch (data[i].dataType) {
-                        case 'error':
-                            console.log(data[i].errorMsg);
-                            break;
-                        case 'nototp':
-                            $('.otp,.footerOTP').removeClass('ui-hide');
-                            $('.register,.footerRegister').addClass('ui-hide');
-                            sendOTP();
-                            break;
-                        case 'success':
-                            window.location = '/Wetest/User';
-                            break;
+            $.ajax({
+                type: 'POST',
+                url: '/weTest/UploadDummyStudentPhoto',
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        switch (data[i].dataType) {
+                            case 'error':
+                                console.log(data[i].errorMsg);
+                                break;
+                            case 'nototp':
+                                $('.otp,.footerOTP').removeClass('ui-hide');
+                                $('.register,.footerRegister').addClass('ui-hide');
+                                sendOTP();
+                                break;
+                            case 'success':
+                                window.location = '/Wetest/User';
+                                break;
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 }
 //20240716 -- Upload Slip fie
@@ -536,6 +540,7 @@ function UpdateWaitApproveSlip() {
     });
 }
 //20240723 -- Check EditMode And Get User Data
+//20240814 -- ดึงรูป User มาแสดงเมื่อเข้าเมนูแก้ไข
 function checkEditMode() {
     $.ajax({
         type: 'POST',
@@ -548,8 +553,9 @@ function checkEditMode() {
                     $('#MobileNo').val(data[i].MobileNo);
                     $('#EMail').val(data[i].Email);
                     $('#Username').val(data[i].Username);
-
                     $('#btnStudent, #btnOther').addClass('ui-hide');
+                    var PhotoPath = 'url("/WetestPhoto/UserPhoto/' + data[i].StudentId + '.png")'
+                    $('.btnPhoto').css('background', PhotoPath);
                     EditMode = true;
                 } else if (data[i].Result == 'add') {
                     EditMode = false;
@@ -559,7 +565,7 @@ function checkEditMode() {
                     $('.package').removeClass('ui-hide');
                     $('.register').addClass('ui-hide');
                 }
-            } 
+            }
         }
     });
 }
