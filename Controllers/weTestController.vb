@@ -512,8 +512,6 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-
-
         <AcceptVerbs(HttpVerbs.Post)>
         Function UploadSlipFile()
 
@@ -593,6 +591,7 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
         '20240806 -- Update ExpiredDate case Upload Slip แล้ว
+        '20240816 -- เพิ่มการ Insert tblRegister
         <AcceptVerbs(HttpVerbs.Post)>
         Function UpdateWaitApproveSlip()
 
@@ -600,17 +599,21 @@ Namespace Controllers
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim objList As New clsMain()
             Dim stdId As String = Session("studentid").ToString
-            Dim TrialTime = Getconfig("ApproveSlipDay")
+            Dim TrialTime = Getconfig("ApproveSlipTime")
             Try
                 ' ================ Check Permission ================
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
 
-                cmdMsSql = cmdSQL(cn, "update tblStudent set ExpiredDate =  DATEADD(HH, 168, getdate()) where StudentId = @stdId;")
+                cmdMsSql = cmdSQL(cn, "update tblStudent set ExpiredDate =  getdate() + (@TrialTime / 24)   where StudentId = @stdId;
+                                       insert into tblregister select newid(),@stdId,'1702F1EF-8FD5-443A-A68D-4599BC9F9E54',1
+                                       ,case when max(registeramount) is null then 0 else max(registeramount) + 1 end,null
+                                       ,'500',1,getdate() from tblregister where StudentId = @stdId and registerstatus <> 2;")
 
                 With cmdMsSql
                     .Parameters.Add("@stdId", SqlDbType.VarChar).Value = stdId
+                    .Parameters.Add("@TrialTime", SqlDbType.Int).Value = CInt(TrialTime)
                     .ExecuteNonQuery()
                 End With
 
@@ -644,6 +647,7 @@ Namespace Controllers
                     objList = Nothing
                 Else
                     objList.dataType = "Error"
+
                     objList.errorMsg = Result
                     L1.Add(objList)
                     objList = Nothing
@@ -753,7 +757,6 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-
         Function CheckDuplicateUser()
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim Duptxt As String = ""
@@ -836,6 +839,21 @@ Namespace Controllers
                 If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
             End Try
 
+        End Function
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function checkRefillKey()
+            Dim L1 As New List(Of clsMain)
+            Dim StdId As String = Session("studentId")
+            Dim objList As New clsMain()
+            If Session("RefillKey") IsNot Nothing Then
+                objList.dataType = "refillkey"
+            Else
+                objList.dataType = "not"
+            End If
+            objList.errorMsg = ""
+            L1.Add(objList)
+            objList = Nothing
+            Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
 #End Region
 
@@ -1371,9 +1389,9 @@ Namespace Controllers
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
 
-                cmdMsSql = cmdSQL(cn, "select q.QuizMode,q.QuizName, sum(qs.score) as AnsweredNum,q.FullScore,IsStandart from tblQuizScore qs inner join tblquiz q 
-                                        on qs.QuizId = q.QuizId  inner join tblTestset t on q.TestSetId = t.testsetid
-                                        where qs.QuizId = @QuizId group by q.FullScore,q.QuizMode,q.QuizName,IsStandart;")
+                cmdMsSql = cmdSQL(cn, "select q.QuizMode,q.QuizName,q.FullScore,IsStandart from  tblquiz q 
+                                        inner join tblTestset t on q.TestSetId = t.testsetid
+                                        where q.QuizId = @QuizId group by q.FullScore,q.QuizMode,q.QuizName,IsStandart;")
                 With cmdMsSql
                     .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
                 End With
@@ -2379,7 +2397,7 @@ Namespace Controllers
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
                 'check keycode or trial
-
+                '20240818-------------------------------------------------------------------------------------
                 cmdMsSql = cmdSQL(cn, "select KeyCodeId,ExpiredDate from tblstudent where StudentId = @stdid and isactive = 1;")
                 With cmdMsSql
                     .Parameters.Add("@stdid", SqlDbType.VarChar).Value = stdId
@@ -2614,6 +2632,25 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
 
+        '2024816 -- SetRefillKeyMode
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function SetRefillKeyMode()
+            Dim L1 As New List(Of clsMain)
+            Dim objList As New clsMain()
+            Try
+                Session("RefillKey") = True
+
+                objList.dataType = "success"
+                L1.Add(objList)
+                objList = Nothing
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
 
 #End Region
 
