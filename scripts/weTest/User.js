@@ -133,10 +133,24 @@ $(document)
     .on('click', '.Assignment', function (e, data) {
         window.location = '/Wetest/Assignment';
     })
-
 //20240723 Setting
    .on('click', '.btnAccountMenu.Setting', function (e, data) {
    })
+//20240816 RefillKey
+    .on('click', '.btnAccountMenu.RefillKey', function (e, data) {
+        $.ajax({
+            type: 'POST',
+            url: '/weTest/SetRefillKeyMode',
+            success: function (data) {
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].dataType == 'success') {
+                        window.location = '/Wetest/Registration';
+                    }
+                }
+            }
+        });
+})
+
 
 // ========================= Goal ============================= //
 //20240715 -- Set Total Goal
