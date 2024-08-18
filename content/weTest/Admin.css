@@ -9,78 +9,8 @@
 .login .ui-input-text {margin-left: 65px;line-height: 35px;}
 .login .textRight {text-align: right;}
 
-.login .registerlink {cursor: pointer;text-decoration: underline; cursor: pointer;}
 .UserNameandLevel,.UserPhoto {cursor: pointer;}
 
-.btn { text-align: center; margin-top: 40px;}
-
- .btnMainMenu {width:40%;border-style: none; border-radius: 1em;padding: 10px;height: 100px;color: #52734d;border-color: #0a3820;
-      cursor:pointer;background-color: #f9f9f9; box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;
-      margin: auto;text-align:center;}
-
-.practiceIcon {background: url(/images/Wetest/PracticeMenu.png);background-repeat: no-repeat;background-size: contain;background-position: center;width: 100%;height: 60px;margin-bottom:10px;}
-.goalIcon {background: url(/images/Wetest/GoalMenu.png);background-repeat: no-repeat;background-size: contain;background-position: center;width: 100%;height: 60px;margin-bottom:10px;}
-.mockUpExamMenuIcon {background: url(/images/Wetest/MockUpExamMenu.png);background-repeat: no-repeat;background-size: contain;background-position: center;width: 100%;height: 60px;margin-bottom:10px;}
-.reportIcon {background: url(/images/Wetest/ReportMenu.png);background-repeat: no-repeat;background-size: contain;background-position: center;width: 100%;height: 60px;margin-bottom:10px;}
-
-.txtMenu {font-size:1.4em;}
-
-.menuButton {display:flex;}
-
-.Percent {background: url(/images/Wetest/WhiteCircle.png);background-repeat: no-repeat;background-size: contain;background-position: center;
-          width: 100%;height: 200px;margin-bottom:10px;text-align: center;line-height: 200px;font-size: 2.5em;}
-#TimeUsed,#PracticeScore {width: 50%;text-align: center;}
-#TimeUsed {cursor:pointer;}
-
-.btnSaveGoal{background: url(/images/Wetest/GoalMenu.png);background-repeat: no-repeat;background-size: contain;background-position: center;
-          width: 100%;height: 40px;margin-bottom:10px;text-align: center;line-height: 200px;font-size: 3em;cursor:pointer;}
-.btnSaveGoal.unActive{background: url(/images/Wetest/UnActiveGoal.png);background-repeat: no-repeat;background-size: contain;background-position: center;
-          width: 100%;height: 40px;margin-bottom:10px;text-align: center;line-height: 200px;font-size: 3em;}
-
-#SelectGoalDate {border-style:solid;padding:20px;}
-
-.btnSetDetailGoal{background: url(/images/Wetest/GoalMenu.png);padding-right:90px;}
-.btnSetDetailGoal.unActive{background: url(/images/Wetest/UnActiveGoal.png);padding-right:90px;}
-.btnBack {background: url(/images/Wetest/Previous.png);padding-left:90px;}
-
-.btnClear{color:indianred;margin-top:0px;margin-right: 0px;}
-
-#btnNotClear, #btnConfirmClear {margin-top: 20px !important;}
-
-#ReadingIcon{background: url(/images/Wetest/reading.png);background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;margin:auto;margin-bottom: 20px;}
-#ListeningIcon{background: url(/images/Wetest/listening.png);background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;margin:auto;margin-bottom: 20px;}
-#VocabIcon{background: url(/images/Wetest/vocab.png);background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;margin:auto;margin-bottom: 20px;}
-#GrammarIcon{background: url(/images/Wetest/gramma.png);background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;margin:auto;margin-bottom: 20px;}
-#SituationIcon{background: url(/images/Wetest/situation.png);background-repeat: no-repeat;background-size: contain;background-position: left;width:50px;height:50px;margin:auto;margin-bottom: 20px;}
-
-
-.ReadingPercent{background: url(/images/Wetest/blueCircle.png);background-repeat: no-repeat;background-size: contain;background-position: center;
-                    width: 90px;height: 90px;text-align: center;line-height: 90px;font-size: 1.5em;margin: auto;margin-top: 25px;}
-.ListeningPercent{background: url(/images/Wetest/redCircle.png);background-repeat: no-repeat;background-size: contain;background-position: center;
-                    width: 90px;height: 90px;text-align: center;line-height: 90px;font-size: 1.5em;margin: auto;margin-top: 25px;}
-.VocabPercent{background: url(/images/Wetest/greenCircle.png);background-repeat: no-repeat;background-size: contain;background-position: center;
-                    width: 90px;height: 90px;text-align: center;line-height: 90px;font-size: 1.5em;margin: auto;margin-top: 25px;}
-.GrammarPercent{background: url(/images/Wetest/purpleCircle.png);background-repeat: no-repeat;background-size: contain;background-position: center;
-                    width: 90px;height: 90px;text-align: center;line-height: 90px;font-size: 1.5em;margin: auto;margin-top: 25px;}
-.SituationPercent{background: url(/images/Wetest/orangeCircle.png);background-repeat: no-repeat;background-size: contain;background-position: center;
-                    width: 90px;height: 90px;text-align: center;line-height: 90px;font-size: 1.5em;margin: auto;margin-top: 25px;}
-#ReadingTime,#ListeningTime,#VocabTime,#GrammarTime,#SituationTime{cursor:pointer;}
-#TU {margin-top:100px;}
-#TPC {width: max-content;margin-top: 110px;margin-right: 30px;}
-.divPercentContain{margin-right: 20px;width: 130px;text-align: center;}
-.DetailGoal {margin: auto;width: fit-content;}
-.TimeResult{margin-top:10px;}
-.smalltxt {font-size: small;text-align:center;}
-.PS {margin-top: 70px!important;}
-.expiredDate {margin-top: 100px; font-size: small; color: red;text-align: center;}
-
-.UserMenu{margin-top: 80px; position: absolute;right: 60px;}
-.btnAccountMenu{border-style: solid;border-radius: 1em;line-height: 30px;padding: 10px; height: 30px;color: #f9f9f9;border-color: #0a3820;cursor: pointer;box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038; margin: auto; min-width: 20%;background-color: #0a3820;text-align: center;margin-top: 15px;}
-.Accountlogo {background: url(/images/Wetest/AccountMenu.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 30px;}
-.Logoutlogo {background: url(/images/Wetest/Logout.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 30px;}
-.Deletelogo {background: url(/images/Wetest/DeleteAccount.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 30px;}
-
-#dialogGoalDate {width:300px!important;}
-
-.Assignment {background: url(/images/Wetest/Assignment.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;
-    height: 60px; margin-top: 100px; margin-left: 60px;    position: absolute;cursor:pointer; }
+.jobdiv {border-style: solid; border-radius: 1em;line-height: 30px;padding: 10px;height: 30px;color: #0a3820;border-color: #0a3820;
+      cursor:pointer;background-color: #f9f9f9; box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;width: fit-content; 
+      margin: auto; min-width: 20%;text-align:center;}
