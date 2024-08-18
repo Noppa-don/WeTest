@@ -9,6 +9,7 @@ $(function () {
     $('div[data-role=page]').page({ theme: 'c', });
     checkAnsweredFromReport();
     GetConfigMultiFile();
+    SetLogo();
 });
 
 // ============================================================ //
@@ -21,8 +22,8 @@ $(document)
  .on('click', '.btnNext', function (e, data) {
     
      if ($('.bap-icon').children().hasClass('bap-icon-on')) {
-         $('.bap-btn').click()
-         if ($('.bap-icon').children().hasClass('bap-icon-on')) { $('.bap-btn').click() }
+         $('.multifileIcon').click()
+         if ($('.bap-icon').children().hasClass('bap-icon-on')) { $('.multifileIcon').click() }
      }
      if ($('.btnNext').hasClass('UnActive') == false) {
          GetQuestionAndAnswer('next', '');
@@ -35,8 +36,8 @@ $(document)
 //20240807 -- เพิ่มการกดหยุดไฟล์เสียง
  .on('click', '.btnBack', function (e, data) {
      if ($('.bap-icon').children().hasClass('bap-icon-on')) {
-         $('.bap-btn').click()
-         if ($('.bap-icon').children().hasClass('bap-icon-on')) { $('.bap-btn').click() }
+         $('.multifileIcon').click()
+         if ($('.bap-icon').children().hasClass('bap-icon-on')) { $('.multifileIcon').click() }
      }
 
      if ($('.btnBack').hasClass('UnActive') == false) {
@@ -63,7 +64,12 @@ $(document)
          }
      });
  })
+ //202408017 -- เพิ่มการกดหยุดไฟล์เสียง
  .on('click', '#divSendQuiz', function (e, data) {
+     if ($('.bap-icon').children().hasClass('bap-icon-on')) {
+         $('.multifileIcon').click()
+         if ($('.bap-icon').children().hasClass('bap-icon-on')) { $('.multifileIcon').click() }
+     }
      $.ajax({
          type: 'POST',
          url: '/weTest/CheckSendDialog',
@@ -512,7 +518,6 @@ function checkAnsweredFromReport() {
                     setProgressbar();
                     PageNum = 1
                 }
-                SetLogo();
             }
         }
     });
