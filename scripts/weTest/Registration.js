@@ -3,7 +3,7 @@
 // ========================= Page Load ======================== //
 $(function () { $('div[data-role=page]').page({ theme: 'c', }); $('#Firstname').focus(); });
 checkEditMode();
-
+checkRefillKey();
 // ============================================================ //
 // ======================= Object Event ======================= //
 $(document)
@@ -317,7 +317,6 @@ function UploadSlip() {
 
     if (files.length > 0) {
         data.append("UploadedImage", files[0]);
-        var post1 = 'DiscountCode=' + $('#txtKeyCode').val();
         $.ajax({
             type: 'POST',
             url: '/weTest/UploadSlipFile',
@@ -331,7 +330,8 @@ function UploadSlip() {
                             console.log(data[i].errorMsg);
                             break;
                         case 'success':
-                            window.location = '/Wetest/User';
+                            UpdateWaitApproveSlip()
+                            
                     }
                 }
             }
@@ -522,9 +522,12 @@ function UpdateTrialDate() {
 }
 //20240806 -- Update วันที่รอ Approvee Slip
 function UpdateWaitApproveSlip() {
+    var post1 = 'DiscountCode=' + $('#txtKeyCode').val() + '&PackageId=1702F1EF-8FD5-443A-A68D-4599BC9F9E54';
+
     $.ajax({
         type: 'POST',
         url: '/weTest/UpdateWaitApproveSlip',
+        data: post1,
         success: function (data) {
             for (var i = 0; i < data.length; i++) {
 
@@ -596,6 +599,21 @@ function OpenPolicy() {
     console.log('OpenPolicy');
     $('#dialogPolicy').attr('action', 'focus');
     popupOpen($('#dialogPolicy'), 99999);
+}
+//20240816 -- ตรวจสอบว่ากดมาจาก Refill Key ใช่มั้ย
+function checkRefillKey() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/checkRefillKey',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].dataType == 'refillkey') {
+                    $('.package').removeClass('ui-hide');
+                    $('.register,.footerRegister .btnNext').addClass('ui-hide');
+                }
+            }
+        }
+    });
 }
 
 
