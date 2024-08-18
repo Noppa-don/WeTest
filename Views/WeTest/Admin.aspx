@@ -70,7 +70,13 @@
            Notification
         </div>
     </div>
-    <div class="PaymentList ui-hide"></div>
+    <div class="PaymentList ui-hide">
+        <div class="jobdiv doingJob">งานที่ต้องทำ</div>
+        <div class="jobdiv problemPayment">การชำระเงินที่มีปัญหา</div>
+        <div class="jobdiv discount">ส่วนลด</div>
+        <div class="jobdiv trial">ทดลองใช้ / ฟรี</div>
+        <div class="jobdiv successPayment">ชำระเงินสำเร็จ</div>
+    </div>
     <div class="PaymentDetail"></div>
      <div class="footer">
         <div class='footerButton footerGoal ui-hide'>
