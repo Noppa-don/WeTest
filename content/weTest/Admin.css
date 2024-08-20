@@ -9,8 +9,24 @@
 .login .ui-input-text {margin-left: 65px;line-height: 35px;}
 .login .textRight {text-align: right;}
 
+ .btnMainMenu {width:40%;border-style: none; border-radius: 1em;padding: 10px;height: 100px;color: #52734d;border-color: #0a3820;
+      cursor:pointer;background-color: #f9f9f9; box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;
+      margin: auto;text-align:center;}
+
 .UserNameandLevel,.UserPhoto {cursor: pointer;}
 
 .jobdiv {border-style: solid; border-radius: 1em;line-height: 30px;padding: 10px;height: 30px;color: #0a3820;border-color: #0a3820;
-      cursor:pointer;background-color: #f9f9f9; box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;width: fit-content; 
-      margin: auto; min-width: 20%;text-align:center;}
+      cursor:pointer;background-color: #f9f9f9; box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;
+      margin: auto; min-width: 20%;text-align:center;margin-top: 15px; width: 60%;}
+
+.PaymentList{max-width: 1000px; margin: auto;}
+.JobMenu{width: 30%;}
+.JobDetail{color: black; padding: 10px; width: 90%; border-radius: 15px;}
+.UploadDate { padding: 10px; width: 15%;}
+.UploadTime {background-color: #edebeb; border-style: solid; border-width: 1px; border-radius: 15px; padding: 10px; width: 12%;}
+.UploadDetail { background-color: #edebeb; border-style: solid;  border-width: 1px;  border-radius: 15px; 
+                padding: 10px; margin-left: 10px; width: 90%;}
+.jobDetailItem{    margin-top: 10px;
+    background: #e7dddd;
+    padding: inherit;
+    border-radius: 10px;width:100%;}
