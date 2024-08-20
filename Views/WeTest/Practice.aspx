@@ -9,13 +9,31 @@
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="MainContent" runat="server">
 
-    <div class="banner">
+        <div class="banner">
         <div class="AppData">
             <div class="logo"></div>
-            <div class='pagename'>- Practice</div>
+            <div class='pagename'></div>
         </div>
-        <div class="UserData flexDiv">
+        <div class="UserData flexDiv ui-hide">
             <div class="UserNameandLevel"></div>
+        </div>
+        <div class="UserMenu ui-hide">
+            <div class="btnAccountMenu EditAccount flexDiv">
+                <div class="Accountlogo firstflexdiv"></div>
+                <div>Account</div>
+            </div>
+            <div class="btnAccountMenu Setting flexDiv">
+                <div class="Accountlogo firstflexdiv"></div>
+                <div>Setting</div>
+            </div>
+            <div class="btnAccountMenu Logout flexDiv">
+                <div class="Logoutlogo firstflexdiv"></div>
+                <div class="firstflexdiv">Log out</div>
+            </div>
+            <div class="btnAccountMenu DeleteAccount flexDiv">
+                <div class="Deletelogo firstflexdiv"></div>
+                <div>Delete Account</div>
+            </div>
         </div>
     </div>
 
