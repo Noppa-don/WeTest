@@ -23,6 +23,12 @@ $(document)
             CheckUserLogin();
         }
     })
+    .on('click', '#btnPaymentList', function (e, data) {
+        $('.MainMenu').addClass('ui-hide');
+        $('.PaymentList').removeClass('ui-hide');
+        GetJobDetail();
+    })
+
 
 function CheckUserLogin() {
     $.ajax({
@@ -32,6 +38,22 @@ function CheckUserLogin() {
             for (var i = 0; i < data.length; i++) {
 
                 if (data[i].dataType == 'success') {
+              
+                }
+            }
+        }
+    });
+}
+
+function GetJobDetail() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/GetJobDetail',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+
+                if (data[i].dataType == 'success') {
+                    $('.JobDetail').html(data[i].errorMsg);
                 }
 
             }
