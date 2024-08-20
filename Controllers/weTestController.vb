@@ -2214,6 +2214,7 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
         '20240715 -- Save TotalGoal
+        '20240819 -- ปรับการเก็บข้อมูล Goal ให้เก็บวันที่เริ่มของแต่ละ Goal เพิ่ม (ปิด skill ที่ยังไม่มีไปก่อน)
         <AcceptVerbs(HttpVerbs.Post)>
         Function SaveTotalGoal()
             Dim L1 As New List(Of clsStudentData)
@@ -2227,32 +2228,39 @@ Namespace Controllers
 
                 Dim StdId As String = Session("StudentId").ToString
                 Dim GoalType As String = Request.Form("GoalType").ToLower
-
+                Dim SkillId As String = Request.Form("SkillId").ToLower
                 Select Case GoalType
                     Case "total"
-                        cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set isActive = 0 ,LastUpdate = getdate() where StudentId = @StdId;
-                                       Insert into tblstudentGoal(StudentId,TotalGoalDate)values(@StdId,@GoalDate);
+                        cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set isActive = 0 ,LastUpdate = getdate() where StudentId = @StdId and GoalType = 1;
+                                       Insert into tblstudentGoal(StudentId,GoalType,StartDate,EndDate)values(@StdId,1,getdate(),@GoalDate);
                                        select datediff(day,getdate(),@GoalDate);")
-                    Case "reading"
-                        cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set ReadingGoal = @GoalDate ,LastUpdate = getdate() where StudentId = @StdId and isActive = 1;
-                                            select datediff(day,getdate(),@GoalDate);")
-                    Case "listening"
-                        cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set ListeningGoal = @GoalDate ,LastUpdate = getdate() where StudentId = @StdId and isActive = 1;
-                                            select datediff(day,getdate(),@GoalDate);")
+                    'Case "reading"
+                    '    cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set isActive = 0 ,LastUpdate = getdate() where StudentId = @StdId
+                    '                            and skillIKd = ;
+                    '                   Insert into tblstudentGoal(StudentId,GoalType,StartDate,EndDate)values(@StdId,1,getdate(),@GoalDate);
+                    '                   select datediff(day,getdate(),@GoalDate);")
+                    'Case "listening"
+                    '    cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set ListeningGoal = @GoalDate ,LastUpdate = getdate() where StudentId = @StdId and isActive = 1;
+                    '                        select datediff(day,getdate(),@GoalDate);")
                     Case "vocabulary"
-                        cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set vocabGoal = @GoalDate ,LastUpdate = getdate() where StudentId = @StdId and isActive = 1;
-                                            select datediff(day,getdate(),@GoalDate);")
+                        cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set isActive = 0 ,LastUpdate = getdate() where StudentId = @StdId and GoalType = 2 and skillId = @SkillId;
+                                                Insert into tblstudentGoal(StudentId,GoalType,StartDate,EndDate,skillId)
+                                                values(@StdId,2,getdate(),@GoalDate,@SkillId);
+                                                select datediff(day,getdate(),@GoalDate);")
                     Case "grammar"
-                        cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set GrammarGoal = @GoalDate ,LastUpdate = getdate() where StudentId = @StdId and isActive = 1;
-                                            select datediff(day,getdate(),@GoalDate);")
-                    Case "situation"
-                        cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set SituationGoal = @GoalDate ,LastUpdate = getdate() where StudentId = @StdId and isActive = 1;
-                                            select datediff(day,getdate(),@GoalDate);")
+                        cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set isActive = 0 ,LastUpdate = getdate() where StudentId = @StdId and GoalType = 2 and skillId = @SkillId;
+                                                Insert into tblstudentGoal(StudentId,GoalType,StartDate,EndDate,skillId)
+                                                values(@StdId,2,getdate(),@GoalDate,@SkillId);
+                                                select datediff(day,getdate(),@GoalDate);")
+                        'Case "situation"
+                        '    cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set SituationGoal = @GoalDate ,LastUpdate = getdate() where StudentId = @StdId and isActive = 1;
+                        '                        select datediff(day,getdate(),@GoalDate);")
                 End Select
 
                 With cmdMsSql
                     .Parameters.Add("@StdId", SqlDbType.VarChar).Value = StdId
                     .Parameters.Add("@GoalDate", SqlDbType.VarChar).Value = Request.Form("selectedGoalDate")
+                    .Parameters.Add("@SkillId", SqlDbType.VarChar).Value = SkillId
                 End With
 
                 dt = getDataTable(cmdMsSql)
@@ -2388,6 +2396,7 @@ Namespace Controllers
         '20240722 เพิ่ม ExpiredDate
         '20240723 เพิ่ม User Data สำหรับแก้ไข
         '20240813 select จำนวนวันที่จะหมดอายุเพื่อเอาไปใช้กำหนด Max Date ของ calendar
+        '20240819 ปรับวิธีการดึง Student Goal
         Function GetUserData(stdId As String)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim objList As New clsStudentData()
@@ -2411,17 +2420,10 @@ Namespace Controllers
                         objList.Result = "not"
                     ElseIf dt.Rows(0)("KeyCodeId").ToString = "" And dt.Rows(0)("ExpiredDate").ToString <> "" Then
                         objList.Result = "trial"
-                        cmdMsSql = cmdSQL(cn, "select top 1 s.StudentId,Firstname,Surname,MobileNo,Email,Username,l.LevelShortName,CONVERT (varchar(10),s.ExpiredDate , 103) AS expiredDate,DATEDIFF(DAY,getdate(),ExpiredDate) as ExpiredDateAmount
-                                        ,CONVERT(varchar(10), sg.TotalGoalDate, 103) as TotalGoal,datediff(day,getdate(),sg.TotalGoalDate) as TotalGoalAmount
-                                        ,CONVERT(varchar(10), sg.ReadingGoal, 103) as ReadingGoal,datediff(day,getdate(),sg.ReadingGoal) as ReadingGoalAmount
-                                        ,CONVERT(varchar(10), sg.ListeningGoal, 103) as ListeningGoal,datediff(day,getdate(),sg.ListeningGoal) as ListeningGoalAmount 
-                                        ,CONVERT(varchar(10), sg.VocabGoal, 103) as VocabGoal,datediff(day,getdate(),sg.VocabGoal) as VocabGoalAmount  
-                                        ,CONVERT(varchar(10), sg.GrammarGoal, 103) as GrammarGoal,datediff(day,getdate(),sg.GrammarGoal) as GrammarGoalAmount  
-                                        ,CONVERT(varchar(10), sg.SituationGoal, 103) as SituationGoal,datediff(day,getdate(),sg.SituationGoal) as SituationGoalAmount    
-                                        from tblStudent s inner join tblStudentLevel sl on s.studentId = sl.StudentId 
-                                        inner join tblLevel l on sl.levelId = l.LevelId left join tblstudentGoal sg on s.StudentId = sg.StudentId 
-                                        and sg.IsActive = 1 and getdate() <= sg.TotalGoalDate where s.studentId = @stdid and s.IsActive = 1 and sl.IsActive = 1  
-                                        order by sl.lastupdate desc;")
+                        cmdMsSql = cmdSQL(cn, "select top 1 s.StudentId,Firstname,Surname,MobileNo,Email,Username,l.LevelShortName,CONVERT (varchar(10),s.ExpiredDate , 103) AS expiredDate
+                                                ,DATEDIFF(DAY,getdate(),ExpiredDate) as ExpiredDateAmount from tblStudent s inner join tblStudentLevel sl on s.studentId = sl.StudentId 
+                                                inner join tblLevel l on sl.levelId = l.LevelId where s.studentId = @stdid and s.IsActive = 1 and sl.IsActive = 1  
+                                                order by sl.lastupdate desc;")
                         With cmdMsSql
                             .Parameters.Add("@stdid", SqlDbType.VarChar).Value = stdId
                         End With
@@ -2439,21 +2441,43 @@ Namespace Controllers
                             objList.ExpiredDate = "Your account expire date is : " & dt(0)("expiredDate").ToString
                             objList.ExpiredDateAmount = dt(0)("ExpiredDateAmount").ToString
                             objList.UserLevel = dt(0)("LevelShortName").ToString
-                            objList.TotalGoal = dt(0)("TotalGoal").ToString
-                            objList.TotalGoalAmount = dt.Rows(0)("TotalGoalAmount").ToString
-                            objList.ReadingGoal = dt(0)("ReadingGoal").ToString
-                            objList.ReadingGoalAmount = dt(0)("ReadingGoalAmount").ToString
-                            objList.ListeningGoal = dt(0)("ListeningGoal").ToString
-                            objList.ListeningGoalAmount = dt(0)("ListeningGoalAmount").ToString
-                            objList.VocabGoal = dt(0)("VocabGoal").ToString
-                            objList.VocabGoalAmount = dt(0)("VocabGoalAmount").ToString
-                            objList.GrammarGoal = dt(0)("GrammarGoal").ToString
-                            objList.GrammarGoalAmount = dt(0)("GrammarGoalAmount").ToString
-                            objList.SituationGoal = dt(0)("SituationGoal").ToString
-                            objList.SituationGoalAmount = dt(0)("SituationGoalAmount").ToString
                         End If
 
-                        cmdMsSql = cmdSQL(cn, "select (100 - ((DATEDIFF(DAY,getdate(),totalgoaldate)*100) / DATEDIFF(DAY,LastUpdate,totalgoaldate))) as DatePercent
+                        cmdMsSql = cmdSQL(cn, "select GoalType,SkillId,CONVERT(varchar(10),enddate, 103) as GoalDate,datediff(day,getdate(),Enddate) as GoalAmount 
+                                                from tblstudentGoal where StudentId = @stdid and isactive = 1 and datediff(day,getdate(),Enddate) >=0;")
+                        With cmdMsSql
+                            .Parameters.Add("@stdid", SqlDbType.VarChar).Value = stdId
+                        End With
+
+                        dt = getDataTable(cmdMsSql)
+
+                        If dt.Rows.Count <> 0 Then
+                            For i = 0 To dt.Rows.Count - 1
+                                Select Case dt(i)("GoalType").ToString
+                                    Case "1"
+                                        objList.TotalGoal = dt(i)("GoalDate").ToString
+                                        objList.TotalGoalAmount = dt.Rows(i)("GoalAmount").ToString
+                                    Case "2"
+                                        If dt(i)("SkillId").ToString.ToLower = "31667BAB-89FF-43B3-806F-174774C8DFBF".ToLower Then
+                                            objList.VocabGoal = dt(i)("GoalDate").ToString
+                                            objList.VocabGoalAmount = dt(i)("GoalAmount").ToString
+                                        ElseIf dt(i)("SkillId").ToString.ToLower = "5BBD801D-610F-40EB-89CB-5957D05C4A0B".ToLower Then
+                                            objList.GrammarGoal = dt(i)("GoalDate").ToString
+                                            objList.GrammarGoalAmount = dt(0)("GoalAmount").ToString
+                                        End If
+
+                                End Select
+                            Next
+                            objList.ReadingGoal = ""
+                            objList.ReadingGoalAmount = ""
+                            objList.SituationGoal = ""
+                            objList.SituationGoalAmount = ""
+                            objList.ListeningGoal = ""
+                            objList.ListeningGoalAmount = ""
+                        End If
+
+
+                        cmdMsSql = cmdSQL(cn, "select (100 - ((DATEDIFF(DAY,getdate(),enddate)*100) / DATEDIFF(DAY,LastUpdate,enddate))) as DatePercent
                                             from tblStudentGoal where StudentId = @stdid and isactive = 1;")
                         With cmdMsSql
                             .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentid").ToString
@@ -2481,7 +2505,7 @@ Namespace Controllers
                             cmdMsSql = cmdSQL(cn, "select case when sum(q.totalscore) is null then 0 else sum(q.totalscore) end as UserScore 
                                             from tblQuiz q inner join tblquizSession qs on q.quizId = qs.QuizId 
                                             inner join tblstudentGoal sg on qs.studentId = sg.StudentId
-                                            where qs.StudentId = @stdid and q.starttime between sg.lastupdate and sg.TotalGoalDate and sg.isactive = 1")
+                                            where qs.StudentId = @stdid and q.starttime between sg.lastupdate and sg.enddate and sg.isactive = 1")
                             With cmdMsSql
                                 .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentid").ToString
                             End With
@@ -3328,6 +3352,52 @@ Namespace Controllers
 #Region "Admin"
         Function Admin() As ActionResult
             Return View()
+        End Function
+
+        '20240819 ดึงข้อมูลสลิป
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function GetJobDetail()
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsMain()
+
+            Try
+                    ' ================ Check Permission ================
+                    cn = New SqlConnection(sqlCon("Wetest"))
+                    If cn.State = 0 Then cn.Open()
+                ' ================================================== 
+
+                cmdMsSql = cmdSQL(cn, "Select distinct CONVERT(varchar(10), r.lastupdate, 103) as SlipDate,FORMAT(r.lastupdate,'hh:mm tt') as SlipTime
+                                            ,PackageName + ' ' + cast(packageprice as varchar) + ' Bath ' + s.Firstname + ' ' + s.Surname as SlipDetail
+                                            From tblRegister r inner Join tblstudent s on r.studentId = s.studentId 
+                                            inner Join tblpackage p on p.packageId = r.packageId;")
+
+                dt = getDataTable(cmdMsSql)
+
+                Dim jobDetail As String = ""
+                If dt.Rows.Count <> 0 Then
+                    For i = 0 To dt.Rows.Count() - 1
+                        jobDetail &= "<div Class=""flexDiv jobDetailItem""><div Class=""UploadDate"">" & dt.Rows(i)("SlipDate") & "</div>
+                                            <div Class=""UploadTime"">" & dt.Rows(i)("SlipTime") & "</div>
+                                            <div Class=""UploadDetail"">" & dt.Rows(i)("SlipDetail") & "</div></div>"
+                    Next
+                    objList.dataType = "success"
+                    objList.errorMsg = jobDetail
+                    L1.Add(objList)
+                    objList = Nothing
+                End If
+
+            Catch ex As Exception
+                objList.dataType = "Error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
 #End Region
 
