@@ -2,9 +2,9 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server"></asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
-<link href="../content/Wetest/Wetest.css?ver=1.1.6" rel="stylesheet" type="text/css" />
-<link href="../content/Wetest/Admin.css?ver=1.1.6" rel="stylesheet" type="text/css" />
-<script src="../scripts/Wetest/Admin.js?ver=1.1.6" type="text/javascript"></script>
+    <link href="../content/Wetest/Wetest.css?ver=1.1.6" rel="stylesheet" type="text/css" />
+    <link href="../content/Wetest/Admin.css?ver=1.1.6" rel="stylesheet" type="text/css" />
+    <script src="../scripts/Wetest/Admin.js?ver=1.1.6" type="text/javascript"></script>
 
 </asp:Content>
 
@@ -23,7 +23,7 @@
                 <div class="Accountlogo firstflexdiv"></div>
                 <div>Account</div>
             </div>
-             <div class="btnAccountMenu Setting flexDiv">
+            <div class="btnAccountMenu Setting flexDiv">
                 <div class="Accountlogo firstflexdiv"></div>
                 <div>Setting</div>
             </div>
@@ -54,7 +54,7 @@
             <div class='textRight registerlink'>Register ?</div>
         </div>
         <div class="MainMenu">
-            <div class="menuButton">
+            <div class="menuButton flexDiv">
                 <div class="btn btnMainMenu" id="btnPaymentList">
                     <div class='paymentListIcon'></div>
                     <span class="txtMenu">Payment list</span>
@@ -67,18 +67,24 @@
             <div class="expiredDate"></div>
         </div>
         <div class="Setting ui-hide">
-           Notification
+            Notification
         </div>
     </div>
-    <div class="PaymentList ui-hide">
-        <div class="jobdiv doingJob">งานที่ต้องทำ</div>
-        <div class="jobdiv problemPayment">การชำระเงินที่มีปัญหา</div>
-        <div class="jobdiv discount">ส่วนลด</div>
-        <div class="jobdiv trial">ทดลองใช้ / ฟรี</div>
-        <div class="jobdiv successPayment">ชำระเงินสำเร็จ</div>
+    <div class="PaymentList flexDiv ui-hide">
+        <div class="JobMenu firstflexdiv">
+            <div class="jobdiv doingJob">งานที่ต้องทำ</div>
+            <div class="jobdiv problemPayment">การชำระเงินที่มีปัญหา</div>
+            <div class="jobdiv discount">ส่วนลด</div>
+            <div class="jobdiv trial">ทดลองใช้ / ฟรี</div>
+            <div class="jobdiv successPayment">ชำระเงินสำเร็จ</div>
+        </div>
+        <div class="JobDetail">
+            
+        </div>
+
     </div>
     <div class="PaymentDetail"></div>
-     <div class="footer">
+    <div class="footer">
         <div class='footerButton footerGoal ui-hide'>
             <div class="Imagebtn btnBack fistflexdiv"></div>
             <div class="Imagebtn btnSetDetailGoal unActive ui-Right"></div>
