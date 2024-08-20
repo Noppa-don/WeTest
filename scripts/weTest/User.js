@@ -1,4 +1,4 @@
-﻿var xobjClick, xobjAlert, OTPNum, selectedGoalDate, formatSelectedGoalDate, GoalType;
+﻿var xobjClick, xobjAlert, OTPNum, selectedGoalDate, formatSelectedGoalDate, GoalType,SkillId;
 var totalGoalAmount;
 var ExpiredDateAmount;
 // ========================= Page Load ====================================================================== //
@@ -199,27 +199,35 @@ $(document)
     })
 //20240716 -- Set Reading Goal
     .on('click', '#ReadingTime', function (e, data) {
-        GoalType = 'Reading'
+        return 0;
+        GoalType = 'Reading';
+        SkillId = 'Reading';
         SkillGoaldate();
     })
 //20240716 -- Set Listening Goal
     .on('click', '#ListeningTime', function (e, data) {
-        GoalType = 'Listening'
+        return 0;
+        GoalType = 'Listening';
+        SkillId = 'Listening';
         SkillGoaldate();
     })
 //20240716 -- Set Vocab Goal
     .on('click', '#VocabTime', function (e, data) {
-        GoalType = 'Vocabulary'
+        GoalType = 'Vocabulary';
+        SkillId = '31667BAB-89FF-43B3-806F-174774C8DFBF';
         SkillGoaldate();
     })
 //20240716 -- Set Grammar Goal
     .on('click', '#GrammarTime', function (e, data) {
-        GoalType = 'Grammar'
+        GoalType = 'Grammar';
+        SkillId = '5BBD801D-610F-40EB-89CB-5957D05C4A0B';
         SkillGoaldate();
     })
 //20240716 -- Set Situation Goal
     .on('click', '#SituationTime', function (e, data) {
-        GoalType = 'Situation'
+        return 0;
+        GoalType = 'Situation';
+        SkillId = 'Situation';
         SkillGoaldate();
     })
 
@@ -302,7 +310,7 @@ function Goaldate() {
     popupOpen($('#dialogGoalDate'), 99999);
 
 }
-//20240813 -- เพิ่ม Function สำหรัขบสร้าง calendar ของแต่ละ Skill
+//20240813 -- เพิ่ม Function สำหรับสร้าง calendar ของแต่ละ Skill
 function SkillGoaldate() {
     $('#btnSaveSkillGoal').addClass('unActive');
     var MaxDate
@@ -332,7 +340,7 @@ function SkillGoaldate() {
 }
 //20240715 -- Save Goal Date
 function SaveGoal() {
-    var post1 = 'selectedGoalDate=' + selectedGoalDate + '&formatSelectedGoalDate=' + formatSelectedGoalDate + '&GoalType=' + GoalType;
+    var post1 = 'selectedGoalDate=' + selectedGoalDate + '&formatSelectedGoalDate=' + formatSelectedGoalDate + '&GoalType=' + GoalType + '&SkillId=' + SkillId;
 
     $.ajax({
         type: 'POST',
