@@ -221,16 +221,16 @@ $(document)
 })
 //20240805 -- กดฟังไฟล์เสียง multiQuestion
 //20240814 -- เปลี่ยนไป click Icon แล้วให้เล่นไฟล์
-.on('click', '.multifileIcon', function (e, data) {
+.on('click', '.multiQfileIcon', function (e, data) {
     if (MultiFileCount == MultiFileAmount) {
         $('#multiQuestion .bap-btn').click();
         MultiFileCount = 1
-        if ($('.multifileSlowIcon').length) {
-            $('.multifileIcon').addClass('ui-hide');
-            $('.multifileSlowIcon').removeClass('ui-hide');
-        } else if ($('.multitxtIcon').length) {
-            $('.multifileIcon').addClass('ui-hide');
-            $('.multitxtIcon').removeClass('ui-hide');
+        if ($('.multiQfileSlowIcon').length) {
+            $('.multiQfileIcon').addClass('ui-hide');
+            $('.multiQfileSlowIcon').removeClass('ui-hide');
+        } else if ($('.multiQtxtIcon').length) {
+            $('.multiQfileIcon').addClass('ui-hide');
+            $('.multiQtxtIcon').removeClass('ui-hide');
         }
     } else {
         $('#multiQuestion .bap-btn').click();
@@ -239,13 +239,13 @@ $(document)
 })
 //20240805 -- กดฟังไฟล์เสียง multiSlowQuestion
 //20240814 -- เปลี่ยนไป click Icon แล้วให้เล่นไฟล์
-.on('click', '.multifileSlowIcon', function (e, data) {
+.on('click', '.multiQfileSlowIcon', function (e, data) {
     if (MultiFileCount == MultiFileSlowAmount) {
         $('#multiSlowQuestion .bap-btn').click();
         MultiFileCount = 1
-        if ($('.multitxtIcon').length) {
-            $('.multifileSlowIcon').addClass('ui-hide');
-            $('.multitxtIcon').removeClass('ui-hide');
+        if ($('.multiQtxtIcon').length) {
+            $('.multiQfileSlowIcon').addClass('ui-hide');
+            $('.multiQtxtIcon').removeClass('ui-hide');
         }
     } else {
         $('#multiSlowQuestion .bap-btn').click();
@@ -253,8 +253,8 @@ $(document)
     }
 })
 //20240814 -- เปิดคำอ่านไฟล์เสียง
-.on('click', '.multitxtIcon', function (e, data) {
-    $('#multitxt').removeClass('ui-hide');
+.on('click', '.multiQtxtIcon', function (e, data) {
+    $('#multiQtxt').removeClass('ui-hide');
 })
 
 // ==== Dialog ข้อข้าม ========================================================================================= //
@@ -355,7 +355,7 @@ $(document)
 // ========================================================================================================== //
 
 // ================================================ Function ================================================ //
-
+//20240820 -- เพิ่มการแสดงปุ่มเล่นไฟล์เสียงที่คำตอบ
 function GetQuestionAndAnswer(ActionType, QuestionNo) {
     var post1 = 'ActionType=' + ActionType + '&QuestionNo=' + QuestionNo;
     $.ajax({
@@ -375,16 +375,16 @@ function GetQuestionAndAnswer(ActionType, QuestionNo) {
                     $('#divQuestion').attr('Qid', data[i].ItemId);
 
                     if (data[i].multiname != null) {
-                        $('.QName').append("<div class='multifileIcon'></div><div id='multiQuestion' class='ui-hide' mid='" + data[i].multiname + "'></div>");
+                        $('.QName').append("<div class='multiQfileIcon'></div><div id='multiQuestion' class='ui-hide' mid='" + data[i].multiname + "'></div>");
                         setbuttonAudioPlayer('multiQuestion', data[i].multipath);
                     }
 
                     if (data[i].multiSlowname != null) {
-                        $('.QName').append("<div class='multifileSlowIcon ui-hide'></div><div id='multiSlowQuestion' class='ui-hide' mid='" + data[i].multiSlowname + "'></div>");
+                        $('.QName').append("<div class='multiQfileSlowIcon ui-hide'></div><div id='multiSlowQuestion' class='ui-hide' mid='" + data[i].multiSlowname + "'></div>");
                         setbuttonAudioPlayer('multiSlowQuestion', data[i].multiSlowpath);
                     }
                     if (data[i].multitxt != null) {
-                        $('.QName').append("<div class='multitxtIcon ui-hide'><div id='multitxt' class='ui-hide'>" + data[i].multitxt + "</div>");
+                        $('.QName').append("<div class='multiQtxtIcon ui-hide'><div id='multiQtxt' class='ui-hide'>" + data[i].multitxt + "</div>");
                     }
 
                     if (data[i].ItemStatus == 'first') { $('.btnBack').addClass("UnActive"); }
@@ -396,6 +396,18 @@ function GetQuestionAndAnswer(ActionType, QuestionNo) {
 
                     $('#divAnswer').html(data[i].Itemtxt);
 
+                    if (data[i].multiAnsname != null) {
+                        $('.AName').append("<div class='multiAfileIcon'></div><div id='multiAnswer' class='ui-hide' mid='" + data[i].multiAnsname + "'></div>");
+                        setbuttonAudioPlayer('multiAnswer', data[i].multiAnspath);
+                    }
+
+                    if (data[i].multiAnsSlowname != null) {
+                        $('.AName').append("<div class='multiAfileSlowIcon ui-hide'></div><div id='multiAnsSlowQuestion' class='ui-hide' mid='" + data[i].multiAnsSlowname + "'></div>");
+                        setbuttonAudioPlayer('multiAnsSlowQuestion', data[i].multiAnsSlowpath);
+                    }
+                    if (data[i].multiAnstxt != null) {
+                        $('.AName').append("<div class='multiAtxtIcon ui-hide'><div id='multiAnstxt' class='ui-hide'>" + data[i].multiAnstxt + "</div>");
+                    }
                 }
             }
         }
