@@ -469,6 +469,7 @@ function GotoQuiz() {
 
 
 }
+//20240820 -- เพิ่มการเก็บ DiscountId เพื่อทการบันทึกลงใน tblN                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
 function CheckDiscount() {
     if ($('#txtKeyCode').val() == '') { $('#txtKeyCode').addClass("InvalidData"); } else {
         var post1 = 'DiscountCode=' + $('#txtKeyCode').val();
@@ -479,18 +480,14 @@ function CheckDiscount() {
             success: function (data) {
                 for (var i = 0; i < data.length; i++) {
 
-                    if (data[i].dataType == 'Success') {
-                        $('#txtKeyCode').val('');
+                    if (data[i].Result == 'Success') {
                         $('#dialogDiscount .ui-Warning-red').addClass('ui-hide');
                         $('#spnWarningDiscount').removeClass('ui-hide')
-                        $('#PackagePrice').html(data[i].errorMsg);
-                        //popupClose($('#dialogDiscount'), 99999);
-
+                        $('#PackagePrice').html(data[i].ResultTxt);
+                        $('#btnConfirmPayment').attr('DiscountId', data[i].DiscountId)
                     } else {
-                        //$('#dialogDiscount .ui-Warning-red').html(data[i].errorMsg);
-                        //$('#dialogDiscount .ui-Warning-red').removeClass('ui-hide');
                         $('#dialogConfirm').attr('action', 'focus');
-                        $('#dialogConfirm .ui-text').html(data[i].errorMsg);
+                        $('#dialogConfirm .ui-text').html(data[i].ResultTxt);
                         popupOpen($('#dialogConfirm'), 99999);
                     }
 
@@ -522,7 +519,9 @@ function UpdateTrialDate() {
 }
 //20240806 -- Update วันที่รอ Approvee Slip
 function UpdateWaitApproveSlip() {
-    var post1 = 'DiscountCode=' + $('#txtKeyCode').val() + '&PackageId=1702F1EF-8FD5-443A-A68D-4599BC9F9E54';
+    var DiscountId = $('#btnConfirmPayment').attr('DiscountId')
+    console.log(DiscountId);
+    var post1 = 'DiscountCode=' + DiscountId + '&PackageId=1702F1EF-8FD5-443A-A68D-4599BC9F9E54';
 
     $.ajax({
         type: 'POST',
