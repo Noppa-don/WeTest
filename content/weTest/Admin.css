@@ -9,9 +9,12 @@
 .login .ui-input-text {margin-left: 65px;line-height: 35px;}
 .login .textRight {text-align: right;}
 
- .btnMainMenu {width:40%;border-style: none; border-radius: 1em;padding: 10px;height: 100px;color: #52734d;border-color: #0a3820;
-      cursor:pointer;background-color: #f9f9f9; box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;
+ .btnMainMenu {width:40%;border-style: none; border-radius: 1em;padding: 10px;height: 100px;color: #030303;border-color: #040707;
+      cursor:pointer;background-color: #e6e6e6; box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;
       margin: auto;text-align:center;}
+
+ .paymentListIcon {background: url(/images/Wetest/PaymentList.png);background-repeat: no-repeat;background-size: contain;background-position: center;width: 100%;height: 60px;margin-bottom:10px;}
+ .reportIcon {background: url(/images/Wetest/AdminReport.png);background-repeat: no-repeat;background-size: contain;background-position: center;width: 100%;height: 60px;margin-bottom:10px;}
 
 .UserNameandLevel,.UserPhoto {cursor: pointer;}
 
@@ -20,13 +23,18 @@
       margin: auto; min-width: 20%;text-align:center;margin-top: 15px; width: 60%;}
 
 .PaymentList{max-width: 1000px; margin: auto;}
+.PaymentDetail{max-width: 1000px; margin: auto;}
 .JobMenu{width: 30%;}
-.JobDetail{color: black; padding: 10px; width: 90%; border-radius: 15px;}
+.JobDetail{color: black; padding: 10px; width: 90%; border-radius: 15px;cursor:pointer;}
 .UploadDate { padding: 10px; width: 15%;}
-.UploadTime {background-color: #edebeb; border-style: solid; border-width: 1px; border-radius: 15px; padding: 10px; width: 12%;}
+.UploadTime {background-color: #edebeb; border-style: solid; border-width: 1px; border-radius: 15px; padding: 10px; width: 13%;}
 .UploadDetail { background-color: #edebeb; border-style: solid;  border-width: 1px;  border-radius: 15px; 
                 padding: 10px; margin-left: 10px; width: 90%;}
-.jobDetailItem{    margin-top: 10px;
-    background: #e7dddd;
-    padding: inherit;
-    border-radius: 10px;width:100%;}
+.jobDetailItem{ margin-top: 10px; background: #e7dddd; padding: inherit; border-radius: 10px;width:100%;}
+
+.footerButton {display: flex;justify-content: space-between;padding: 10px 10% 20px 10%;}
+.slipDetail {line-height:50px;float: left;}
+.slipPhoto {width: 350px; height: 390px;background-size: cover;float: inline-start;margin-left: 80px;}
+.btnReject {background: url(/images/Wetest/reject.png);background-repeat: no-repeat;background-size: contain;background-position: center;}
+.btnConfirmSlip {background: url(/images/Wetest/confirm.png);background-repeat: no-repeat;background-size: contain;background-position: center;}
+.btnCancelConfirmSlip {background: url(/images/Wetest/cancel.png);background-repeat: no-repeat;background-size: contain;background-position: center;float: inline-end;}
