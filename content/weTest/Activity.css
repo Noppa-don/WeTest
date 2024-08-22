@@ -119,10 +119,14 @@
 
 .UserAns{background: url(/images/Wetest/circle.png);background-repeat: no-repeat!important;background-size: contain!important;text-align: center; width: 33px;}
 
-.multifileIcon{background: url(/images/Wetest/MultiFile.png);background-repeat: no-repeat!important;background-size: contain!important;text-align: center; width: 35px; height: 35px;cursor:pointer;}
-.multifileSlowIcon{background: url(/images/Wetest/MultiFileSlow.png);background-repeat: no-repeat!important;background-size: contain!important;text-align: center; width: 35px; height: 35px;cursor:pointer;}
-.multitxtIcon{background: url(/images/Wetest/Multitxt.png);background-repeat: no-repeat!important;background-size: contain!important;text-align: center; width: 35px; height: 35px;cursor:pointer;}
+.multiQfileIcon{background: url(/images/Wetest/MultiFile.png);background-repeat: no-repeat!important;background-size: contain!important;text-align: center; width: 35px; height: 35px;cursor:pointer;}
+.multiQfileSlowIcon{background: url(/images/Wetest/MultiFileSlow.png);background-repeat: no-repeat!important;background-size: contain!important;text-align: center; width: 35px; height: 35px;cursor:pointer;}
+.multiQtxtIcon{background: url(/images/Wetest/Multitxt.png);background-repeat: no-repeat!important;background-size: contain!important;text-align: center; width: 35px; height: 35px;cursor:pointer;}
 
-#multitxt {width: 83%; margin-left: 55px; position: absolute; text-align: left; padding-top: 2px; color: #f2777d;}
+.multiAfileIcon{background: url(/images/Wetest/MultiFile.png);background-repeat: no-repeat!important;background-size: contain!important;text-align: center; width: 35px; height: 35px;cursor:pointer;}
+.multiAfileSlowIcon{background: url(/images/Wetest/MultiFileSlow.png);background-repeat: no-repeat!important;background-size: contain!important;text-align: center; width: 35px; height: 35px;cursor:pointer;}
+.multiAtxtIcon{background: url(/images/Wetest/Multitxt.png);background-repeat: no-repeat!important;background-size: contain!important;text-align: center; width: 35px; height: 35px;cursor:pointer;}
+
+#multiQtxt {width: 83%; margin-left: 55px; position: absolute; text-align: left; padding-top: 2px; color: #f2777d;}
 
 .ui-popup-screen.ui-overlay-b.in.pause{opacity: 0.95; background-color: black;}
