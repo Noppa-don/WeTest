@@ -405,9 +405,9 @@ Namespace Controllers
         End Function
         <AcceptVerbs(HttpVerbs.Post)>
         Function CheckDiscount()
-            Dim L1 As New List(Of clsMain)
+            Dim L1 As New List(Of clsDiscount)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
-            Dim objList As New clsMain()
+            Dim objList As New clsDiscount()
             Try
                 ' ================ Check Permission ================
                 cn = New SqlConnection(sqlCon("Wetest"))
@@ -421,16 +421,16 @@ Namespace Controllers
                 End With
                 dt = getDataTable(cmdMsSql)
                 If dt.Rows.Count = 0 Then
-                    objList.dataType = "error"
-                    objList.errorMsg = "This code does not apply to this promotion!<br>Please try again or Contact us @Italt<br><br>"
+                    objList.Result = "error"
+                    objList.ResultTxt = "This code does not apply to this promotion!<br>Please try again or Contact us @Italt<br><br>"
                 ElseIf dt.Rows(0)("isExpired").ToString = "1" Then
-                    objList.dataType = "Expired"
-                    objList.errorMsg = "This code is expired!<br>Please try again or Contact us @Italt<br><br>"
+                    objList.Result = "Expired"
+                    objList.ResultTxt = "This code is expired!<br>Please try again or Contact us @Italt<br><br>"
                 ElseIf dt.Rows(0)("isUsed").ToString = "True" Then
-                    objList.dataType = "Used"
-                    objList.errorMsg = "This code has alrady beeen used!<br>Please try again or contact @Italt<br><br>"
+                    objList.Result = "Used"
+                    objList.ResultTxt = "This code has alrady beeen used!<br>Please try again or contact @Italt<br><br>"
                 Else
-                    objList.dataType = "Success"
+                    objList.Result = "Success"
                     Dim NetPrice As String = "0"
                     Dim PackagePrice = Getconfig("PackagePrice")
 
@@ -440,14 +440,15 @@ Namespace Controllers
                         NetPrice = (CInt(PackagePrice) - ((CInt(PackagePrice) * CInt(dt.Rows(0)("DiscountAmount"))) / 100)).ToString
                     End If
 
-                    objList.errorMsg = NetPrice
+                    objList.ResultTxt = NetPrice
+                    objList.DiscountId = dt.Rows(0)("DiscountId").ToString
                 End If
                 L1.Add(objList)
                 objList = Nothing
 
             Catch ex As Exception
-                objList.dataType = "error"
-                objList.errorMsg = ex.Message
+                objList.Result = "error"
+                objList.ResultTxt = ex.Message
                 L1.Add(objList)
                 objList = Nothing
             Finally
@@ -592,6 +593,7 @@ Namespace Controllers
         End Function
         '20240806 -- Update ExpiredDate case Upload Slip แล้ว
         '20240816 -- เพิ่มการ Insert tblRegister
+        '20240820 -- เพิ่มการ Insert DiscountId
         <AcceptVerbs(HttpVerbs.Post)>
         Function UpdateWaitApproveSlip()
 
@@ -606,14 +608,23 @@ Namespace Controllers
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
 
+                Dim DiscountId
+
+                If Request.Form("DiscountCode").ToString() = "undefined" Then
+                    DiscountId = DBNull.Value
+                Else
+                    DiscountId = Request.Form("DiscountCode").ToString()
+                End If
+
                 cmdMsSql = cmdSQL(cn, "update tblStudent set ExpiredDate =  getdate() + (@TrialTime / 24)   where StudentId = @stdId;
                                        insert into tblregister select newid(),@stdId,'1702F1EF-8FD5-443A-A68D-4599BC9F9E54',1
-                                       ,case when max(registeramount) is null then 0 else max(registeramount) + 1 end,null
+                                       ,case when max(registeramount) is null then 0 else max(registeramount) + 1 end,@DiscountId
                                        ,'500',1,getdate() from tblregister where StudentId = @stdId and registerstatus <> 2;")
 
                 With cmdMsSql
                     .Parameters.Add("@stdId", SqlDbType.VarChar).Value = stdId
                     .Parameters.Add("@TrialTime", SqlDbType.Int).Value = CInt(TrialTime)
+                    .Parameters.Add("@DiscountId", SqlDbType.VarChar).Value = DiscountId
                     .ExecuteNonQuery()
                 End With
 
@@ -926,7 +937,7 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-        '20240814 - เพิ่ม Assignment
+        '20240814 -- เพิ่ม Assignment
         <AcceptVerbs(HttpVerbs.Post)>
         Function CheckSendDialog()
             Dim L1 As New List(Of clsMain)
@@ -980,7 +991,7 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-        '20240814 - เพิ่ม Assignment
+        '20240814 -- เพิ่ม Assignment
         <AcceptVerbs(HttpVerbs.Post)>
         Function EndQuiz()
             Dim L1 As New List(Of clsMain)
@@ -1533,6 +1544,7 @@ Namespace Controllers
             Return QuizData
         End Function
         '20240805 -- เพิ่มการดึงไฟล์เสียงแบบ Slow และคำอธิบาย
+        '20240820 -- เพิ่มการดึงไฟล์เสียงคำตอบ
         Function GetQuestionAndAnswer()
             Dim objList As New clsItemQAndA()
             Dim L1 As New List(Of clsItemQAndA)
@@ -1570,6 +1582,7 @@ Namespace Controllers
                 QuestionNo = Session("QuestionNo")
 
 
+
                 ' ================ Check Permission ================
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
@@ -1586,6 +1599,8 @@ Namespace Controllers
 
                 Dim QuestionId As String = dtQuestion(0)("QuestionId").ToString
                 Dim QSetId As String = dtQuestion(0)("QSetId").ToString
+
+                SaveQuizScore(QuestionId)
 
                 Dim QExplain As String = dtQuestion(0)("QuestionExpain_Quiz").ToString
                 QExplain = QExplain.Replace("___MODULE_URL___", GenFilePath(QSetId))
@@ -1671,7 +1686,7 @@ Namespace Controllers
 
                 dtAnswer = getDataTable(cmdMsSql)
 
-                Dim objList2 As New clsItemQAndA()
+                Dim objListAnswer As New clsItemQAndA()
                 Dim AnsHtml As String = ""
 
                 Dim ArrChoicetxt() As String = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"}
@@ -1701,6 +1716,43 @@ Namespace Controllers
                     Dim Aname As String = dtAnswer(i)("AnswerNameQuiz").ToString
                     Aname = Aname.Replace("___MODULE_URL___", GenFilePath(QSetId))
 
+                    '20240820 -- Answer Multimedia File
+                    cmdMsSql = cmdSQL(cn, "select MultimediaObjId,MfileName,MFileExplain from tblMultimediaObject where ReferenceId = @AnswerId and ReferenceType = 1 and MFileLevel = 1 and isactive = 1;")
+
+                    With cmdMsSql
+                        .Parameters.Add("@AnswerId", SqlDbType.VarChar).Value = dtAnswer(i)("AnswerId").ToString
+                    End With
+
+                    Dim dtmultiAns As DataTable = getDataTable(cmdMsSql)
+
+                    If dtmultiAns.Rows.Count <> 0 Then
+
+                        Dim FPath As String = "../file" & FullPath & "/" & dtmultiAns(0)("MfileName").ToString
+
+                        objListAnswer.multiAnsname = dtmultiAns(0)("MultimediaObjId").ToString
+                        objListAnswer.multiAnspath = FPath
+
+                        If dtmultiAns.Rows(0)("MFileExplain").ToString <> "" Then
+                            objListAnswer.multiAnstxt = dtmultiAns.Rows(0)("MFileExplain").ToString
+                        End If
+                    End If
+
+                    cmdMsSql = cmdSQL(cn, "select MultimediaObjId,MfileName from tblMultimediaObject where ReferenceId = @AnswerId and ReferenceType = 1 and MFileLevel = 2 and isactive = 1;")
+
+                    With cmdMsSql
+                        .Parameters.Add("@AnswerId", SqlDbType.VarChar).Value = dtAnswer(i)("AnswerId").ToString
+                    End With
+
+                    Dim dtmultiAnsSlow As DataTable = getDataTable(cmdMsSql)
+
+                    If dtmultiAnsSlow.Rows.Count <> 0 Then
+
+                        Dim FPath As String = "../file" & FullPath & "/" & dtmultiAns(0)("MfileName").ToString
+
+                        objListAnswer.multiAnsSlowname = dtmultiAns(0)("MultimediaObjId").ToString
+                        objListAnswer.multiAnsSlowpath = FPath
+                    End If
+
                     Dim AExplain As String = dtAnswer(i)("AnswerExpainQuiz").ToString
                     AExplain = AExplain.Replace("___MODULE_URL___", GenFilePath(QSetId))
                     AExplain = "<br><div class=""ExplainQ ui-hide"">" & AExplain & "</div>"
@@ -1711,15 +1763,15 @@ Namespace Controllers
                     If i Mod 2 = 0 Then
                         AnsHtml &= "<div Class=""divAnswerRow"">
                                     <div Class=""divAnswerbar" & divName & " flexdiv Left " & IsAnswered & """ QId=""" & QuestionId & """ AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
-                          "<div class=""fistflexdiv " & UserAns & """>" & ArrChoicetxt(i) & ".</div><div>" & Aname & "</div></div>"
+                          "<div class=""fistflexdiv " & UserAns & """>" & ArrChoicetxt(i) & ".</div><div class='AName'>" & Aname & "</div></div>"
                     Else
                         AnsHtml &= "<div Class=""divAnswerbar" & divName & " flexdiv Right " & IsAnswered & """ QId=""" & QuestionId & """ AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
-                            "<div class=""fistflexdiv " & UserAns & """> " & ArrChoicetxt(i) & ".</div><div>" & Aname & "</div></div></div>"
+                            "<div class=""fistflexdiv " & UserAns & """> " & ArrChoicetxt(i) & ".</div><div class='AName'>" & Aname & "</div></div></div>"
                     End If
 
-                    objList2.ItemType = "2"
-                    objList2.Itemtxt = AnsHtml
-
+                    objListAnswer.ItemType = "2"
+                    objListAnswer.Itemtxt = AnsHtml
+                    objListAnswer.ItemId = dtAnswer(0)("AnswerId").ToString
                     cmdMsSql = cmdSQL(cn, "select MultimediaObjId,MfileName from tblMultimediaObject where ReferenceId = @AnswerId and ReferenceType = 1 and isactive = 1;")
 
                     With cmdMsSql
@@ -1732,17 +1784,18 @@ Namespace Controllers
 
                         Dim FPath As String = "../file" & FullPath & "/" & dtAmulti(0)("MfileName").ToString
 
-                        objList2.multiname = dtAmulti(0)("MultimediaObjId").ToString
-                        objList2.multipath = FPath
+                        objListAnswer.multiname = dtAmulti(0)("MultimediaObjId").ToString
+                        objListAnswer.multipath = FPath
                     End If
 
 
-                    L1.Add(objList2)
+
+                    L1.Add(objListAnswer)
                 Next
 
-                objList2 = Nothing
+                objListAnswer = Nothing
 
-                SaveQuizScore(QuestionId)
+
 
             Catch ex As Exception
                 objList.dataType = "error"
@@ -3362,30 +3415,127 @@ Namespace Controllers
             Dim objList As New clsMain()
 
             Try
-                    ' ================ Check Permission ================
-                    cn = New SqlConnection(sqlCon("Wetest"))
-                    If cn.State = 0 Then cn.Open()
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
                 ' ================================================== 
 
-                cmdMsSql = cmdSQL(cn, "Select distinct CONVERT(varchar(10), r.lastupdate, 103) as SlipDate,FORMAT(r.lastupdate,'hh:mm tt') as SlipTime
-                                            ,PackageName + ' ' + cast(packageprice as varchar) + ' Bath ' + s.Firstname + ' ' + s.Surname as SlipDetail
-                                            From tblRegister r inner Join tblstudent s on r.studentId = s.studentId 
-                                            inner Join tblpackage p on p.packageId = r.packageId;")
+                cmdMsSql = cmdSQL(cn, "Select distinct r.RHId,  CONVERT(varchar(10), r.lastupdate, 103) as SlipDate
+                                        ,FORMAT(r.lastupdate,'hh:mm tt') as SlipTime
+                                        ,PackageName + ' ' + cast(packageprice as varchar) + ' Bath'  as SlipDetail
+                                        ,' ' + s.Firstname + ' ' + s.Surname as StudentName
+                                        From tblRegister r inner Join tblstudent s on r.studentId = s.studentId 
+                                        inner Join tblpackage p on p.packageId = r.packageId where RegisterStatus = 1;")
 
                 dt = getDataTable(cmdMsSql)
 
                 Dim jobDetail As String = ""
                 If dt.Rows.Count <> 0 Then
                     For i = 0 To dt.Rows.Count() - 1
-                        jobDetail &= "<div Class=""flexDiv jobDetailItem""><div Class=""UploadDate"">" & dt.Rows(i)("SlipDate") & "</div>
+                        jobDetail &= "<div Class=""flexDiv jobDetailItem"" RHId=""" & dt.Rows(i)("RHId").ToString & """><div Class=""UploadDate"">" & dt.Rows(i)("SlipDate") & "</div>
                                             <div Class=""UploadTime"">" & dt.Rows(i)("SlipTime") & "</div>
-                                            <div Class=""UploadDetail"">" & dt.Rows(i)("SlipDetail") & "</div></div>"
+                                            <div Class=""UploadDetail"">" & dt.Rows(i)("SlipDetail") & dt.Rows(i)("StudentName") & "</div></div>"
                     Next
                     objList.dataType = "success"
                     objList.errorMsg = jobDetail
                     L1.Add(objList)
                     objList = Nothing
                 End If
+
+            Catch ex As Exception
+                objList.dataType = "Error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+        '20240820 ดึงข้อมูลรายละเอียดสลิป
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function GetSlip()
+            Dim L1 As New List(Of clsSlip)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsSlip()
+
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ================================================== 
+
+                cmdMsSql = cmdSQL(cn, "Select 'Date : ' + CONVERT(varchar(10), r.lastupdate, 103) + '  Time : ' + FORMAT(r.lastupdate,'hh:mm tt') as SlipTime
+                                        ,PackageName + ' ' + cast(packageprice as varchar) + ' Bath'  as SlipDetail
+                                        ,' ' + s.Firstname + ' ' + s.Surname as StudentName,s.StudentId
+                                        From tblRegister r inner Join tblstudent s on r.studentId = s.studentId inner Join tblpackage p on p.packageId = r.packageId 
+                                        left join tblDiscount d on r.DiscountId = d.DiscountId where rhid = @rhid")
+                With cmdMsSql
+                    .Parameters.Add("@rhid", SqlDbType.VarChar).Value = Request.Form("rhid")
+                    .ExecuteNonQuery()
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                Dim SlipDetail As String = ""
+                If dt.Rows.Count <> 0 Then
+                    For i = 0 To dt.Rows.Count() - 1
+                        SlipDetail &= "<div class=""UploadDateTime"">" & dt.Rows(0)("SlipTime") & "</div>
+                                       <div class=""PackageName"">Package : " & dt.Rows(0)("SlipDetail") & "</div>
+                                       <div class=""Discount"">Discount : -</div>
+                                       <div class=""UploadName"">Name : " & dt.Rows(0)("StudentName") & "</div>"
+                    Next
+                    objList.Result = "success"
+                    objList.ResultTxt = SlipDetail
+                    objList.slipURL = "/WetestPhoto/Slip/" & dt.Rows(0)("StudentId").ToString & ".png"
+                    L1.Add(objList)
+                    objList = Nothing
+                End If
+
+            Catch ex As Exception
+                objList.Result = "Error"
+                objList.ResultTxt = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+        '20240820 บันทึก Status Slip
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function ConfirmSlip()
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsMain()
+
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ================================================== 
+
+
+                cmdMsSql = cmdSQL(cn, "Update tblRegister set RegisterStatus = @RegisterStatus , registeramount += 1 
+                                       ,lastupdate = getdate() where rhid = @rhid;
+                                       update tblstudent set ExpiredDate = getdate() + PackageTime / 24
+                                       from tblregister r inner join tblPackage p on r.packageId = p.packageId 
+                                       inner join tblstudent s on s.StudentId = r.StudentId where rhid = @rhid;")
+                With cmdMsSql
+                    .Parameters.Add("@rhid", SqlDbType.VarChar).Value = Request.Form("rhid").ToString
+                    .Parameters.Add("@RegisterStatus", SqlDbType.Int).Value = CInt(Request.Form("RegisterStatus"))
+                    .ExecuteNonQuery()
+                End With
+
+
+                objList.dataType = "success"
+
+                L1.Add(objList)
+                objList = Nothing
 
             Catch ex As Exception
                 objList.dataType = "Error"
@@ -3414,7 +3564,8 @@ Namespace Controllers
         Private Class clsItemQAndA
             Inherits clsMain
             Public ItemType As String, ItemNo As String, ItemId As String, Itemtxt As String, ItemStatus As String _
-                , multiname As String, multipath As String, multiSlowname As String, multiSlowpath As String, multitxt As String
+                , multiname As String, multipath As String, multiSlowname As String, multiSlowpath As String, multitxt As String _
+                , multiAnsname As String, multiAnspath As String, multiAnsSlowname As String, multiAnsSlowpath As String, multiAnstxt As String
         End Class
         Public Class clsQuizData
             Inherits clsMain
@@ -3455,6 +3606,15 @@ Namespace Controllers
             Inherits clsMain
             Public Result As String, ResultTxt As String, MultiAmount As Integer, MultiSlowAmount As Integer
         End Class
+        Public Class clsDiscount
+            Inherits clsMain
+            Public Result As String, ResultTxt As String, DiscountId As String
+        End Class
+        Public Class clsSlip
+            Inherits clsMain
+            Public Result As String, ResultTxt As String, slipURL As String
+        End Class
+
 #End Region
 
     End Class
