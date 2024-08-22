@@ -48,7 +48,7 @@ $(document)
     })
     .on('click', '#dialogConfirm .btnconfirm', function (e, data) {
         var RHId = $(this).attr('RHId');
-        SaveConfirmSlip(RHId,2);
+        SaveConfirmSlip(RHId,2,'');
         popupClose($(this).closest('.my-popup'));
     })
 
@@ -59,7 +59,9 @@ $(document)
      })
     .on('click', '#dialogReject .btnRejectConfirm', function (e, data) {
         var RHId = $(this).attr('RHId');
-        SaveConfirmSlip(RHId, 3);
+        var RejectReason = $('#txtReason').val();
+        console.log(RejectReason);
+        SaveConfirmSlip(RHId, 3, RejectReason);
         popupClose($(this).closest('.my-popup'));
     })
 
@@ -118,8 +120,8 @@ function ShowJobDetail(RHId) {
     });
 }
 //20240820 -- บันทึกสถานะ
-function SaveConfirmSlip(RHId,RegisterStatus) {
-    var data = 'RHId=' + RHId + '&RegisterStatus=' + RegisterStatus
+function SaveConfirmSlip(RHId, RegisterStatus, RejectReason) {
+    var data = 'RHId=' + RHId + '&RegisterStatus=' + RegisterStatus + '&RejectReason=' + RejectReason
     $.ajax({
         type: 'POST',
         url: '/weTest/ConfirmSlip',
