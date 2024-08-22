@@ -256,6 +256,46 @@ $(document)
 .on('click', '.multiQtxtIcon', function (e, data) {
     $('#multiQtxt').removeClass('ui-hide');
 })
+//20240822 -- ปรับการกดเล่นไฟล์เสียงแต่ละคำตอบ
+.on('click', '.multiAfileIcon', function (e, data) {
+    var MID = $(this).attr('MID');
+    var PlayCount = $(this).attr('PlayCount');
+    if (PlayCount == MultiFileAmount) {
+        $('#multiAnswer' + MID + ' .bap-btn').click();
+
+        $('#MA' + MID).attr('PlayCount',1);
+
+        if ($('#multiAnswerSlow' + MID).length) {
+            $('#MA' + MID).addClass('ui-hide');
+            $('#MAS' + MID).removeClass('ui-hide');
+        } else if ($('#MATIcon' + MID).length) {
+            $('#MAS' + MID).addClass('ui-hide');
+            $('#MATIcon' + MID).removeClass('ui-hide');
+        }
+    } else {
+        PlayCount = parseInt(PlayCount) + 1;
+        $('#multiAnswer' + MID + ' .bap-btn').click();
+        $('#MA' + MID).attr('PlayCount',PlayCount);
+    }
+})
+.on('click', '.multiAfileSlowIcon', function (e, data) {
+    var MID = $(this).attr('MID');
+    var PlayCount = $(this).attr('PlayCount');
+    if (PlayCount == MultiFileAmount) {
+        $('#multiAnswerSlow' + MID + ' .bap-btn').click();
+
+        $('#MAS' + MID).attr('PlayCount', 1);
+
+        if ($('#MATIcon' + MID).length) {
+            $('#MAS' + MID).addClass('ui-hide');
+            $('#MATIcon' + MID).removeClass('ui-hide');
+        }
+    } else {
+        PlayCount = parseInt(PlayCount) + 1;
+        $('#multiAnswerSlow' + MID + ' .bap-btn').click();
+        $('#MAS' + MID).attr('PlayCount', 1);
+    }
+})
 
 // ==== Dialog ข้อข้าม ========================================================================================= //
  .on('click', '#divAllLeapChoice ,#btnAllChoice', function (e, data) {
@@ -375,12 +415,12 @@ function GetQuestionAndAnswer(ActionType, QuestionNo) {
                     $('#divQuestion').attr('Qid', data[i].ItemId);
 
                     if (data[i].multiname != null) {
-                        $('.QName').append("<div class='multiQfileIcon'></div><div id='multiQuestion' class='ui-hide' mid='" + data[i].multiname + "'></div>");
+                        $('.QName').append("<div class='multiQfileIcon'></div><div id='multiQuestion' class='ui-hide'></div>");
                         setbuttonAudioPlayer('multiQuestion', data[i].multipath);
                     }
 
                     if (data[i].multiSlowname != null) {
-                        $('.QName').append("<div class='multiQfileSlowIcon ui-hide'></div><div id='multiSlowQuestion' class='ui-hide' mid='" + data[i].multiSlowname + "'></div>");
+                        $('.QName').append("<div class='multiQfileSlowIcon ui-hide'></div><div id='multiSlowQuestion' class='ui-hide'></div>");
                         setbuttonAudioPlayer('multiSlowQuestion', data[i].multiSlowpath);
                     }
                     if (data[i].multitxt != null) {
@@ -395,18 +435,18 @@ function GetQuestionAndAnswer(ActionType, QuestionNo) {
                 } else {
 
                     $('#divAnswer').html(data[i].Itemtxt);
-
+                    console.log(data[i].ItemId);
                     if (data[i].multiAnsname != null) {
-                        $('.AName').append("<div class='multiAfileIcon'></div><div id='multiAnswer' class='ui-hide' mid='" + data[i].multiAnsname + "'></div>");
-                        setbuttonAudioPlayer('multiAnswer', data[i].multiAnspath);
+                        $('.AName' + data[i].ItemId).append("<div class='multiAfileIcon' id='MA" + data[i].ItemId + "' MID='" + data[i].ItemId + "' PlayCount='1'></div><div id='multiAnswer" + data[i].ItemId + "' class='ui-hide'></div>");
+                        setbuttonAudioPlayer('multiAnswer' + data[i].ItemId, data[i].multiAnspath);
                     }
 
                     if (data[i].multiAnsSlowname != null) {
-                        $('.AName').append("<div class='multiAfileSlowIcon ui-hide'></div><div id='multiAnsSlowQuestion' class='ui-hide' mid='" + data[i].multiAnsSlowname + "'></div>");
+                        $('.AName' + data[i].ItemId).append("<div class='multiAfileSlowIcon ui-hide' id='MAS" + data[i].ItemId + "' MID='" + data[i].ItemId + "' PlayCount='1'></div><div id='multiAnswerSlow" + data[i].ItemId + "' class='ui-hide'></div>");
                         setbuttonAudioPlayer('multiAnsSlowQuestion', data[i].multiAnsSlowpath);
                     }
                     if (data[i].multiAnstxt != null) {
-                        $('.AName').append("<div class='multiAtxtIcon ui-hide'><div id='multiAnstxt' class='ui-hide'>" + data[i].multiAnstxt + "</div>");
+                        $('.AName' + data[i].ItemId).append("<div class='multiAtxtIcon ui-hide' id='MATIcon" + data[i].ItemId + "'><div id='MAT" + data[i].ItemId + "'  class='ui-hide'>" + data[i].multiAnstxt + "</div>");
                     }
                 }
             }
