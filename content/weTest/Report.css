@@ -44,8 +44,8 @@ h1 {border-bottom-style:solid;border-bottom-width: 1px;}
 .divTestsetName,.divEI{width:30%}
 .divScore{width:6%}
 .divRightSpace{width:70px;}
-.divAnswered{background: url(/images/Wetest/SeeAnswered.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 10px;height: 10px;margin-left: 10px;cursor:pointer;}
-.divAgain{background: url(/images/Wetest/Again.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 10px;height: 10px;margin-left: 10px;cursor:pointer;}
+.divAnswered{background: url(/images/Wetest/SeeAnswered.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 10px;height: 10px;margin-left: 10px;cursor:pointer;z-index:100;}
+.divAgain{background: url(/images/Wetest/Again.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 10px;height: 10px;margin-left: 10px;cursor:pointer;z-index:100;}
 
 .Logovocab{background: url(/images/Wetest/vocab.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 30px;height:30px;margin-left: 5px;cursor:pointer;}
 .Logogrammar{background: url(/images/Wetest/gramma.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 30px;height:30px;margin-left: 5px;cursor:pointer;}
