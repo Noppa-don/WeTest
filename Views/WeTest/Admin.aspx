@@ -2,7 +2,7 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server"></asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
-    <link href="../content/Wetest/Wetest.css?ver=1.1.6" rel="stylesheet" type="text/css" />
+    <link href="../content/Wetest/weTestCashier.css?ver=1.1.6" rel="stylesheet" type="text/css" />
     <link href="../content/Wetest/Admin.css?ver=1.1.6" rel="stylesheet" type="text/css" />
     <script src="../scripts/Wetest/Admin.js?ver=1.1.6" type="text/javascript"></script>
 
@@ -78,26 +78,39 @@
             <div class="jobdiv trial">ทดลองใช้ / ฟรี</div>
             <div class="jobdiv successPayment">ชำระเงินสำเร็จ</div>
         </div>
-        <div class="JobDetail">
-            
-        </div>
-
+        <div class="JobDetail"></div>
     </div>
-    <div class="PaymentDetail"></div>
+    <div class="PaymentDetail flexdiv ui-hide">
+        <div class="slipDetail"></div>
+        <div class="slipPhoto"></div>
+        <div class="Imagebtn btnCancelConfirmSlip"></div>
+    </div>
     <div class="footer">
-        <div class='footerButton footerGoal ui-hide'>
-            <div class="Imagebtn btnBack fistflexdiv"></div>
-            <div class="Imagebtn btnSetDetailGoal unActive ui-Right"></div>
+        <div class='footerButton footerslip ui-hide'>
+            <div class="Imagebtn btnReject fistflexdiv"></div>
+            <div class="Imagebtn btnConfirmSlip ui-Right"></div>
         </div>
     </div>
 
-    <div name='alert' id="dialogAlert" class='my-popup alert ui-popup-container ui-popup-hidden'>
+    <div name='select' id="dialogConfirm" class='my-popup confirm ui-popup-container ui-popup-hidden'>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
-            <div class='ui-icon wrong'></div>
-            <div class='ui-text'></div>
-            <div id="btnOK" class='btn btnSelected'>OK</div>
+            <div class='ui-icon warning'></div>
+            <div class='ui-text'>Confirm this payment?</div>
+            <div class="ui-twoButton">
+                <div class='btn btnCancel btnNo'>No</div>
+                <div class='btn btnSelected btnconfirm'>Confirm</div>
+            </div>
         </div>
     </div>
-
+    <div name='select' id="dialogReject" class='my-popup confirm ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon warning'></div>
+            <div class='ui-text'>Reject this payment?</div>
+            <div class="ui-twoButton">
+                <div class='btn btnCancel btnNo'>No</div>
+                <div class='btn btnSelected btnRejectConfirm'>Confirm</div>
+            </div>
+        </div>
+    </div>
 
 </asp:Content>
