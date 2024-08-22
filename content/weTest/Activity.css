@@ -14,7 +14,7 @@
 #divIconRun{background: url(/images/Wetest/Run.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 35px;height: 70px;}
 #divGoal{background: url(/images/Wetest/GoalFlag.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 35px;height: 70px;}
 #divQuestionRun {width:90%;border-style:solid; border-color:white; border-radius:1.2em;margin: 10px 10px 10px 10px;}
-#divBtnReportProblem {margin-right:50px;float:right;background: url(/images/Wetest/QuuestionProblem.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;cursor:pointer;}
+#divBtnReportProblem {margin-right:50px;float:right;background: url(/images/Wetest/QuuestionProblem.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;cursor:pointer;margin-right:10px;}
 
 
 #divPlayground {background-color:#f7eee9;display: flex;width: 100%;padding:15px;}
