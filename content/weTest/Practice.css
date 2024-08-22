@@ -24,15 +24,15 @@
 
 .Lessondiv{float:left;width:80px;height:50px;background-color:#82d1f5;line-height:50px;text-align:center;margin-left:23px;border-radius:1em;}
 
-.LessonReading{background-color:#82d1f5;cursor:pointer;}
-.LessonListening{background-color:#d98c8a;cursor:pointer;}
-.LessonVocabulary{background-color:#64c087;cursor:pointer;}
-.LessonGrammar{background-color:#d3c2df;cursor:pointer;}
-.LessonSituation{background-color:#e5b99e;cursor:pointer;}
+.LessonReading{background-color:#82d1f5;cursor:pointer;z-index:100;}
+.LessonListening{background-color:#d98c8a;cursor:pointer;z-index:100;}
+.LessonVocabulary{background-color:#64c087;cursor:pointer;z-index:100;}
+.LessonGrammar{background-color:#d3c2df;cursor:pointer;z-index:100;}
+.LessonSituation{background-color:#e5b99e;cursor:pointer;z-index:100;}
 
 .skilldiv {margin-top:15px;}
 
-.otherButton{background: url(/images/Wetest/other.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:25px;height:25px;margin:auto;cursor:pointer;}
+.otherButton{background: url(/images/Wetest/other.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width:25px;height:25px;margin:auto;cursor:pointer;z-index:100;}
 
 #LessonType {margin-top:40px;}
 
