@@ -106,6 +106,10 @@
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
             <div class='ui-icon warning'></div>
             <div class='ui-text'>Reject this payment?</div>
+             <div class="txtData">
+                Reason <input type='text' id='txtReason' />
+             </div>
+            <br />
             <div class="ui-twoButton">
                 <div class='btn btnCancel btnNo'>No</div>
                 <div class='btn btnSelected btnRejectConfirm'>Confirm</div>
