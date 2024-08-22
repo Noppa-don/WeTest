@@ -1686,12 +1686,13 @@ Namespace Controllers
 
                 dtAnswer = getDataTable(cmdMsSql)
 
-                Dim objListAnswer As New clsItemQAndA()
+
                 Dim AnsHtml As String = ""
 
                 Dim ArrChoicetxt() As String = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"}
 
                 For i = 0 To dtAnswer.Rows.Count - 1
+                    Dim objListAnswer As New clsItemQAndA()
                     Dim IsAnswered As String = ""
                     Dim UserAns As String = ""
                     Dim divName As String = ""
@@ -1728,7 +1729,6 @@ Namespace Controllers
                     If dtmultiAns.Rows.Count <> 0 Then
 
                         Dim FPath As String = "../file" & FullPath & "/" & dtmultiAns(0)("MfileName").ToString
-
                         objListAnswer.multiAnsname = dtmultiAns(0)("MultimediaObjId").ToString
                         objListAnswer.multiAnspath = FPath
 
@@ -1763,15 +1763,15 @@ Namespace Controllers
                     If i Mod 2 = 0 Then
                         AnsHtml &= "<div Class=""divAnswerRow"">
                                     <div Class=""divAnswerbar" & divName & " flexdiv Left " & IsAnswered & """ QId=""" & QuestionId & """ AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
-                          "<div class=""fistflexdiv " & UserAns & """>" & ArrChoicetxt(i) & ".</div><div class='AName'>" & Aname & "</div></div>"
+                          "<div class=""fistflexdiv " & UserAns & """>" & ArrChoicetxt(i) & ".</div><div class='AName" & dtAnswer(i)("AnswerId").ToString & "'>" & Aname & "</div></div>"
                     Else
                         AnsHtml &= "<div Class=""divAnswerbar" & divName & " flexdiv Right " & IsAnswered & """ QId=""" & QuestionId & """ AnsId=""" & dtAnswer(i)("AnswerId").ToString & """>" &
-                            "<div class=""fistflexdiv " & UserAns & """> " & ArrChoicetxt(i) & ".</div><div class='AName'>" & Aname & "</div></div></div>"
+                            "<div class=""fistflexdiv " & UserAns & """> " & ArrChoicetxt(i) & ".</div><div class='AName" & dtAnswer(i)("AnswerId").ToString & "'>" & Aname & "</div></div></div>"
                     End If
 
                     objListAnswer.ItemType = "2"
                     objListAnswer.Itemtxt = AnsHtml
-                    objListAnswer.ItemId = dtAnswer(0)("AnswerId").ToString
+                    objListAnswer.ItemId = dtAnswer(i)("AnswerId").ToString
                     cmdMsSql = cmdSQL(cn, "select MultimediaObjId,MfileName from tblMultimediaObject where ReferenceId = @AnswerId and ReferenceType = 1 and isactive = 1;")
 
                     With cmdMsSql
@@ -1787,16 +1787,9 @@ Namespace Controllers
                         objListAnswer.multiname = dtAmulti(0)("MultimediaObjId").ToString
                         objListAnswer.multipath = FPath
                     End If
-
-
-
                     L1.Add(objListAnswer)
+                    objListAnswer = Nothing
                 Next
-
-                objListAnswer = Nothing
-
-
-
             Catch ex As Exception
                 objList.dataType = "error"
                 objList.errorMsg = ex.Message
@@ -2450,6 +2443,7 @@ Namespace Controllers
         '20240723 เพิ่ม User Data สำหรับแก้ไข
         '20240813 select จำนวนวันที่จะหมดอายุเพื่อเอาไปใช้กำหนด Max Date ของ calendar
         '20240819 ปรับวิธีการดึง Student Goal
+        '20240822 ปรับวิธีการดึง Total Goal case เลยวันที่ตั้งค่าไว้
         Function GetUserData(stdId As String)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim objList As New clsStudentData()
@@ -2496,8 +2490,9 @@ Namespace Controllers
                             objList.UserLevel = dt(0)("LevelShortName").ToString
                         End If
 
-                        cmdMsSql = cmdSQL(cn, "select GoalType,SkillId,CONVERT(varchar(10),enddate, 103) as GoalDate,datediff(day,getdate(),Enddate) as GoalAmount 
-                                                from tblstudentGoal where StudentId = @stdid and isactive = 1 and datediff(day,getdate(),Enddate) >=0;")
+                        cmdMsSql = cmdSQL(cn, "select GoalType,SkillId,CONVERT(varchar(10),enddate, 103) as GoalDate
+                                                ,datediff(day,getdate(),Enddate) as GoalAmount 
+                                                from tblstudentGoal where StudentId = @stdid and isactive = 1;")
                         With cmdMsSql
                             .Parameters.Add("@stdid", SqlDbType.VarChar).Value = stdId
                         End With
@@ -2527,10 +2522,18 @@ Namespace Controllers
                             objList.SituationGoalAmount = ""
                             objList.ListeningGoal = ""
                             objList.ListeningGoalAmount = ""
+                        Else
+                            objList.TotalGoal = ""
+                            objList.TotalGoalAmount = ""
+                            objList.ReadingGoal = ""
+                            objList.ReadingGoalAmount = ""
+                            objList.SituationGoal = ""
+                            objList.SituationGoalAmount = ""
+                            objList.ListeningGoal = ""
+                            objList.ListeningGoalAmount = ""
                         End If
 
-
-                        cmdMsSql = cmdSQL(cn, "select (100 - ((DATEDIFF(DAY,getdate(),enddate)*100) / DATEDIFF(DAY,LastUpdate,enddate))) as DatePercent
+                        cmdMsSql = cmdSQL(cn, "select (100 - ((DATEDIFF(DAY,getdate(),enddate)*100) / DATEDIFF(DAY,LastUpdate,enddate))) as DatePercent,datediff(day,getdate(),Enddate) as Enddate
                                             from tblStudentGoal where StudentId = @stdid and isactive = 1;")
                         With cmdMsSql
                             .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentid").ToString
@@ -2543,7 +2546,11 @@ Namespace Controllers
 
                         '-- ส่วนของการ Set Percent เป้าหมาย
                         If dt.Rows.Count <> 0 Then
-                            objList.TotalGoalDatePercent = dt(0)("DatePercent").ToString & "%"
+                            If CInt(dt(0)("Enddate")) < 0 Then
+                                objList.TotalGoalDatePercent = "100%"
+                            Else
+                                objList.TotalGoalDatePercent = dt(0)("DatePercent").ToString & "%"
+                            End If
 
                             cmdMsSql = cmdSQL(cn, "select sum(a.AnswerScore) as TotalScore 
                                             from tbltestset t inner join tblTestSetQuestionSet ts on t.TestSetId = ts.TestSetId 
@@ -2614,6 +2621,11 @@ Namespace Controllers
                         Else
                             objList.TotalGoalDatePercent = "0%"
                             objList.TotalGoalScorePercent = "0%"
+                            objList.ReadingScorePercent = "0%"
+                            objList.ListeningScorePercent = "0%"
+                            objList.GrammarScorePercent = "0%"
+                            objList.VocabScorePercent = "0%"
+                            objList.SituationScorePercent = "0%"
                         End If
                     End If
                 Else
@@ -3507,6 +3519,7 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
         '20240820 บันทึก Status Slip
+        '20240822 บันทึกหมาายเหตุ กรณี Reject Slip
         <AcceptVerbs(HttpVerbs.Post)>
         Function ConfirmSlip()
             Dim L1 As New List(Of clsMain)
@@ -3521,13 +3534,14 @@ Namespace Controllers
 
 
                 cmdMsSql = cmdSQL(cn, "Update tblRegister set RegisterStatus = @RegisterStatus , registeramount += 1 
-                                       ,lastupdate = getdate() where rhid = @rhid;
+                                       ,RejectReason = @RejectReason,lastupdate = getdate() where rhid = @rhid;
                                        update tblstudent set ExpiredDate = getdate() + PackageTime / 24
                                        from tblregister r inner join tblPackage p on r.packageId = p.packageId 
                                        inner join tblstudent s on s.StudentId = r.StudentId where rhid = @rhid;")
                 With cmdMsSql
                     .Parameters.Add("@rhid", SqlDbType.VarChar).Value = Request.Form("rhid").ToString
                     .Parameters.Add("@RegisterStatus", SqlDbType.Int).Value = CInt(Request.Form("RegisterStatus"))
+                    .Parameters.Add("@RejectReason", SqlDbType.Int).Value = Request.Form("RejectReason")
                     .ExecuteNonQuery()
                 End With
 
