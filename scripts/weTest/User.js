@@ -171,7 +171,8 @@ $(document)
         if ($('.btnSetDetailGoal').hasClass('unActive')) {
             return 0;
         } else {
-            $('.Goal,.btnSetDetailGoal').addClass('ui-hide');
+            $('.Goal').addClass('ui-hide');
+            $('.btnSetDetailGoal').addClass('unActive');
             $('.DetailGoal').removeClass('ui-hide');
         }
 
@@ -353,7 +354,7 @@ function SaveGoal() {
                         $('#lastestGOAL').html('Your lastest GOAL : ' + data[i].TotalGoal + ' ( Time left ' + data[i].TotalGoalAmount + ' days )');
                         $('#lastestBigGOAL').html('Your lastest A BIG GOAL : ' + data[i].TotalGoal + ' ( Time left ' + data[i].TotalGoalAmount + ' days )');
                         $('.btnSetDetailGoal').removeClass('unActive');
-                        $('.btnClear').removeClass('ui-hide');
+                        $('.btnClear,.btnSetDetailGoal').removeClass('ui-hide');
                     } else {
                         $('#' + GoalType + 'TimeResult').html('Due date : ' + data[i].TotalGoal + '<br />(Time left ' + data[i].TotalGoalAmount + ' days)');
                         $('#' + GoalType + 'TimeResult').removeClass('ui-hide');
@@ -376,6 +377,7 @@ function SaveGoal() {
     });
 }
 //20240716 -- Set User Data
+//20240716 -- ปรับการแสดงผล Total Goal case เลยวันที่ที่ตั้งค่าไว้
 function SetUserData(data) {
     for (var i = 0; i < data.length; i++) {
         console.log(data[i].Result);
@@ -397,8 +399,11 @@ function SetUserData(data) {
                 $('.btnSetDetailGoal').removeClass('unActive');
                 $('.btnClear').removeClass('ui-hide');
                 totalGoalAmount = data[i].TotalGoalAmount
+                $('.btnClear,.btnSetDetailGoal').removeClass('ui-hide');
             } else {
                 $('.btnClear').addClass('ui-hide');
+                $('.btnSetDetailGoal').removeClass('ui-hide');
+                $('.btnSetDetailGoal').addClass('unActive');
             }
             if (data[i].ReadingGoal != '') {
                 $('#ReadingTimeResult').html('Due date : ' + data[i].ReadingGoal + '<br />(Time left ' + data[i].ReadingGoalAmount + ' days)');
