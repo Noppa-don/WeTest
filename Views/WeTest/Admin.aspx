@@ -61,7 +61,7 @@
                 </div>
                 <div class="btn btnMainMenu" id="btnReport">
                     <div class='reportIcon'></div>
-                    <span class="txtMenu">Reports</span>
+                    <span class="txtMenu">Reports</span>   
                 </div>
             </div>
             <div class="expiredDate"></div>
