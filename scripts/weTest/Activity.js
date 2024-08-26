@@ -7,9 +7,11 @@ var MultiFileSlowAmount;
 // ========================= Page Load ======================== //
 $(function () {
     $('div[data-role=page]').page({ theme: 'c', });
+    GetStartTime();
     checkAnsweredFromReport();
     GetConfigMultiFile();
     SetLogo();
+  
 });
 
 // ============================================================ //
@@ -604,6 +606,20 @@ function GetConfigMultiFile() {
                     MultiFileSlowAmount = data[i].MultiSlowAmount;
                 } else {
                     console.log(data[i].ResultTxt)
+                }
+            }
+        }
+    });
+}
+//20240823 -- ตรวจสอบเวลาเริ่มต้น Case Refresh Page แล้วเวลากลับไปเริ่มนับใหม่
+function GetStartTime() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/GetStartTime',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].dataType == 'success') {
+                    sec = data[i].errorMsg;
                 }
             }
         }
