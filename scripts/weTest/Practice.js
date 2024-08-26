@@ -136,13 +136,13 @@ $(document)
      });
  })
 //20240730 Select Dropdown
- .on('click', '#ddlLevel', function (e, data) {
-
+ .on('change', 'select', function (e, data) {
+     console.log(this.value);
      var post1 = 'LevelId=' + this.value;
      $.ajax({
          type: 'POST',
          url: '/weTest/GetLesson',
-         data: post1,
+         data: post1,                                                            
          success: function (data) {
              for (var i = 0; i < data.length; i++) {
                  if (data[i].skillSet == 'error') {
@@ -218,7 +218,7 @@ function GetLevel() {
                     var LevelId;
                     for (var i = 0; i < data.length; i++) {
                         selectHTML += "<option value='" + data[i].LevelId + "'>" + data[i].LevelName + "</option>";
-                        LevelId = data[i].LevelId
+                        LevelId = data[0].LevelId
                     }
                     selectHTML += "</select>";
                     $('#SelectLevel').html(selectHTML);
