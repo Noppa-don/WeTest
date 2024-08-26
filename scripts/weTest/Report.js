@@ -210,6 +210,7 @@ function OpenFilterdate() {
 
 }
 //20240722 -- Search Report with Filter
+//20240823 -- Check Session
 function SearchReport() {
     var startdate, enddate;
     if ($('#rdbThisWeek').is(":checked")) {
@@ -252,6 +253,8 @@ function SearchReport() {
                 } else if (data[i].dataType == 'nodata') {
                     $('.nodata').removeClass('ui-hide');
                     $('.reportDetail').addClass('ui-hide');
+                } else if (data[i].dataType == 'sessionlost') {
+                    window.location = '/Wetest/user';
                 } else {
                     $('#dialogAlert').attr('action', 'focus');
                     $('#dialogAlert .ui-text').html(data[i].errorMsg);
