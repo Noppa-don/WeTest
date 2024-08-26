@@ -1467,6 +1467,47 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+        '20240823 -- ดึงเวลาเริ่มทำควิซ Case กด Refresh แล้วเวลาเริ่มนับใหม่
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function GetStartTime()
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As New DataTable, dtQuiz As New DataTable, dtSkill As DataTable
+            Dim objList As New clsMain()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                cmdMsSql = cmdSQL(cn, "select datediff(ss,StartTime,getdate()) as DiffTime from tblQuiz where QuizId = @QuizId;")
+                With cmdMsSql
+                    .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
+                End With
+
+                dtQuiz = getDataTable(cmdMsSql)
+
+                If dtQuiz.Rows.Count <> 0 Then
+
+                End If
+                objList.dataType = "success"
+                objList.errorMsg = dtQuiz.Rows(0)("DiffTime")
+
+                L1.Add(objList)
+                objList = Nothing
+            Catch ex As Exception
+                objList.dataType = "Error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
+
         Function CreateNewQuiz(QuizData As clsQuizData) As clsQuizData
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim L1 As New List(Of clsMain)
@@ -2123,6 +2164,8 @@ Namespace Controllers
             End Try
             Return objList
         End Function
+
+
 
 #End Region
 
@@ -3034,14 +3077,18 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
+                If Session("") IsNot Nothing Then
+                    If Request.Form("PracticeType").ToString = "0" Then
+                        objList.errorMsg = GetRandomReport(Request.Form("StartDate").ToString, Request.Form("EndDate").ToString, Request.Form("PracticeType").ToString)
+                    Else
+                        objList.errorMsg = GetLessonReport(Request.Form("StartDate").ToString, Request.Form("EndDate").ToString, Request.Form("PracticeType").ToString)
+                    End If
 
-                If Request.Form("PracticeType").ToString = "0" Then
-                    objList.errorMsg = GetRandomReport(Request.Form("StartDate").ToString, Request.Form("EndDate").ToString, Request.Form("PracticeType").ToString)
+                    objList.dataType = "success"
                 Else
-                    objList.errorMsg = GetLessonReport(Request.Form("StartDate").ToString, Request.Form("EndDate").ToString, Request.Form("PracticeType").ToString)
+                    objList.dataType = "sessionlost"
                 End If
 
-                objList.dataType = "success"
                 L1.Add(objList)
                 objList = Nothing
             Catch ex As Exception
