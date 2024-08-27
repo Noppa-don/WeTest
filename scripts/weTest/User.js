@@ -37,7 +37,6 @@ $(document)
 // ======================= MainMenu =========================== //
     .on('click', '#btnMockUpExam', function (e, data) {
         CheckExamAgain();
-
     })
     .on('click', '#btnPracticeMenu', function (e, data) {
         window.location = '/Wetest/Practice';
@@ -59,16 +58,16 @@ $(document)
     .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel,#dialogLogout .btnCancel,#dialogDeleteAccount .btnCancel', function (e, data) {
         popupClose($(this).closest('.my-popup'));
     })
-//20240723 toggle User Menu
+//20240723 -- toggle User Menu
     .on('click', '.UserNameandLevel,.UserPhoto', function (e, data) {
         $('.UserMenu').toggleClass('ui-hide');
     })
-//20240723 Logout 
+//20240723 -- Logout 
     .on('click', '.btnAccountMenu.Logout', function (e, data) {
         $('#dialogLogout').attr('action', 'focus');
         popupOpen($('#dialogLogout'), 99999);
     })
-//20240723 Confirm Logout
+//20240723 -- Confirm Logout
     .on('click', '.btnConfirmLogout', function (e, data) {
         $.ajax({
             type: 'POST',
@@ -85,12 +84,12 @@ $(document)
             }
         });
     })
-//20240723 Delete Account
+//20240723 -- Delete Account
    .on('click', '.btnAccountMenu.DeleteAccount', function (e, data) {
        $('#dialogDeleteAccount').attr('action', 'focus');
        popupOpen($('#dialogDeleteAccount'), 99999);
    })
-//20240723 Confirm Delete Account
+//20240723 -- Confirm Delete Account
    .on('click', '.btnConfirmDelete', function (e, data) {
        $.ajax({
            type: 'POST',
@@ -107,7 +106,7 @@ $(document)
            }
        });
    })
-//20240723 Edit Account
+//20240723 -- Edit Account
    .on('click', '.btnAccountMenu.EditAccount', function (e, data) {
        $.ajax({
            type: 'POST',
@@ -133,10 +132,10 @@ $(document)
     .on('click', '.Assignment', function (e, data) {
         window.location = '/Wetest/Assignment';
     })
-//20240723 Setting
+//20240723 -- Setting
    .on('click', '.btnAccountMenu.Setting', function (e, data) {
    })
-//20240816 RefillKey
+//20240816 -- RefillKey
     .on('click', '.btnAccountMenu.RefillKey', function (e, data) {
         $.ajax({
             type: 'POST',
@@ -381,7 +380,7 @@ function SaveGoal() {
 function SetUserData(data) {
     for (var i = 0; i < data.length; i++) {
         console.log(data[i].Result);
-        if (data[i].Result == 'trial') {
+        if (data[i].Result == 'ok') {
             $('.login').addClass('ui-hide');
             $('.UserData,.MainMenu,.Assignment').removeClass('ui-hide');
             $('.pagename').html('');
@@ -441,12 +440,11 @@ function SetUserData(data) {
             if (data[i].VocabScorePercent != '') {
                 $('#VocabularyPS').html(data[i].VocabScorePercent);
             }
-
-        } else if (data[i].Result == 'sessionlost') {
-            if ($('.login').hasClass('ui-hide') == true) {
-                window.location = '/Wetest/User';
-                $('.Assignment').addClass('ui-hide');
-            }
+            $('.MainMenu').removeClass('ui-hide');
+        }
+        else if (data[i].Result == 'sessionlost') {
+            $('.login').removeClass('ui-hide');
+            $('.MainMenu,.Goal,.Setting,.banner,.DetailGoal,.Assignment').addClass('ui-hide');
         } else if (data[i].Result == 'not') {
             $('#dialogPurchase').attr('action', 'focus');
             popupOpen($('#dialogPurchase'), 99999);
