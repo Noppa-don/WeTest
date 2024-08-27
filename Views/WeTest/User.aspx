@@ -63,7 +63,6 @@
             <div class='textRight registerlink'>Register ?</div>
         </div>
         <div class="MainMenu ui-hide">
-
             <div class="menuButton">
                 <div class="btn btnMainMenu" id="btnPracticeMenu">
                     <div class='practiceIcon'></div>
