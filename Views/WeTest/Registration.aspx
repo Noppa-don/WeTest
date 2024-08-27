@@ -43,7 +43,7 @@
 
     <div class='wrapper'>
 
-        <div class='register'>
+        <div class='register ui-hide'>
             <div class="registerData">
                 <div class="registerDetail">
                     <div class="userType">
@@ -135,8 +135,6 @@
             </div>
         </div>
 
-
-
         <div class="payment ui-hide">
             <span>You must have a Wetest Key for register<br />
                 <br />
@@ -183,28 +181,35 @@
 
     </div>
 
-            <div class="package ui-hide">
+    <div class="package ui-hide">
 
             <div class="flexDiv divpackagecon">
+                  <div class="divPackage">
+                    <span>Code</span>
+                    <br />
+                    <div class="detailpackage"><span>Type Your Code</span><br /><br /><input type='text' id='txtCode' /></div>
+                    <div class="btn btnCheckCode">Got it</div>
+                </div>
                 <div class="divPackage">
                     <span>Wetest for Practice</span>
                     <br />
                     <div class="detailpackage"><span>500 THB</span></div>
+
                     <div class="btn btnChoosePackage" id="btnPack1" price="500">Got it</div>
                 </div>
-                <div class="divPackage">
+                <div class="divPackage  ui-hide">
                     <span>Exam only</span>
                     <br />
                     <div class="detailpackage"><span>Price 750 THB</span><br /><br /><span>- 1 User / 1 Exam.</span></div>
                     <div class="btn btnChoosePackage" id="btnPack2" price="750">Got it</div>
                 </div>
-                <div class="divPackage">
+                <div class="divPackage ui-hide">
                     <span>Exam and 3 certificates</span>
                     <br />
                     <div class="detailpackage"><span>Price 900 THB</span><br /><br /><span>- 1 User / 1 Exam.</span><br /><span>- 3 certificates.</span></div>
                     <div class="btn btnChoosePackage" id="btnPack3" price="900">Got it</div>
                 </div>
-                <div class="divPackage">
+                <div class="divPackage ui-hide">
                     <span>Exam and 5 certificates</span>
                     <br />
                     <div class="detailpackage"><span>Price 1250 THB</span><br /><br /><span>- 1 User / 1 Exam.</span><br /><span>- 5 certificates.</span><br /><span>- Free 1 photo.</span></div>
@@ -532,6 +537,13 @@
                 <div class='btn btnCancel btncancelPolicy'>No</div>
                 <div class='btn btnSelected btnAcceptPolicy btnUnActive'>Yes</div>
             </div>
+        </div>
+    </div>
+    <div name='confirm' id="dialogConfirmCheckKeycode" class='my-popup alert ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon done'></div>
+            <div class='ui-text'></div>
+            <div id="btnConfirmCheckKeycode" class='btn btnSelected'>OK</div>
         </div>
     </div>
 </asp:Content>
