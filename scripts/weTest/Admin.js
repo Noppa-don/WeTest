@@ -1,7 +1,6 @@
 ﻿// ========================= Page Load ====================================================================== //
 $(function () {
     $('div[data-role=page]').page({ theme: 'c', });
-    $('#userName').focus();
 });
 
 // ========================================================================================================== //
@@ -23,17 +22,25 @@ $(document)
             CheckUserLogin();
         }
     })
-    .on('click', '#btnPaymentList', function (e, data) {
+    //20240826 -- เพิ่มการส่ง JobStatus
+    .on('click', '#btnPaymentList, #doingJob', function (e, data) {
         $('.MainMenu').addClass('ui-hide');
         $('.PaymentList').removeClass('ui-hide');
-        GetJobDetail();
+        GetJobDetail(1);
     })
-    .on('click', '.jobDetailItem', function (e, data) {
+    //20240826 -- เลือกการชำระเงินที่มีปัญหา
+    .on('click', '#problemPayment', function (e, data) {
+         GetJobDetail(3);
+    })
+    //20240826 -- เลือกการชำระเงินที่สำเร็จแล้ว
+    .on('click', '#successPayment', function (e, data) {
+        GetJobDetail(2);
+    })
+    .on('click', '.seeDetail', function (e, data) {
         var RHId = $(this).attr('RHId');
         ShowJobDetail(RHId)
         $('.PaymentList').addClass('ui-hide');
         $('.PaymentDetail,.footerslip').removeClass('ui-hide');
-
     })
     //20240820 -- cancel confirm slip
     .on('click', '.btnCancelConfirmSlip', function (e, data) {
@@ -51,7 +58,6 @@ $(document)
         SaveConfirmSlip(RHId,2,'');
         popupClose($(this).closest('.my-popup'));
     })
-
     //20240820 -- reject slip
     .on('click', '.btnReject', function (e, data) {
         $('#dialogReject').attr('action', 'focus');
@@ -64,11 +70,14 @@ $(document)
         SaveConfirmSlip(RHId, 3, RejectReason);
         popupClose($(this).closest('.my-popup'));
     })
-
     .on('click', '#dialogConfirm .btnNo,#dialogReject .btnNo', function (e, data) {
         popupClose($(this).closest('.my-popup'));
     })
-
+    //20240826 -- Click Menu
+    .on('click', '.jobdiv', function (e, data) {
+        $('.jobdiv').removeClass('Active');
+        $(this).addClass('Active');
+    })
 
 function CheckUserLogin() {
     $.ajax({
@@ -84,17 +93,25 @@ function CheckUserLogin() {
         }
     });
 }
-function GetJobDetail() {
+//20240826 -- เพิ่มสถานะการดึง Job แบบต่างๆ
+function GetJobDetail(JobStatus) {
+    var data = 'JobStatus=' + JobStatus
     $.ajax({
         type: 'POST',
+        data: data,
         url: '/weTest/GetJobDetail',
         success: function (data) {
             for (var i = 0; i < data.length; i++) {
 
                 if (data[i].dataType == 'success') {
                     $('.JobDetail').html(data[i].errorMsg);
+                    if (JobStatus == 1) {
+                        $('.jobDetailItem').addClass('seeDetail');
+                    } else {
+                        $('.jobDetailItem').removeClass('seeDetail');
+                    }
+               
                 }
-
             }
         }
     });
@@ -128,7 +145,10 @@ function SaveConfirmSlip(RHId, RegisterStatus, RejectReason) {
         data: data,
         success: function (data) {
             for (var i = 0; i < data.length; i++) {
-
+                if (data[i].Result == 'success') {
+                    $('.PaymentDetail').addClass('ui-hide');
+                    $('.PaymentList').removeClass('ui-hide');
+                }
 
             }
         }
