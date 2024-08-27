@@ -72,11 +72,9 @@
     </div>
     <div class="PaymentList flexDiv ui-hide">
         <div class="JobMenu firstflexdiv">
-            <div class="jobdiv doingJob">งานที่ต้องทำ</div>
-            <div class="jobdiv problemPayment">การชำระเงินที่มีปัญหา</div>
-            <div class="jobdiv discount">ส่วนลด</div>
-            <div class="jobdiv trial">ทดลองใช้ / ฟรี</div>
-            <div class="jobdiv successPayment">ชำระเงินสำเร็จ</div>
+            <div class="jobdiv Active" id="doingJob">งานที่ต้องทำ</div>
+            <div class="jobdiv" id="problemPayment">การชำระเงินที่มีปัญหา</div>
+            <div class="jobdiv" id="successPayment">ชำระเงินสำเร็จ</div>
         </div>
         <div class="JobDetail"></div>
     </div>
