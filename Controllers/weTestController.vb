@@ -364,6 +364,7 @@ Namespace Controllers
 
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+        '20240826 -- ปรับการตรวจสอบ Keycode และบันทึกข้อมูลต่างๆ
         <AcceptVerbs(HttpVerbs.Post)>
         Function CheckKeyCode()
             Dim L1 As New List(Of clsMain)
@@ -374,18 +375,34 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-                cmdMsSql = cmdSQL(cn, "select Keycode from tblKeycode where KeyCode =@KeyCode and IsActive = 1")
+                cmdMsSql = cmdSQL(cn, "select KeyCodeId from tblKeycode where KeyCode = @KeyCode and IsActive = 1 and IsUsed = 0;")
                 With cmdMsSql
                     .Parameters.Add("@KeyCode", SqlDbType.VarChar).Value = Request.Form("KeyCode")
                     .ExecuteNonQuery()
                 End With
+
                 dt = getDataTable(cmdMsSql)
+
                 If dt.Rows.Count = 0 Then
                     objList.dataType = "error"
                     objList.errorMsg = "WeTest Key is wrong !<br><br>Please try again or contact @Italt."
                 Else
+                    cmdMsSql = cmdSQL(cn, "Update tblstudent set ExpiredDate = getdate() + (select KeyCodeDateAmount 
+                                            from tblkeycode where keycodeId = @KeyCodeId) where studentId = @stdId;
+                                            Insert Into tblregister(StudentId,KeyCodeId,RegisterStatus)
+                                            values(@stdId,@KeyCodeId,2);
+                                            select CONVERT (varchar(10),getdate() + keycodedateAmount, 103) AS expiredDate 
+                                            from tblKeycode where keycodeId = @KeyCodeId;")
+                    With cmdMsSql
+                        .Parameters.Add("@KeyCodeId", SqlDbType.VarChar).Value = dt("0")("KeyCodeId").ToString
+                        .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
+                        .ExecuteNonQuery()
+                    End With
+
+                    dt = getDataTable(cmdMsSql)
+
                     objList.dataType = "success"
-                    objList.errorMsg = "Registration Done !<br><br>Do you want go to Placement Test now ?. "
+                    objList.errorMsg = "Package OK! You can use WeTest until " & dt.Rows(0)("expiredDate").ToString
 
                 End If
                 L1.Add(objList)
@@ -617,9 +634,8 @@ Namespace Controllers
                 End If
 
                 cmdMsSql = cmdSQL(cn, "update tblStudent set ExpiredDate =  getdate() + (@TrialTime / 24)   where StudentId = @stdId;
-                                       insert into tblregister select newid(),@stdId,'1702F1EF-8FD5-443A-A68D-4599BC9F9E54',1
-                                       ,case when max(registeramount) is null then 0 else max(registeramount) + 1 end,@DiscountId
-                                       ,'500',1,getdate() from tblregister where StudentId = @stdId and registerstatus <> 2;")
+                                       insert into tblregister select newid(),@stdId,'1702F1EF-8FD5-443A-A68D-4599BC9F9E54'
+                                       ,null,1 ,1,@DiscountId,'500',null,1,getdate()")
 
                 With cmdMsSql
                     .Parameters.Add("@stdId", SqlDbType.VarChar).Value = stdId
@@ -643,7 +659,6 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-
         <AcceptVerbs(HttpVerbs.Post)>
         Function SaveFirstPlacementTest()
             Dim L1 As New List(Of clsMain)
@@ -674,8 +689,9 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
         '20240723 -- Check Edit Mode and Get User Data
+        '20240826 -- ปรับการตรวจสอบ Mode เมื่อเข้าหน้าจอ Register (register edituser purchees)
         <AcceptVerbs(HttpVerbs.Post)>
-        Function checkEditMode()
+        Function checkMode()
             Dim L1 As New List(Of clsStudentData)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim objList As New clsStudentData()
@@ -684,24 +700,13 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-                cmdMsSql = cmdSQL(cn, "select KeyCodeId,ExpiredDate from tblstudent where StudentId = @stdid;")
-                With cmdMsSql
-                    .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentId")
-                End With
-
-                dt = getDataTable(cmdMsSql)
-
-                If dt.Rows.Count <> 0 Then
-                    If dt.Rows(0)("KeyCodeId").ToString = "" And dt.Rows(0)("ExpiredDate").ToString = "" Then
-                        objList.Result = "purchess"
-                    Else
-                        If Session("EditUserData") IsNot Nothing Then
-                            objList = GetUserData(Session("studentid"))
-                            objList.Result = "edit"
-                        End If
-                    End If
+                If Session("RefillKey") IsNot Nothing Then
+                    objList.Result = "purchess"
+                ElseIf Session("EditUserData") IsNot Nothing Then
+                    objList = GetUserData(Session("studentid"))
+                    objList.Result = "edituser"
                 Else
-                    objList.Result = "add"
+                    objList.Result = "register"
                 End If
 
                 L1.Add(objList)
@@ -768,6 +773,24 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function checkRefillKey()
+            Dim L1 As New List(Of clsMain)
+            Dim StdId As String = Session("studentId")
+            Dim objList As New clsMain()
+            If Session("RefillKey") IsNot Nothing Then
+                objList.dataType = "refillkey"
+            Else
+                objList.dataType = "not"
+            End If
+            objList.errorMsg = ""
+            L1.Add(objList)
+            objList = Nothing
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
+
+
         Function CheckDuplicateUser()
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim Duptxt As String = ""
@@ -851,21 +874,7 @@ Namespace Controllers
             End Try
 
         End Function
-        <AcceptVerbs(HttpVerbs.Post)>
-        Function checkRefillKey()
-            Dim L1 As New List(Of clsMain)
-            Dim StdId As String = Session("studentId")
-            Dim objList As New clsMain()
-            If Session("RefillKey") IsNot Nothing Then
-                objList.dataType = "refillkey"
-            Else
-                objList.dataType = "not"
-            End If
-            objList.errorMsg = ""
-            L1.Add(objList)
-            objList = Nothing
-            Return Json(L1, JsonRequestBehavior.AllowGet)
-        End Function
+
 #End Region
 
 #Region "Activity"
@@ -1506,6 +1515,7 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+
 
 
         Function CreateNewQuiz(QuizData As clsQuizData) As clsQuizData
@@ -2166,7 +2176,6 @@ Namespace Controllers
         End Function
 
 
-
 #End Region
 
 #Region "User"
@@ -2223,12 +2232,7 @@ Namespace Controllers
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim objList As New clsStudentData()
             Try
-                If Session("studentid") IsNot Nothing Then
-                    objList = GetUserData(Session("studentid"))
-                Else
-                    objList.Result = "sessionlost"
-                    objList.Msg = ""
-                End If
+                objList = GetUserData(Session("studentid"))
 
                 L1.Add(objList)
                 objList = Nothing
@@ -2450,7 +2454,7 @@ Namespace Controllers
                 objList.Result = "success"
                 L1.Add(objList)
                 objList = Nothing
-
+                Session("studentId") = Nothing
             Catch ex As Exception
                 objList.Result = "error"
                 objList.Msg = ex.Message
@@ -2470,6 +2474,120 @@ Namespace Controllers
             Dim objList As New clsMain()
             Try
                 Session("EditUserData") = True
+                Session("RefillKey") = Nothing
+                objList.dataType = "success"
+                L1.Add(objList)
+                objList = Nothing
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+        '20240801 -- CheckExamAgain
+        '20240805 -- CheckExamAgain เพิ่มเวลาเล่นได้อีกครั้ง
+        '20240826 -- เพิ่ม Config Highest Level และตรวจสอบ
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function CheckExamAgain()
+
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim objList As New clsMain()
+            Try
+
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+                Dim HighestLevel As Integer = CInt(Getconfig("HighestLevel"))
+                cmdMsSql = cmdSQL(cn, "Select LevelNo from tblStudentLevel sl inner join tblLevel l On sl.levelId = l.levelId  
+                                        where studentid = @StudentID")
+                With cmdMsSql
+                    .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = Session("StudentID")
+                    .ExecuteNonQuery()
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                If CInt(dt.Rows(0)("LevelNo")) < HighestLevel Then
+                    Dim ExamAgainDay = Getconfig("ExamAgainDay")
+
+                    cmdMsSql = cmdSQL(cn, "select top 1  datediff(day,StartTime,getdate()) as LastExamDayAmount,CONVERT (varchar(10), DATEADD(day,@exaAmount, StartTime), 103) as  DateNextime from tblQuiz q 
+                                        inner join tblquizsession qs on q.quizid = qs.quizId 
+                                        where q.QuizMode = 3 and qs.StudentId = @StudentID order by q.lastupdate desc")
+                    With cmdMsSql
+                        .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = Session("StudentID")
+                        .Parameters.Add("@exaAmount", SqlDbType.Int).Value = CInt(ExamAgainDay)
+                        .ExecuteNonQuery()
+                    End With
+
+                    dt = getDataTable(cmdMsSql)
+
+                    If dt.Rows.Count = 0 Or ExamAgainDay = 0 Then
+                        objList.dataType = "ok"
+                        objList.errorMsg = "Do you want to start exam for up level ?"
+                    Else
+                        If (CInt(dt.Rows(0)("LastExamDayAmount")) > ExamAgainDay) Then
+                            objList.dataType = "ok"
+                            objList.errorMsg = "Do you want to start exam for up level ?"
+                        Else
+                            objList.dataType = "no"
+                            objList.errorMsg = "You can't make Mock Up Exam. Plase try again at " & dt.Rows(0)("DateNextime") & "."
+                        End If
+                    End If
+                Else
+                    objList.dataType = "no"
+                    objList.errorMsg = "Congratulations! You are at the highest level"
+                End If
+
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+
+        End Function
+        '20240814 -- ดึง Config จำนวนครั้งในการเล่นไฟล์เสียง
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function GetConfigMultiFile()
+            Dim L1 As New List(Of clsMultiAmount)
+            Dim objList As New clsMultiAmount()
+            Try
+                Dim MultimediaAmount As Integer = CInt(Getconfig("MultimediaAmount"))
+                Dim MultimediaSlowAmount As Integer = CInt(Getconfig("MultimediaSlowAmount"))
+
+                objList.Result = "success"
+                objList.MultiAmount = MultimediaAmount
+                objList.MultiSlowAmount = MultimediaSlowAmount
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.Result = "error"
+                objList.ResultTxt = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+        '2024816 -- SetRefillKeyMode
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function SetRefillKeyMode()
+            Dim L1 As New List(Of clsMain)
+            Dim objList As New clsMain()
+            Try
+                Session("RefillKey") = True
 
                 objList.dataType = "success"
                 L1.Add(objList)
@@ -2482,11 +2600,12 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-        '20240722 เพิ่ม ExpiredDate
-        '20240723 เพิ่ม User Data สำหรับแก้ไข
-        '20240813 select จำนวนวันที่จะหมดอายุเพื่อเอาไปใช้กำหนด Max Date ของ calendar
-        '20240819 ปรับวิธีการดึง Student Goal
-        '20240822 ปรับวิธีการดึง Total Goal case เลยวันที่ตั้งค่าไว้
+        '20240722 -- เพิ่ม ExpiredDate
+        '20240723 -- เพิ่ม User Data สำหรับแก้ไข
+        '20240813 -- select จำนวนวันที่จะหมดอายุเพื่อเอาไปใช้กำหนด Max Date ของ calendar
+        '20240819 -- ปรับวิธีการดึง Student Goal
+        '20240822 -- ปรับวิธีการดึง Total Goal case เลยวันที่ตั้งค่าไว้
+        '20240826 -- ปรับวิธีการตรวจสอบ Expired Date 
         Function GetUserData(stdId As String)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim objList As New clsStudentData()
@@ -2495,21 +2614,20 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-                'check keycode or trial
-                '20240818-------------------------------------------------------------------------------------
-                cmdMsSql = cmdSQL(cn, "select KeyCodeId,ExpiredDate from tblstudent where StudentId = @stdid and isactive = 1;")
-                With cmdMsSql
+
+                If stdId Is Nothing Then
+                    objList.Result = "sessionlost"
+                Else
+                    cmdMsSql = cmdSQL(cn, "select ExpiredDate from tblstudent where StudentId = @stdid  and ExpiredDate > getdate() and isactive = 1;")
+                    With cmdMsSql
                     .Parameters.Add("@stdid", SqlDbType.VarChar).Value = stdId
                 End With
 
                 dt = getDataTable(cmdMsSql)
 
-                If dt.Rows.Count <> 0 Then
+                    If dt.Rows.Count <> 0 AndAlso dt.Rows(0)("ExpiredDate").ToString <> "" Then
 
-                    If dt.Rows(0)("KeyCodeId").ToString = "" And dt.Rows(0)("ExpiredDate").ToString = "" Then
-                        objList.Result = "not"
-                    ElseIf dt.Rows(0)("KeyCodeId").ToString = "" And dt.Rows(0)("ExpiredDate").ToString <> "" Then
-                        objList.Result = "trial"
+                        objList.Result = "ok"
                         cmdMsSql = cmdSQL(cn, "select top 1 s.StudentId,Firstname,Surname,MobileNo,Email,Username,l.LevelShortName,CONVERT (varchar(10),s.ExpiredDate , 103) AS expiredDate
                                                 ,DATEDIFF(DAY,getdate(),ExpiredDate) as ExpiredDateAmount from tblStudent s inner join tblStudentLevel sl on s.studentId = sl.StudentId 
                                                 inner join tblLevel l on sl.levelId = l.LevelId where s.studentId = @stdid and s.IsActive = 1 and sl.IsActive = 1  
@@ -2670,10 +2788,12 @@ Namespace Controllers
                             objList.VocabScorePercent = "0%"
                             objList.SituationScorePercent = "0%"
                         End If
+                    Else
+                        'Not Register
+                        objList.Result = "not"
+                        Session("RefillKey") = True
                     End If
-                Else
-                    Session("studentId") = Nothing
-                    objList.Result = "sessionlost"
+
                 End If
             Catch ex As Exception
                 objList.Result = "Error"
@@ -2685,104 +2805,7 @@ Namespace Controllers
             End Try
             Return objList
         End Function
-        '20240801 -- CheckExamAgain
-        '20240805 -- CheckExamAgain เพิ่มเวลาเล่นได้อีกครั้ง
-        <AcceptVerbs(HttpVerbs.Post)>
-        Function CheckExamAgain()
 
-            Dim L1 As New List(Of clsMain)
-            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
-            Dim objList As New clsMain()
-            Try
-
-                ' ================ Check Permission ================
-                cn = New SqlConnection(sqlCon("Wetest"))
-                If cn.State = 0 Then cn.Open()
-                ' ================================================== 
-                Dim ExamAgainDay = Getconfig("ExamAgainDay")
-
-                cmdMsSql = cmdSQL(cn, "select top 1  datediff(day,StartTime,getdate()) as LastExamDayAmount,CONVERT (varchar(10), DATEADD(day,@exaAmount, StartTime), 103) as  DateNextime from tblQuiz q 
-                                        inner join tblquizsession qs on q.quizid = qs.quizId 
-                                        where q.QuizMode = 3 and qs.StudentId = @StudentID order by q.lastupdate desc")
-                With cmdMsSql
-                    .Parameters.Add("@StudentID", SqlDbType.VarChar).Value = Session("StudentID")
-                    .Parameters.Add("@exaAmount", SqlDbType.Int).Value = CInt(ExamAgainDay)
-                    .ExecuteNonQuery()
-                End With
-
-                dt = getDataTable(cmdMsSql)
-
-                If dt.Rows.Count = 0 Or ExamAgainDay = 0 Then
-                    objList.dataType = "ok"
-                    objList.errorMsg = "Do you want to start exam for up level ?"
-                Else
-                    If (CInt(dt.Rows(0)("LastExamDayAmount")) > ExamAgainDay) Then
-                        objList.dataType = "ok"
-                        objList.errorMsg = "Do you want to start exam for up level ?"
-                    Else
-                        objList.dataType = "no"
-                        objList.errorMsg = "You can't make Mock Up Exam. Plase try again at " & dt.Rows(0)("DateNextime") & "."
-                    End If
-                End If
-                L1.Add(objList)
-                objList = Nothing
-
-            Catch ex As Exception
-                objList.dataType = "error"
-                objList.errorMsg = ex.Message
-                L1.Add(objList)
-                objList = Nothing
-            Finally
-                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
-                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
-                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
-            End Try
-            Return Json(L1, JsonRequestBehavior.AllowGet)
-
-        End Function
-        '20240814 -- ดึง Config จำนวนครั้งในการเล่นไฟล์เสียง
-        <AcceptVerbs(HttpVerbs.Post)>
-        Function GetConfigMultiFile()
-            Dim L1 As New List(Of clsMultiAmount)
-            Dim objList As New clsMultiAmount()
-            Try
-                Dim MultimediaAmount As Integer = CInt(Getconfig("MultimediaAmount"))
-                Dim MultimediaSlowAmount As Integer = CInt(Getconfig("MultimediaSlowAmount"))
-
-                objList.Result = "success"
-                objList.MultiAmount = MultimediaAmount
-                objList.MultiSlowAmount = MultimediaSlowAmount
-                L1.Add(objList)
-                objList = Nothing
-
-            Catch ex As Exception
-                objList.Result = "error"
-                objList.ResultTxt = ex.Message
-                L1.Add(objList)
-                objList = Nothing
-            End Try
-            Return Json(L1, JsonRequestBehavior.AllowGet)
-        End Function
-
-        '2024816 -- SetRefillKeyMode
-        <AcceptVerbs(HttpVerbs.Post)>
-        Function SetRefillKeyMode()
-            Dim L1 As New List(Of clsMain)
-            Dim objList As New clsMain()
-            Try
-                Session("RefillKey") = True
-
-                objList.dataType = "success"
-                L1.Add(objList)
-                objList = Nothing
-            Catch ex As Exception
-                objList.dataType = "error"
-                objList.errorMsg = ex.Message
-                L1.Add(objList)
-                objList = Nothing
-            End Try
-            Return Json(L1, JsonRequestBehavior.AllowGet)
-        End Function
 
 #End Region
 
@@ -3124,7 +3147,7 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-        '20240722 GetLessonReport
+        '20240722 -- GetLessonReport
         Function GetLessonReport(StartDate, EndDate, PracticeType)
 
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
@@ -3223,7 +3246,7 @@ Namespace Controllers
             End Try
             Return reportdata
         End Function
-        '20240722 GetRandomReport
+        '20240722 -- GetRandomReport
         Function GetRandomReport(StartDate, EndDate, PracticeType)
 
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
@@ -3347,8 +3370,8 @@ Namespace Controllers
         Function Assignment() As ActionResult
             Return View()
         End Function
-        '20240813 Get Assignment
-        '20240814 ปรับ Get Assignment เพิ่มข้อมูลสำหรับเอาไปสร้าง Quiz
+        '20240813 -- Get Assignment
+        '20240814 -- ปรับ Get Assignment เพิ่มข้อมูลสำหรับเอาไปสร้าง Quiz
         <AcceptVerbs(HttpVerbs.Post)>
         Function GetAssignment()
 
@@ -3418,7 +3441,7 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
 
         End Function
-        '20240814 สร้าง Quiz Assignment
+        '20240814 -- สร้าง Quiz Assignment
         <AcceptVerbs(HttpVerbs.Post)>
         Function CreateAssignment()
             Dim L1 As New List(Of clsMain)
@@ -3466,7 +3489,8 @@ Namespace Controllers
             Return View()
         End Function
 
-        '20240819 ดึงข้อมูลสลิป
+        '20240819 -- ดึงข้อมูลสลิป
+        '20240826 -- ปรับให้ดึงข้อมูล Slip จาก Status ต่างๆ
         <AcceptVerbs(HttpVerbs.Post)>
         Function GetJobDetail()
             Dim L1 As New List(Of clsMain)
@@ -3484,7 +3508,10 @@ Namespace Controllers
                                         ,PackageName + ' ' + cast(packageprice as varchar) + ' Bath'  as SlipDetail
                                         ,' ' + s.Firstname + ' ' + s.Surname as StudentName
                                         From tblRegister r inner Join tblstudent s on r.studentId = s.studentId 
-                                        inner Join tblpackage p on p.packageId = r.packageId where RegisterStatus = 1;")
+                                        inner Join tblpackage p on p.packageId = r.packageId where RegisterStatus = @JobStatus;")
+                With cmdMsSql
+                    .Parameters.Add("@JobStatus", SqlDbType.Int).Value = CInt(Request.Form("JobStatus"))
+                End With
 
                 dt = getDataTable(cmdMsSql)
 
@@ -3495,12 +3522,12 @@ Namespace Controllers
                                             <div Class=""UploadTime"">" & dt.Rows(i)("SlipTime") & "</div>
                                             <div Class=""UploadDetail"">" & dt.Rows(i)("SlipDetail") & dt.Rows(i)("StudentName") & "</div></div>"
                     Next
-                    objList.dataType = "success"
-                    objList.errorMsg = jobDetail
-                    L1.Add(objList)
-                    objList = Nothing
-                End If
 
+                End If
+                objList.dataType = "success"
+                objList.errorMsg = jobDetail
+                L1.Add(objList)
+                objList = Nothing
             Catch ex As Exception
                 objList.dataType = "Error"
                 objList.errorMsg = ex.Message
@@ -3513,7 +3540,7 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-        '20240820 ดึงข้อมูลรายละเอียดสลิป
+        '20240820 -- ดึงข้อมูลรายละเอียดสลิป
         <AcceptVerbs(HttpVerbs.Post)>
         Function GetSlip()
             Dim L1 As New List(Of clsSlip)
@@ -3565,8 +3592,8 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-        '20240820 บันทึก Status Slip
-        '20240822 บันทึกหมาายเหตุ กรณี Reject Slip
+        '20240820 -- บันทึก Status Slip
+        '20240822 -- บันทึกหมาายเหตุ กรณี Reject Slip
         <AcceptVerbs(HttpVerbs.Post)>
         Function ConfirmSlip()
             Dim L1 As New List(Of clsMain)
@@ -3588,7 +3615,7 @@ Namespace Controllers
                 With cmdMsSql
                     .Parameters.Add("@rhid", SqlDbType.VarChar).Value = Request.Form("rhid").ToString
                     .Parameters.Add("@RegisterStatus", SqlDbType.Int).Value = CInt(Request.Form("RegisterStatus"))
-                    .Parameters.Add("@RejectReason", SqlDbType.Int).Value = Request.Form("RejectReason")
+                    .Parameters.Add("@RejectReason", SqlDbType.VarChar).Value = Request.Form("RejectReason")
                     .ExecuteNonQuery()
                 End With
 
