@@ -2,13 +2,12 @@
 
 // ========================= Page Load ======================== //
 $(function () { $('div[data-role=page]').page({ theme: 'c', }); $('#Firstname').focus(); });
-checkEditMode();
-checkRefillKey();
+checkMode();
 // ============================================================ //
 // ======================= Object Event ======================= //
 $(document)
 // ======================= Register ======================= //
-    .on('focus', '#Firstname, #Surname, #MobileNo, #EMail, #Username, #Password, #ConfirmPassword', function (e, data) { $(this).removeClass("InvalidData") })
+    .on('focus', '#Firstname, #Surname, #MobileNo, #EMail, #Username, #Password, #ConfirmPassword, #txtCode', function (e, data) { $(this).removeClass("InvalidData") })
     .on('keypress blur', '#Firstname, #Surname, #MobileNo, #EMail, #Username, #Password', function (e, data) {
         var xkey = keyA(e);
         if (xkey == 13) { keyEnterNextItem(e); }
@@ -125,7 +124,7 @@ $(document)
     .on('click', '#btnskip', function (e, data) {
         UpdateTrialDate();
     })
-    .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel,#btnOKOTP,.btnAcceptPolicy.btnActive', function (e, data) {
+    .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel,#btnOKOTP', function (e, data) {
         popupClose($(this).closest('.my-popup'));
     })
     .on('click', '.ui-icon.close ', function (e, data) {
@@ -158,6 +157,11 @@ $(document)
     .on('click', '.btnAcceptPolicy.btnUnActive', function (e, data) {
         return 0;
     })
+    //20240826 -- แสดง div Register เมื่อ AcceptPolicy
+    .on('click', '.btnAcceptPolicy.btnActive', function (e, data) {
+        $('.register').removeClass('ui-hide');
+        popupClose($(this).closest('.my-popup')); 
+    })
     .on('change', '#chkAccept', function (e, data) {
         if ($('.btnAcceptPolicy').hasClass('btnUnActive')) {
             $('.btnAcceptPolicy').removeClass('btnUnActive');
@@ -186,6 +190,21 @@ $(document)
         }
 
     })
+    //20240826 -- ตรวจสอบ Key
+    .on('click', '.btnCheckCode', function (e, data) {
+        if ($('#txtCode').val() == '') {
+            $('#txtCode').addClass("InvalidData");
+        }
+        else {
+            CheckKeycode();
+        }
+    })
+   //20240826 -- Check KeyCode ผ่าน
+    .on('click', '#btnConfirmCheckKeycode', function (e, data) {
+        window.location = '/Wetest/User';
+    })
+
+
 // ============================================================ //
 
 // ========================= Function ========================= //
@@ -426,8 +445,7 @@ function GetPackagePrice() {
     });
 }
 function CheckKeycode() {
-    if ($('#txtKeyCode').val() == '') { $('#txtKeyCode').addClass("InvalidData"); } else {
-        var post1 = 'KeyCode=' + $('#txtKeyCode').val();
+    var post1 = 'KeyCode=' + $('#txtCode').val();
         $.ajax({
             type: 'POST',
             url: '/weTest/CheckKeyCode',
@@ -436,9 +454,9 @@ function CheckKeycode() {
                 for (var i = 0; i < data.length; i++) {
 
                     if (data[i].dataType == 'success') {
-                        $('#dialogSelect').attr('action', 'focus');
-                        $('#dialogSelect .ui-text').html(data[i].errorMsg);
-                        popupOpen($('#dialogSelect'), 99999);
+                        $('#dialogConfirmCheckKeycode').attr('action', 'focus');
+                        $('#dialogConfirmCheckKeycode .ui-text').html(data[i].errorMsg);
+                        popupOpen($('#dialogConfirmCheckKeycode'), 99999);
                     } else {
                         $('#dialogConfirm').attr('action', 'focus');
                         $('#dialogConfirm .ui-text').html(data[i].errorMsg);
@@ -448,7 +466,6 @@ function CheckKeycode() {
             }
         });
     }
-}
 function GotoQuiz() {
     popupOpen($('#dialogGotoQuiz'), 99999);
 
@@ -543,13 +560,14 @@ function UpdateWaitApproveSlip() {
 }
 //20240723 -- Check EditMode And Get User Data
 //20240814 -- ดึงรูป User มาแสดงเมื่อเข้าเมนูแก้ไข
-function checkEditMode() {
+//20240826 -- ปรับการตรวจสอบ Mode เมื่อเข้าหน้าจอ Register (register edituser purchees)
+function checkMode() {
     $.ajax({
         type: 'POST',
-        url: '/weTest/checkEditMode',
+        url: '/weTest/checkMode',
         success: function (data) {
             for (var i = 0; i < data.length; i++) {
-                if (data[i].Result == 'edit') {
+                if (data[i].Result == 'edituser') {
                     $('#Firstname').val(data[i].Firstname);
                     $('#Surname').val(data[i].Surname);
                     $('#MobileNo').val(data[i].MobileNo);
@@ -559,13 +577,15 @@ function checkEditMode() {
                     var PhotoPath = 'url("/WetestPhoto/UserPhoto/' + data[i].StudentId + '.png")'
                     $('.btnPhoto').css('background', PhotoPath);
                     EditMode = true;
-                } else if (data[i].Result == 'add') {
+                    $('.register,.footerRegister .btnNext').removeClass('ui-hide');
+                } else if (data[i].Result == 'register') {
                     EditMode = false;
                     OpenPolicy();
                 } else if (data[i].Result == 'purchess') {
                     EditMode = false;
                     $('.package').removeClass('ui-hide');
-                    $('.register').addClass('ui-hide');
+                    $('.register,.footerRegister .btnNext').addClass('ui-hide');
+
                 }
             }
         }
@@ -608,7 +628,7 @@ function checkRefillKey() {
             for (var i = 0; i < data.length; i++) {
                 if (data[i].dataType == 'refillkey') {
                     $('.package').removeClass('ui-hide');
-                    $('.register,.footerRegister .btnNext').addClass('ui-hide');
+                    $('.register,.footerRegister .btnNext,.').addClass('ui-hide');
                 }
             }
         }
