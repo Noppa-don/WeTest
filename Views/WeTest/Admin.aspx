@@ -61,7 +61,7 @@
                 </div>
                 <div class="btn btnMainMenu" id="btnReport">
                     <div class='reportIcon'></div>
-                    <span class="txtMenu">Reports</span>   
+                    <span class="txtMenu">Reports</span>
                 </div>
             </div>
             <div class="expiredDate"></div>
@@ -76,7 +76,15 @@
             <div class="jobdiv" id="problemPayment">การชำระเงินที่มีปัญหา</div>
             <div class="jobdiv" id="successPayment">ชำระเงินสำเร็จ</div>
         </div>
-        <div class="JobDetail"></div>
+        <div class="JobDetailContainer">
+            <div class="FilterJob flexDiv">
+
+                <div class="filterdiv Active firstflexdiv" id="simple">แพกเกจปกติ</div>
+                <div class="filterdiv" id="discount">ส่วนลด</div>
+                <div class="filterdiv" id="keycode">ทดลองใช้ / ใช้ฟรี</div>
+            </div>
+            <div class="JobDetail"></div>
+        </div>
     </div>
     <div class="PaymentDetail flexdiv ui-hide">
         <div class="slipDetail"></div>
@@ -104,9 +112,10 @@
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
             <div class='ui-icon warning'></div>
             <div class='ui-text'>Reject this payment?</div>
-             <div class="txtData">
-                Reason <input type='text' id='txtReason' />
-             </div>
+            <div class="txtData">
+                Reason
+                <input type='text' id='txtReason' />
+            </div>
             <br />
             <div class="ui-twoButton">
                 <div class='btn btnCancel btnNo'>No</div>
