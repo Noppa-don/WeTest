@@ -42,10 +42,12 @@ $(document)
         window.location = '/Wetest/Practice';
     })
 //20240715 -- Menu Goal
+//20240828 -- แยกดึงข้อมูล Goal ออกจากการดึงข้อมูล User เพื่อให้ทำงานรวดเร็วขึ้น
     .on('click', '#btnGoalMenu', function (e, data) {
         $('.MainMenu,.Assignment').addClass('ui-hide');
         $('.Goal,.footerGoal').removeClass('ui-hide');
         $('.pagename').html('- Goal');
+        GetGoalData();
     })
 //20240715 -- Menu Report
     .on('click', '#btnReport', function (e, data) {
@@ -171,7 +173,8 @@ $(document)
             return 0;
         } else {
             $('.Goal').addClass('ui-hide');
-            $('.btnSetDetailGoal').addClass('unActive');
+            //$('.btnSetDetailGoal').addClass('unActive');
+            $('.btnSetDetailGoal').addClass('ui-hide');
             $('.DetailGoal').removeClass('ui-hide');
         }
 
@@ -388,54 +391,6 @@ function SetUserData(data) {
             ExpiredDateAmount = data[i].ExpiredDateAmount;
             $('.UserData').append(data[i].UserPhoto);
             $('#UserLevel').html('Your Level : ' + data[i].UserLevel + '<br />');
-
-            if (data[i].TotalGoal != '') {
-                $('#lastestGOAL').html('Your lastest GOAL : ' + data[i].TotalGoal + ' ( Time left ' + data[i].TotalGoalAmount + ' days )');
-                $('#lastestBigGOAL').html('Your lastest A BIG GOAL : ' + data[i].TotalGoal + ' ( Time left ' + data[i].TotalGoalAmount + ' days )');
-                $('.btnSetDetailGoal').removeClass('unActive');
-                totalGoalAmount = data[i].TotalGoalAmount
-                $('.btnClear,.btnSetDetailGoal').removeClass('ui-hide');
-            } else {
-                $('.btnClear').addClass('ui-hide');
-                $('.btnSetDetailGoal').removeClass('ui-hide');
-                $('.btnSetDetailGoal').addClass('unActive');
-            }
-            if (data[i].ReadingGoal != '') {
-                $('#ReadingTimeResult').html('Due date : ' + data[i].ReadingGoal + '<br />(Time left ' + data[i].ReadingGoalAmount + ' days)');
-                $('#ReadingTimeResult').removeClass('ui-hide');
-                $('#ReadingPS').removeClass('PS');
-            }
-            if (data[i].ListeningGoal != '') {
-                $('#ListeningTimeResult').html('Due date : ' + data[i].ListeningGoal + '<br />(Time left ' + data[i].ListeningGoalAmount + ' days)');
-                $('#ListeningTimeResult').removeClass('ui-hide');
-                $('#ListeningPS').removeClass('PS');
-            }
-            if (data[i].VocabGoal != '') {
-                $('#VocabularyTimeResult').html('Due date : ' + data[i].VocabGoal + '<br />(Time left ' + data[i].VocabGoalAmount + ' days)');
-                $('#VocabularyTimeResult').removeClass('ui-hide');
-                $('#VocabularyPS').removeClass('PS');
-            }
-            if (data[i].GrammarGoal != '') {
-                $('#GrammarTimeResult').html('Due date : ' + data[i].GrammarGoal + '<br />(Time left ' + data[i].GrammarGoalAmount + ' days)');
-                $('#GrammarTimeResult').removeClass('ui-hide');
-                $('#GrammarPS').removeClass('PS');
-            }
-            if (data[i].SituationGoal != '') {
-                $('#SituationTimeResult').html('Due date : ' + data[i].SituationGoal + '<br />(Time left ' + data[i].SituationGoalAmount + ' days)');
-                $('#SituationTimeResult').removeClass('ui-hide');
-                $('#SituationPS').removeClass('PS');
-            }
-
-            $('#TimesUsedPercent').html(data[i].TotalDatePercent);
-            $('#PracticeScorePercent').html(data[i].TotalScorePercent);
-
-            if (data[i].GrammarScorePercent != '') {
-                $('#GrammarPS').html(data[i].GrammarScorePercent);
-            }
-
-            if (data[i].VocabScorePercent != '') {
-                $('#VocabularyPS').html(data[i].VocabScorePercent);
-            }
             $('.MainMenu').removeClass('ui-hide');
         }
         else if (data[i].Result == 'sessionlost') {
@@ -508,7 +463,86 @@ function UpdateTrialDate() {
         }
     });
 }
+//20240828 -- แยก Function ดึงข้อมูล Goal ออกจากการดึงข้อมูล User เพื่อให้ทำงานรวดเร็วขึ้น
+function GetGoalData() {
 
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/GetGoalData',
+        success: function (data) {
+            SetGoal(data);
+        }
+    });
+}
+//20240828 -- Bind Goal Data ตามจุดต่างๆ
+function SetGoal(data) {
+    for (var i = 0; i < data.length; i++) {
+        console.log(data[i].Result);
+        console.log(data[i].TotalGoal);
+        if (data[i].Result == 'ok') {
+            if (data[i].TotalGoal != '') {
+                $('#lastestGOAL').html('Your lastest GOAL : ' + data[i].TotalGoal + ' ( Time left ' + data[i].TotalGoalAmount + ' days )');
+                $('#lastestBigGOAL').html('Your lastest A BIG GOAL : ' + data[i].TotalGoal + ' ( Time left ' + data[i].TotalGoalAmount + ' days )');
+                $('.btnSetDetailGoal').removeClass('unActive');
+                totalGoalAmount = data[i].TotalGoalAmount
+                $('#TimesUsedPercent').html(data[i].TotalDatePercent);
+                $('#PracticeScorePercent').html(data[i].TotalScorePercent);
+                $('.btnClear,.btnSetDetailGoal').removeClass('ui-hide');
+            } else {
+                $('.btnClear').addClass('ui-hide');
+                $('.btnSetDetailGoal').removeClass('ui-hide');
+                $('.btnSetDetailGoal').addClass('unActive');
+                $('#TimesUsedPercent').html('0%');
+                $('#PracticeScorePercent').html('0%');
+            }
+            if (data[i].ReadingGoal != '') {
+                $('#ReadingTimeResult').html('Due date : ' + data[i].ReadingGoal + '<br />(Time left ' + data[i].ReadingGoalAmount + ' days)');
+                $('#ReadingTimeResult').removeClass('ui-hide');
+                $('#ReadingPS').removeClass('PS');
+                $('#ReadingPS').html(data[i].ReadingScorePercent);
+            } else {
+                $('#ReadingTimeResult').addClass('ui-hide');
+                $('#ReadingPS').html("0%");
+            }
+            if (data[i].ListeningGoal != '') {
+                $('#ListeningTimeResult').html('Due date : ' + data[i].ListeningGoal + '<br />(Time left ' + data[i].ListeningGoalAmount + ' days)');
+                $('#ListeningTimeResult').removeClass('ui-hide');
+                $('#ListeningPS').removeClass('PS');
+                $('#ListeningPS').html(data[i].ListeningScorePercent);
+            } else {
+                $('#ListeningTimeResult').addClass('ui-hide');
+                $('#ListeningPS').html("0%");
+            }
+            if (data[i].VocabGoal != '') {
+                $('#VocabularyTimeResult').html('Due date : ' + data[i].VocabGoal + '<br />(Time left ' + data[i].VocabGoalAmount + ' days)');
+                $('#VocabularyTimeResult').removeClass('ui-hide');
+                $('#VocabularyPS').removeClass('PS');
+                $('#VocabularyPS').html(data[i].VocabScorePercent);
+            } else {
+                $('#VocabularyTimeResult').addClass('ui-hide');
+                $('#VocabularyPS').html("0%");
+            }
+            if (data[i].GrammarGoal != '') {
+                $('#GrammarTimeResult').html('Due date : ' + data[i].GrammarGoal + '<br />(Time left ' + data[i].GrammarGoalAmount + ' days)');
+                $('#GrammarTimeResult').removeClass('ui-hide');
+                $('#GrammarPS').removeClass('PS');
+                $('#GrammarPS').html(data[i].GrammarScorePercent);
+            } else {
+                $('#GrammarTimeResult').addClass('ui-hide');
+                $('#GrammarPS').html("0%");
+            }
+            if (data[i].SituationGoal != '') {
+                $('#SituationTimeResult').html('Due date : ' + data[i].SituationGoal + '<br />(Time left ' + data[i].SituationGoalAmount + ' days)');
+                $('#SituationTimeResult').removeClass('ui-hide');
+                $('#SituationPS').removeClass('PS');
+                $('#SituationPS').html(data[i].GrammarScorePercent);
+            } else {
+                $('#SituationTimeResult').addClass('ui-hide');
+                $('#SituationPS').html("0%");
+            }
+        }
+    }
+}
 
 
 
