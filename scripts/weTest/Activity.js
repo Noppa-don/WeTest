@@ -437,7 +437,6 @@ function GetQuestionAndAnswer(ActionType, QuestionNo) {
                 } else {
 
                     $('#divAnswer').html(data[i].Itemtxt);
-                    console.log(data[i].ItemId);
                     if (data[i].multiAnsname != null) {
                         $('.AName' + data[i].ItemId).append("<div class='multiAfileIcon' id='MA" + data[i].ItemId + "' MID='" + data[i].ItemId + "' PlayCount='1'></div><div id='multiAnswer" + data[i].ItemId + "' class='ui-hide'></div>");
                         setbuttonAudioPlayer('multiAnswer' + data[i].ItemId, data[i].multiAnspath);
