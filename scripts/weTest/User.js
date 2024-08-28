@@ -316,7 +316,6 @@ function SkillGoaldate() {
     var MaxDate
     $('#spnGoalName').html('Set goal for ' + GoalType);
     MaxDate = totalGoalAmount
-    console.log(MaxDate);
     var options = $.extend(global.datepickerOption, {
         minDate: 1,
         maxDate: '"+' + MaxDate + 'd"',
@@ -379,7 +378,6 @@ function SaveGoal() {
 //20240716 -- ปรับการแสดงผล Total Goal case เลยวันที่ที่ตั้งค่าไว้
 function SetUserData(data) {
     for (var i = 0; i < data.length; i++) {
-        console.log(data[i].Result);
         if (data[i].Result == 'ok') {
             $('.login').addClass('ui-hide');
             $('.UserData,.MainMenu,.Assignment').removeClass('ui-hide');
@@ -387,7 +385,6 @@ function SetUserData(data) {
             //20240716 -- ดึงข้อมูล User เพิ่มเติม
             $('.UserNameandLevel').html('Welcome, ' + data[i].Firstname + '<br />' + data[i].UserLevel);
             $('.expiredDate').html(data[i].ExpiredDate)
-            console.log(data[i].ExpiredDateAmount);
             ExpiredDateAmount = data[i].ExpiredDateAmount;
             $('.UserData').append(data[i].UserPhoto);
             $('#UserLevel').html('Your Level : ' + data[i].UserLevel + '<br />');
@@ -396,7 +393,6 @@ function SetUserData(data) {
                 $('#lastestGOAL').html('Your lastest GOAL : ' + data[i].TotalGoal + ' ( Time left ' + data[i].TotalGoalAmount + ' days )');
                 $('#lastestBigGOAL').html('Your lastest A BIG GOAL : ' + data[i].TotalGoal + ' ( Time left ' + data[i].TotalGoalAmount + ' days )');
                 $('.btnSetDetailGoal').removeClass('unActive');
-                $('.btnClear').removeClass('ui-hide');
                 totalGoalAmount = data[i].TotalGoalAmount
                 $('.btnClear,.btnSetDetailGoal').removeClass('ui-hide');
             } else {
@@ -430,8 +426,8 @@ function SetUserData(data) {
                 $('#SituationPS').removeClass('PS');
             }
 
-            $('#TimesUsedPercent').html(data[i].TotalGoalDatePercent);
-            $('#PracticeScorePercent').html(data[i].TotalGoalScorePercent);
+            $('#TimesUsedPercent').html(data[i].TotalDatePercent);
+            $('#PracticeScorePercent').html(data[i].TotalScorePercent);
 
             if (data[i].GrammarScorePercent != '') {
                 $('#GrammarPS').html(data[i].GrammarScorePercent);
@@ -444,7 +440,7 @@ function SetUserData(data) {
         }
         else if (data[i].Result == 'sessionlost') {
             $('.login').removeClass('ui-hide');
-            $('.MainMenu,.Goal,.Setting,.banner,.DetailGoal,.Assignment').addClass('ui-hide');
+            $('.MainMenu,.Goal,.Setting,.DetailGoal,.Assignment').addClass('ui-hide');
         } else if (data[i].Result == 'not') {
             $('#dialogPurchase').attr('action', 'focus');
             popupOpen($('#dialogPurchase'), 99999);
