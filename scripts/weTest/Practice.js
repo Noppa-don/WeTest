@@ -79,29 +79,29 @@ $(document)
      popupClose($(this).closest('.my-popup'));
 
  })
- //20240717 Choose Exam Amount
+ //20240717 -- Choose Exam Amount
  .on('click', '.btnAmount', function (e, data) {
      $('.btnAmount').removeClass('btnSelected');
      $('#UserType').val('');
      $(this).addClass('btnSelected');
  })
- //20240717 Check numeric key press
+ //20240717 -- Check numeric key press
  .on('keypress', '#UserType', function (e, data) {
      if (event.which != 8 && isNaN(String.fromCharCode(event.which))) {
          event.preventDefault(); //stop character from entering input
      }
  })
-//20240717 Choose Random All Skill
+//20240717 -- Choose Random All Skill
  .on('click', '#btnRandomAll', function (e, data) {
      $('#btnRandomAll').toggleClass('btnSelected');
      $('.btnSkill').toggleClass('Selected');
  })
-//20240717 Choose Random Skill
+//20240717 -- Choose Random Skill
  .on('click', '.btnSkill', function (e, data) {
      $(this).toggleClass('Selected');
      $('#btnRandomAll').removeClass('Selected');
  })
-//20240717 Start Random
+//20240717 -- Start Random
  .on('click', '.btnStart', function (e, data) {
      if ($(".btnAmount.btnSelected").attr('id') == 'btnUserType') {
          ExamAmount = $("#UserType").val();
@@ -135,9 +135,8 @@ $(document)
          }
      });
  })
-//20240730 Select Dropdown
+//20240730 -- Select Dropdown
  .on('change', 'select', function (e, data) {
-     console.log(this.value);
      var post1 = 'LevelId=' + this.value;
      $.ajax({
          type: 'POST',
@@ -185,7 +184,7 @@ function GotoPractice(TestsetId, TestsetName) {
         }
     });
 }
-//20240723 Get name level and Photo
+//20240723 -- Get name level and Photo
 function CheckLoginStatus() {
     $.ajax({
         type: 'POST',
@@ -202,9 +201,9 @@ function CheckLoginStatus() {
         }
     });
 }
-//20240730 สร้าง Dropdown สำหรับเลือกระดับชั้นที่ต้องการให้แสดงชุดข้อสอบ
-//20240805 ปรับการแสดงผล
-//20240814 ปรับการแสดงผล
+//20240730 -- สร้าง Dropdown สำหรับเลือกระดับชั้นที่ต้องการให้แสดงชุดข้อสอบ
+//20240805 -- ปรับการแสดงผล
+//20240814 -- ปรับการแสดงผล
 function GetLevel() {
 
     $.ajax({
@@ -236,7 +235,7 @@ function GetLevel() {
         }
     });
 }
-//20240814 ย้าย Function สร้างชุดข้อสอบฝึกฝน
+//20240814 -- ย้าย Function สร้างชุดข้อสอบฝึกฝน
 function BindPracticeItem(LevelId) {
     var post1 = 'LevelId=' + LevelId;
     $.ajax({
