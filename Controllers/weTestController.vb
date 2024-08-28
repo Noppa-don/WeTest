@@ -1001,6 +1001,7 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
         '20240814 -- เพิ่ม Assignment
+        '202408028 -- ปรับการบันทึกเวลาจบ
         <AcceptVerbs(HttpVerbs.Post)>
         Function EndQuiz()
             Dim L1 As New List(Of clsMain)
@@ -1012,78 +1013,77 @@ Namespace Controllers
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
 
-                'Update Score
-
-                cmdMsSql = cmdSQL(cn, "Select sum(score) As TotalScore,cast((sum(score)*100)/FullScore As Decimal(18,2)) As PercentScore from tblQuizScore qs inner join tblquiz q On q.quizid = qs.quizid 
-                                        where qs.QuizId = @QuizId Group by FullScore;")
-                With cmdMsSql
-                    .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
-                End With
-
-                dtScore = getDataTable(cmdMsSql)
-
-                cmdMsSql = cmdSQL(cn, "Update tblquiz set TotalScore = @TotalScore, PercentScore = @PercentScore, EndTime = getdate(),lastupdate = getdate() where quizId = @QuizId;")
-
-                With cmdMsSql
-                    .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId")
-                    .Parameters.Add("@TotalScore", SqlDbType.VarChar).Value = dtScore(0)("TotalScore")
-                    .Parameters.Add("@PercentScore", SqlDbType.VarChar).Value = dtScore(0)("PercentScore")
-                End With
-
-                dt = getDataTable(cmdMsSql)
-
-                'Next Step
-
-                If Session("QuizMode") = "1" Then
-                    'QuizMode 1 : PlacementTest
-                    Dim Result As String = CheckAndCreatePlacementTest()
-                    'ครั้งที่ 1 ให้ทำชุดที่ 2 ต่อ
-                    If Result = "success2" Then
-                        objList.dataType = "success2"
-                        Session("QuestionNo") = Nothing
-                    Else
-                        'ครั้งที่ 2 ให้บันทึก Level ที่ทำได้
-                        Dim ResultTxt As String = UpdateStudentLevel(CInt(dtScore(0)("PercentScore")))
-                        If ResultTxt <> "error" Then
-                            objList.dataType = "success3"
-                            objList.errorMsg = ResultTxt
-                            Session("QuizId") = Nothing
-                            Session("QuestionNo") = Nothing
-                        End If
-                    End If
-                    '20240712 -- เพิ่มการตรวจสอบสถานะการกดส่ง Practice
-                ElseIf Session("QuizMode") = "2" Then
-                    'QuizMode 2 : Practice
-                    If Session("QuizState") IsNot Nothing Then
-                        Session("QuizState") = Nothing
-                        Session("QuizId") = Nothing
-                        Session("QuestionNo") = Nothing
-                        objList.dataType = "success2"
-                    Else
-                        Session("QuizState") = "showanswer"
-                        objList.dataType = "showanswer"
-                        Session("QuestionNo") = Nothing
-                    End If
-                ElseIf Session("QuizMode") = "3" Then
-                    'QuizMode 3 : Exam
-                    objList = CheckAndUplevel()
-                    Session("QuizId") = Nothing
-                    Session("QuestionNo") = Nothing
-                ElseIf Session("QuizMode") = "4" Then
-                    'QuizMode 4 : Assignment
-                    objList.dataType = "success4"
-                    Session("QuizId") = Nothing
-                    Session("QuestionNo") = Nothing
-                End If
-
                 If Session("AnsweredfromReport") IsNot Nothing Then
                     objList.dataType = "gotoreport"
                     Session("QuizState") = Nothing
                     Session("QuizId") = Nothing
                     Session("QuestionNo") = Nothing
                     Session("AnsweredfromReport") = Nothing
-                End If
+                Else
+                    'Update Score
 
+                    cmdMsSql = cmdSQL(cn, "Select sum(score) As TotalScore,cast((sum(score)*100)/FullScore As Decimal(18,2)) As PercentScore from tblQuizScore qs inner join tblquiz q On q.quizid = qs.quizid 
+                                        where qs.QuizId = @QuizId Group by FullScore;")
+                    With cmdMsSql
+                        .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
+                    End With
+
+                    dtScore = getDataTable(cmdMsSql)
+
+                    cmdMsSql = cmdSQL(cn, "Update tblquiz set TotalScore = @TotalScore, PercentScore = @PercentScore, EndTime = getdate(),lastupdate = getdate() where quizId = @QuizId;")
+
+                    With cmdMsSql
+                        .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId")
+                        .Parameters.Add("@TotalScore", SqlDbType.VarChar).Value = dtScore(0)("TotalScore")
+                        .Parameters.Add("@PercentScore", SqlDbType.VarChar).Value = dtScore(0)("PercentScore")
+                    End With
+
+                    dt = getDataTable(cmdMsSql)
+
+                    'Next Step
+
+                    If Session("QuizMode") = "1" Then
+                        'QuizMode 1 : PlacementTest
+                        Dim Result As String = CheckAndCreatePlacementTest()
+                        'ครั้งที่ 1 ให้ทำชุดที่ 2 ต่อ
+                        If Result = "success2" Then
+                            objList.dataType = "success2"
+                            Session("QuestionNo") = Nothing
+                        Else
+                            'ครั้งที่ 2 ให้บันทึก Level ที่ทำได้
+                            Dim ResultTxt As String = UpdateStudentLevel(CInt(dtScore(0)("PercentScore")))
+                            If ResultTxt <> "error" Then
+                                objList.dataType = "success3"
+                                objList.errorMsg = ResultTxt
+                                Session("QuizId") = Nothing
+                                Session("QuestionNo") = Nothing
+                            End If
+                        End If
+                        '20240712 -- เพิ่มการตรวจสอบสถานะการกดส่ง Practice
+                    ElseIf Session("QuizMode") = "2" Then
+                        'QuizMode 2 : Practice
+                        If Session("QuizState") IsNot Nothing Then
+                            Session("QuizState") = Nothing
+                            Session("QuizId") = Nothing
+                            Session("QuestionNo") = Nothing
+                            objList.dataType = "success2"
+                        Else
+                            Session("QuizState") = "showanswer"
+                            objList.dataType = "showanswer"
+                            Session("QuestionNo") = Nothing
+                        End If
+                    ElseIf Session("QuizMode") = "3" Then
+                        'QuizMode 3 : Exam
+                        objList = CheckAndUplevel()
+                        Session("QuizId") = Nothing
+                        Session("QuestionNo") = Nothing
+                    ElseIf Session("QuizMode") = "4" Then
+                        'QuizMode 4 : Assignment
+                        objList.dataType = "success4"
+                        Session("QuizId") = Nothing
+                        Session("QuestionNo") = Nothing
+                    End If
+                End If
                 L1.Add(objList)
                 objList = Nothing
 
@@ -2600,6 +2600,163 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+        '20240828 -- Function Get Goal Data 
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function GetGoalData()
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable, dtSkill As DataTable
+            Dim L1 As New List(Of clsMain)
+            Dim objList As New clsStudentData()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+                'Get GoalDate , GoalAmount, DatePercent
+                cmdMsSql = cmdSQL(cn, "select GoalType,SkillId,CONVERT(varchar(10),enddate, 103) as GoalDate
+                                                ,datediff(day,Startdate,Enddate) as GoalAmount
+                                                ,(100 - ((DATEDIFF(DAY,getdate(),enddate)*100) / DATEDIFF(DAY,startdate,enddate))) as DatePercent 
+                                                from tblstudentGoal where StudentId = @stdid and isactive = 1;")
+                With cmdMsSql
+                    .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("StudentId").ToString
+                End With
+
+                dtSkill = getDataTable(cmdMsSql)
+
+                If dtSkill.Rows.Count <> 0 Then
+                    For i = 0 To dtSkill.Rows.Count - 1
+                        Select Case dtSkill(i)("GoalType").ToString
+                            Case "1"
+                                objList.TotalGoal = dtSkill(i)("GoalDate").ToString
+                                objList.TotalGoalAmount = dtSkill.Rows(i)("GoalAmount").ToString
+                                objList.TotalDatePercent = dtSkill.Rows(i)("DatePercent").ToString & "%"
+
+                                Dim TotalScore As Integer
+                                Dim UserScore As Integer
+
+                                cmdMsSql = cmdSQL(cn, "select case when sum(q.totalscore) is null then 0 else sum(q.totalscore) end as UserScore 
+                                            from tblQuiz q inner join tblquizSession qs on q.quizId = qs.QuizId 
+                                            inner join tblstudentGoal sg on qs.studentId = sg.StudentId
+                                            where qs.StudentId = @stdid and q.starttime between sg.Startdate and sg.enddate and sg.isactive = 1")
+
+                                With cmdMsSql
+                                    .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentid").ToString
+                                End With
+
+                                dt = getDataTable(cmdMsSql)
+
+                                If dt.Rows.Count <> 0 AndAlso dt.Rows(0)("UserScore") <> 0 Then
+
+                                    UserScore = CInt(dt.Rows(0)("UserScore"))
+
+                                    cmdMsSql = cmdSQL(cn, "select sum(a.AnswerScore) as TotalScore 
+                                            from tbltestset t inner join tblTestSetQuestionSet ts on t.TestSetId = ts.TestSetId 
+                                            inner join tblTestSetQuestionDetail td on ts.TSQSId = td.TSQSId inner join tblAnswer a on td.QuestionId = a.QuestionId
+                                            where t.LevelId = (select top 1 LevelId from tblstudentLevel order by lastupdate desc) and t.IsActive = 1 
+                                            and ts.IsActive = 1 and td.IsActive = 1 and td.IsActive = 1 and a.IsActive = 1 and t.IsPractice = 1;")
+
+                                    dt = getDataTable(cmdMsSql)
+
+                                    TotalScore = CInt(dt.Rows(0)("TotalScore"))
+
+                                    Dim SPercent As Decimal = ((UserScore * 100) / TotalScore)
+                                    If SPercent <> 0 Then
+                                        SPercent = Format(SPercent, "N2")
+                                    End If
+
+                                    objList.TotalScorePercent = SPercent.ToString & "%"
+                                Else
+                                    objList.TotalScorePercent = "0%"
+                                End If
+
+                            Case "2"
+                                'Wait For Edit เพิ่ม Skill ที่ยังไม่มี
+                                Select Case dtSkill(i)("SkillId").ToString.ToLower
+                                    Case "31667BAB-89FF-43B3-806F-174774C8DFBF".ToLower
+                                        objList.VocabGoal = dtSkill(i)("GoalDate").ToString
+                                        objList.VocabGoalAmount = dtSkill(i)("GoalAmount").ToString
+                                        objList.VocabDatePercent = dtSkill.Rows(i)("DatePercent").ToString
+                                        objList.VocabScorePercent = GetskillScorePercent("31667BAB-89FF-43B3-806F-174774C8DFBF", cn)
+                                    Case "5BBD801D-610F-40EB-89CB-5957D05C4A0B".ToLower
+                                        objList.GrammarGoal = dtSkill(i)("GoalDate").ToString
+                                        objList.GrammarGoalAmount = dtSkill(0)("GoalAmount").ToString
+                                        objList.GrammarDatePercent = dtSkill.Rows(i)("DatePercent").ToString
+                                        objList.GrammarScorePercent = GetskillScorePercent("5BBD801D-610F-40EB-89CB-5957D05C4A0B", cn)
+                                End Select
+                        End Select
+                    Next
+
+                    If objList.VocabGoal Is Nothing Then
+                        objList.VocabGoal = ""
+                        objList.VocabGoalAmount = ""
+                        objList.VocabDatePercent = "0%"
+                        objList.VocabScorePercent = "0%"
+                    End If
+
+                    If objList.GrammarGoal Is Nothing Then
+                        objList.GrammarGoal = ""
+                        objList.GrammarGoalAmount = ""
+                        objList.GrammarDatePercent = "0%"
+                        objList.GrammarScorePercent = "0%"
+                    End If
+
+
+                    objList.ReadingGoal = ""
+                    objList.ReadingGoalAmount = ""
+                    objList.ReadingDatePercent = "0%"
+                    objList.ReadingScorePercent = "0%"
+
+                    objList.SituationGoal = ""
+                    objList.SituationGoalAmount = ""
+                    objList.SituationDatePercent = "0%"
+                    objList.SituationScorePercent = "0%"
+
+                    objList.ListeningGoal = ""
+                    objList.ListeningGoalAmount = ""
+                    objList.ListeningDatePercent = "0%"
+                    objList.ListeningScorePercent = "0%"
+                Else
+
+                    objList.TotalGoal = ""
+                    objList.TotalGoalAmount = ""
+                    objList.TotalDatePercent = ""
+
+                    objList.ReadingGoal = ""
+                    objList.ReadingGoalAmount = ""
+                    objList.ReadingDatePercent = ""
+
+                    objList.SituationGoal = ""
+                    objList.SituationGoalAmount = ""
+                    objList.SituationDatePercent = ""
+
+                    objList.ListeningGoal = ""
+                    objList.ListeningGoalAmount = ""
+                    objList.ListeningDatePercent = ""
+
+                    objList.GrammarGoal = ""
+                    objList.GrammarGoalAmount = ""
+                    objList.GrammarDatePercent = ""
+
+                    objList.VocabGoal = ""
+                    objList.VocabGoalAmount = ""
+                    objList.VocabDatePercent = ""
+                End If
+                objList.Result = "ok"
+                L1.Add(objList)
+                objList = Nothing
+
+            Catch ex As Exception
+                objList.dataType = "error"
+                objList.errorMsg = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
         '20240722 -- เพิ่ม ExpiredDate
         '20240723 -- เพิ่ม User Data สำหรับแก้ไข
         '20240813 -- select จำนวนวันที่จะหมดอายุเพื่อเอาไปใช้กำหนด Max Date ของ calendar
@@ -2651,116 +2808,6 @@ Namespace Controllers
                             objList.ExpiredDateAmount = dt(0)("ExpiredDateAmount").ToString
                             objList.UserLevel = dt(0)("LevelShortName").ToString
                         End If
-
-                        'Get GoalDate , GoalAmount, DatePercent
-                        cmdMsSql = cmdSQL(cn, "select GoalType,SkillId,CONVERT(varchar(10),enddate, 103) as GoalDate
-                                                ,datediff(day,Startdate,Enddate) as GoalAmount
-                                                ,(100 - ((DATEDIFF(DAY,getdate(),enddate)*100) / DATEDIFF(DAY,startdate,enddate))) as DatePercent 
-                                                from tblstudentGoal where StudentId = @stdid and isactive = 1;")
-                        With cmdMsSql
-                            .Parameters.Add("@stdid", SqlDbType.VarChar).Value = stdId
-                        End With
-
-                        dtSkill = getDataTable(cmdMsSql)
-
-                        If dtSkill.Rows.Count <> 0 Then
-                            For i = 0 To dtSkill.Rows.Count - 1
-                                Select Case dtSkill(i)("GoalType").ToString
-                                    Case "1"
-                                        objList.TotalGoal = dtSkill(i)("GoalDate").ToString
-                                        objList.TotalGoalAmount = dtSkill.Rows(i)("GoalAmount").ToString
-                                        objList.TotalDatePercent = dtSkill.Rows(i)("DatePercent").ToString & "%"
-
-                                        Dim TotalScore As Integer
-                                        Dim UserScore As Integer
-
-                                        cmdMsSql = cmdSQL(cn, "select case when sum(q.totalscore) is null then 0 else sum(q.totalscore) end as UserScore 
-                                            from tblQuiz q inner join tblquizSession qs on q.quizId = qs.QuizId 
-                                            inner join tblstudentGoal sg on qs.studentId = sg.StudentId
-                                            where qs.StudentId = @stdid and q.starttime between sg.Startdate and sg.enddate and sg.isactive = 1")
-
-                                        With cmdMsSql
-                                            .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentid").ToString
-                                        End With
-
-                                        dt = getDataTable(cmdMsSql)
-
-                                        If dt.Rows.Count <> 0 AndAlso dt.Rows(0)("UserScore") <> 0 Then
-
-                                            UserScore = CInt(dt.Rows(0)("UserScore"))
-
-                                            cmdMsSql = cmdSQL(cn, "select sum(a.AnswerScore) as TotalScore 
-                                            from tbltestset t inner join tblTestSetQuestionSet ts on t.TestSetId = ts.TestSetId 
-                                            inner join tblTestSetQuestionDetail td on ts.TSQSId = td.TSQSId inner join tblAnswer a on td.QuestionId = a.QuestionId
-                                            where t.LevelId = (select top 1 LevelId from tblstudentLevel order by lastupdate desc) and t.IsActive = 1 
-                                            and ts.IsActive = 1 and td.IsActive = 1 and td.IsActive = 1 and a.IsActive = 1 and t.IsPractice = 1;")
-
-                                            dt = getDataTable(cmdMsSql)
-
-                                            TotalScore = CInt(dt.Rows(0)("TotalScore"))
-
-                                            Dim SPercent As Decimal = ((UserScore * 100) / TotalScore)
-                                            If SPercent <> 0 Then
-                                                SPercent = Format(SPercent, "N2")
-                                            End If
-
-                                            objList.TotalScorePercent = SPercent.ToString & "%"
-                                        Else
-                                            objList.TotalScorePercent = "0%"
-                                        End If
-
-                                    Case "2"
-                                        If dtSkill(i)("SkillId").ToString.ToLower = "31667BAB-89FF-43B3-806F-174774C8DFBF".ToLower Then
-                                            objList.VocabGoal = dtSkill(i)("GoalDate").ToString
-                                            objList.VocabGoalAmount = dtSkill(i)("GoalAmount").ToString
-                                            objList.VocabDatePercent = dtSkill.Rows(i)("DatePercent").ToString
-                                            objList.VocabScorePercent = GetskillScorePercent("31667BAB-89FF-43B3-806F-174774C8DFBF", cn)
-                                        ElseIf dtSkill(i)("SkillId").ToString.ToLower = "5BBD801D-610F-40EB-89CB-5957D05C4A0B".ToLower Then
-                                            objList.GrammarGoal = dtSkill(i)("GoalDate").ToString
-                                            objList.GrammarGoalAmount = dtSkill(0)("GoalAmount").ToString
-                                            objList.GrammarDatePercent = dtSkill.Rows(i)("DatePercent").ToString
-                                            objList.GrammarScorePercent = GetskillScorePercent("5BBD801D-610F-40EB-89CB-5957D05C4A0B", cn)
-                                        End If
-
-                                        'Wait For Edit เพิ่ม Skill ที่ยังไม่มี
-                                        objList.ReadingGoal = ""
-                                        objList.ReadingGoalAmount = ""
-                                        objList.ReadingDatePercent = "0%"
-                                        objList.ReadingScorePercent = "0%"
-
-                                        objList.SituationGoal = ""
-                                        objList.SituationGoalAmount = ""
-                                        objList.SituationDatePercent = "0%"
-                                        objList.SituationScorePercent = "0%"
-
-                                        objList.ListeningGoal = ""
-                                        objList.ListeningGoalAmount = ""
-                                        objList.ListeningDatePercent = "0%"
-                                        objList.ListeningScorePercent = "0%"
-                                End Select
-                            Next
-                        Else
-                            objList.ReadingGoal = ""
-                            objList.ReadingGoalAmount = ""
-                            objList.ReadingDatePercent = ""
-
-                            objList.SituationGoal = ""
-                            objList.SituationGoalAmount = ""
-                            objList.SituationDatePercent = ""
-
-                            objList.ListeningGoal = ""
-                            objList.ListeningGoalAmount = ""
-                            objList.ListeningDatePercent = ""
-
-                            objList.GrammarGoal = ""
-                            objList.GrammarGoalAmount = ""
-                            objList.GrammarDatePercent = ""
-
-                            objList.VocabGoal = ""
-                            objList.VocabGoalAmount = ""
-                            objList.VocabDatePercent = ""
-                        End If
-
                     Else
                         'Not Register
                         objList.Result = "not"
