@@ -1,5 +1,4 @@
 ﻿var OTPNum,counterId, PageNum, AllPage;
-
 var sec = 0;
 var MultiFileCount = 1;
 var MultiFileAmount;
@@ -32,7 +31,6 @@ $(document)
          MultiFileCount = 1;
          setProgressbar();
      }
-
  })
 //20240726 -- เพิ่มการกดหยุดไฟล์เสียง
 //20240807 -- เพิ่มการกดหยุดไฟล์เสียง
@@ -205,7 +203,7 @@ $(document)
      window.location = '/Wetest/User';
  })
 //20240801 -- กดรูปภาพแล้วขยาย
-.on('click', '#divQuestionAndAnswer img', function (e, data) {
+ .on('click', '#divQuestionAndAnswer img', function (e, data) {
     var img = $(this);
     var bigImg = $('<img />').css({ 'max-width': '80%', 'max-height': '80%', 'display': 'inline', 'margin-top': '10px' });
     bigImg.attr({ src: img.attr('src'), alt: img.attr('alt'), title: img.attr('title') });
@@ -223,7 +221,7 @@ $(document)
 })
 //20240805 -- กดฟังไฟล์เสียง multiQuestion
 //20240814 -- เปลี่ยนไป click Icon แล้วให้เล่นไฟล์
-.on('click', '.multiQfileIcon', function (e, data) {
+ .on('click', '.multiQfileIcon', function (e, data) {
     if (MultiFileCount == MultiFileAmount) {
         $('#multiQuestion .bap-btn').click();
         MultiFileCount = 1
@@ -241,7 +239,7 @@ $(document)
 })
 //20240805 -- กดฟังไฟล์เสียง multiSlowQuestion
 //20240814 -- เปลี่ยนไป click Icon แล้วให้เล่นไฟล์
-.on('click', '.multiQfileSlowIcon', function (e, data) {
+ .on('click', '.multiQfileSlowIcon', function (e, data) {
     if (MultiFileCount == MultiFileSlowAmount) {
         $('#multiSlowQuestion .bap-btn').click();
         MultiFileCount = 1
@@ -255,11 +253,11 @@ $(document)
     }
 })
 //20240814 -- เปิดคำอ่านไฟล์เสียง
-.on('click', '.multiQtxtIcon', function (e, data) {
+ .on('click', '.multiQtxtIcon', function (e, data) {
     $('#multiQtxt').removeClass('ui-hide');
 })
 //20240822 -- ปรับการกดเล่นไฟล์เสียงแต่ละคำตอบ
-.on('click', '.multiAfileIcon', function (e, data) {
+ .on('click', '.multiAfileIcon', function (e, data) {
     var MID = $(this).attr('MID');
     var PlayCount = $(this).attr('PlayCount');
     if (PlayCount == MultiFileAmount) {
@@ -280,7 +278,7 @@ $(document)
         $('#MA' + MID).attr('PlayCount',PlayCount);
     }
 })
-.on('click', '.multiAfileSlowIcon', function (e, data) {
+ .on('click', '.multiAfileSlowIcon', function (e, data) {
     var MID = $(this).attr('MID');
     var PlayCount = $(this).attr('PlayCount');
     if (PlayCount == MultiFileAmount) {
@@ -333,6 +331,11 @@ $(document)
  .on('click', '.LeapchoiceItem', function (e, data) {
      var QuestionNo = $(this).attr('qno');
      GetQuestionAndAnswer('select', QuestionNo);
+     console.log(QuestionNo);
+     if (QuestionNo == 1) {
+         $('.btnNext').removeClass("UnActive");
+         $('.btnBack').addClass("UnActive");
+     }
      popupClose($(this).closest('.my-popup'));
  })
  .on('click', '#btnSkip', function (e, data) {
@@ -345,11 +348,11 @@ $(document)
 
 // ==== Dialog เฉลย ========================================================================================= //
  //20240715 -- แสดง Dialog เฉลย
-.on('click', '#divAllQuestion', function (e, data) {
+ .on('click', '#divAllQuestion', function (e, data) {
     GetAnswerChoicePanel(1)
 })
  //20240715 -- ปุ่ม Next บน Dialog เฉลย
-.on('click', '#dialogResultChoice .btnNextPage', function (e, data) {
+ .on('click', '#dialogResultChoice .btnNextPage', function (e, data) {
     if ($('#dialogResultChoice .btnNextPage').hasClass('UnActive') == false) {
         $('#pageAnswerchoice' + PageNum).addClass("ui-hide");
         PageNum += 1;
@@ -363,7 +366,7 @@ $(document)
     }
 })
  //20240715 -- ปุ่ม Back บน Dialog เฉลย
-.on('click', '#dialogResultChoice .btnBackPage', function (e, data) {
+ .on('click', '#dialogResultChoice .btnBackPage', function (e, data) {
     if ($('#dialogResultChoice .btnBackPage').hasClass('UnActive') == false) {
         $('#pageAnswerchoice' + PageNum).addClass("ui-hide");
         PageNum -= 1;
@@ -378,19 +381,19 @@ $(document)
     }
 })
  //20240715 -- ปุ่มดูเฉพาะข้อถูกบน Dialog เฉลย
-.on('click', '#btnRightMode', function (e, data) {
+ .on('click', '#btnRightMode', function (e, data) {
     GetAnswerChoicePanel(2);
 })
  //20240715 -- ปุ่มดูเฉพาะข้อผิดบน Dialog เฉลย
-.on('click', '#btnWrongMode', function (e, data) {
+ .on('click', '#btnWrongMode', function (e, data) {
     GetAnswerChoicePanel(3);
 })
  //20240715 -- ปุ่มดูเฉพาะข้อข้ามบน Dialog เฉลย
-.on('click', '#btnLeapChoiceMode', function (e, data) {
+ .on('click', '#btnLeapChoiceMode', function (e, data) {
     GetAnswerChoicePanel(4);
 })
  //20240715 -- ปุ่มดูข้อทั้งหมดบน Dialog เฉลย
-.on('click', '.AllAnswer', function (e, data) {
+ .on('click', '.AllAnswer', function (e, data) {
     GetAnswerChoicePanel(1);
 })
 
