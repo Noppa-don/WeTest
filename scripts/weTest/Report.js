@@ -27,7 +27,6 @@ $(document)
      $('#btnLesson').removeClass('btnSelected');
      $('#btnRandom').addClass('btnSelected');
      IsLesson = '0'
-     console.log(selectedStartDate);
      if (typeof selectedStartDate != 'undefined') {
          if (selectedStartDate == 'manual') {
              if ($('#StartDate').val() != '' && $('#EndDate').val() != '') {
@@ -72,12 +71,12 @@ $(document)
  .on('click', '.btnBack', function (e, data) {
      window.location = '/Wetest/User';
  }) 
-//20240718 Choose Random All Skill
+//20240718 -- Choose Random All Skill
  .on('click', '#btnRandomAll', function (e, data) {
      $('#btnRandomAll').toggleClass('btnSelected');
      $('.btnSkill').toggleClass('Selected');
  })
-//20240718 Choose Random Skill
+//20240718 -- Choose Random Skill
  .on('click', '.btnSkill', function (e, data) {
      $(this).toggleClass('Selected');
      $('#btnRandomAll').removeClass('Selected');
@@ -285,7 +284,7 @@ function GotoPracticeAgain(TestsetId, TestsetName) {
         }
     });
 }
-//20240723 Get name level and Photo
+//20240723 -- Get name level and Photo
 function CheckLoginStatus() {
     $.ajax({
         type: 'POST',
