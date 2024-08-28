@@ -31,10 +31,14 @@
 .divAnswerbarAns.RightAns{background-color:darkseagreen; color:white;}
 .divAnswerbarAns.WrongAns{background-color:indianred; color:white;}
 
-#divSideMenuBar { margin-right: auto; margin-left: auto;padding-top: 20px;} 
-#divPause {background: url(/images/Wetest/Pause.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;cursor:pointer;margin: auto;} 
-#divAllQuestion,#divAllLeapChoice {background: url(/images/Wetest/AllQuestion.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;margin: auto;cursor:pointer;} 
-#divShowExplain {background: url(/images/Wetest/key.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;margin: auto;cursor:pointer;} 
+#divSideMenuBar {margin-right: auto; margin-left: auto;} 
+#divPause {background: url(/images/Wetest/Pause.png);background-repeat: no-repeat;background-size: contain;background-position: left;
+           width: 90%;height: 20%;cursor:pointer;margin: auto;} 
+#divAllQuestion,#divAllLeapChoice {background: url(/images/Wetest/AllQuestion.png);background-repeat: no-repeat;
+                                   background-size: contain;background-position: left;width: 90%;height: 20%;
+                                   margin: auto;cursor:pointer;} 
+#divShowExplain {background: url(/images/Wetest/key.png);background-repeat: no-repeat;background-size: contain;
+                 background-position: left;width: 90%;height: 20%;margin: auto;cursor:pointer;} 
 .footer {display: flex;}
 
 .footerButton {display: flex;justify-content:center;float:left;width:90%;padding:20px;}
