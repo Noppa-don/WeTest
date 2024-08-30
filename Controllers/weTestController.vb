@@ -3247,7 +3247,7 @@ Namespace Controllers
                         sqlBuilder.Append(" AND q.starttime between @StartDate and @EndDate ")
                 End Select
 
-                sqlBuilder.Append("  order by Quizdate,starttime desc;")
+                sqlBuilder.Append("  order by Quizdate desc,starttime desc;")
 
 
                 cmdMsSql = cmdSQL(cn, sqlBuilder.ToString())
