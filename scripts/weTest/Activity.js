@@ -10,7 +10,6 @@ $(function () {
     checkAnsweredFromReport();
     GetConfigMultiFile();
     SetLogo();
-  
 });
 
 // ============================================================ //
@@ -23,26 +22,31 @@ $(document)
  .on('click', '.btnNext', function (e, data) {
     
      if ($('.bap-icon').children().hasClass('bap-icon-on')) {
-         $('.multifileIcon').click()
-         if ($('.bap-icon').children().hasClass('bap-icon-on')) { $('.multifileIcon').click() }
+         $('.multiQfileIcon').click()
+         if ($('.bap-icon').children().hasClass('bap-icon-on')) { $('.multiQfileIcon').click() }
+     }
+     if ($('.bap-icon').children().hasClass('bap-icon-on')) {
+         $('.multiQfileSlowIcon').click()
+         if ($('.bap-icon').children().hasClass('bap-icon-on')) { $('.multiQfileSlowIcon').click() }
      }
      if ($('.btnNext').hasClass('UnActive') == false) {
          GetQuestionAndAnswer('next', '');
          MultiFileCount = 1;
-         setProgressbar();
      }
  })
 //20240726 -- เพิ่มการกดหยุดไฟล์เสียง
 //20240807 -- เพิ่มการกดหยุดไฟล์เสียง
  .on('click', '.btnBack', function (e, data) {
      if ($('.bap-icon').children().hasClass('bap-icon-on')) {
-         $('.multifileIcon').click()
-         if ($('.bap-icon').children().hasClass('bap-icon-on')) { $('.multifileIcon').click() }
+         $('.multiQfileIcon').click()
+         if ($('.bap-icon').children().hasClass('bap-icon-on')) { $('.multiQfileIcon').click() }
      }
-
+     if ($('.bap-icon').children().hasClass('bap-icon-on')) {
+         $('.multiQfileSlowIcon').click()
+         if ($('.bap-icon').children().hasClass('bap-icon-on')) { $('.multiQfileSlowIcon').click() }
+     }
      if ($('.btnBack').hasClass('UnActive') == false) {
          GetQuestionAndAnswer('back', '');
-         setProgressbar();
      }
  })
  .on('click', '.divAnswerbar', function (e, data) {
@@ -412,7 +416,8 @@ function GetQuestionAndAnswer(ActionType, QuestionNo) {
             for (var i = 0; i < data.length; i++) {
 
                 if (data[i].ItemStatus == 'sessionExpired') {
-                    window.location = '/Wetest/User';
+                    window.location = '/Wetest/User';                 
+                    return false;
                 }
 
                 if (data[i].ItemType == 1) {
@@ -432,11 +437,17 @@ function GetQuestionAndAnswer(ActionType, QuestionNo) {
                         $('.QName').append("<div class='multiQtxtIcon ui-hide'><div id='multiQtxt' class='ui-hide'>" + data[i].multitxt + "</div>");
                     }
 
-                    if (data[i].ItemStatus == 'first') { $('.btnBack').addClass("UnActive"); }
-                    if (data[i].ItemStatus == 'last') { $('.btnNext').addClass("UnActive"); }
+                    if (data[i].ItemStatus == 'first') {
+                        $('.btnBack').addClass("UnActive");
+                        $('.btnNext').removeClass("UnActive");
+                    }
+                    if (data[i].ItemStatus == 'last') {
+                        $('.btnBack').removeClass("UnActive");
+                        $('.btnNext').addClass("UnActive");
+                    }
 
-                    if (data[i].ItemStatus == 'second') { $('.btnBack').removeClass("UnActive"); }
-                    if (data[i].ItemStatus == 'beforelast') { $('.btnNext').removeClass("UnActive"); }
+                    if (data[i].ItemStatus == 'second') { $('.btnBack,.btnNext').removeClass("UnActive"); }
+                    if (data[i].ItemStatus == 'beforelast') { $('.btnNext,.btnNext').removeClass("UnActive"); }
                 } else {
 
                     $('#divAnswer').html(data[i].Itemtxt);
@@ -454,6 +465,7 @@ function GetQuestionAndAnswer(ActionType, QuestionNo) {
                     }
                 }
             }
+            setProgressbar();
         }
     });
 }
@@ -476,7 +488,7 @@ function setProgressbar() {
                     $(".runningStatus").css("width", data[i].AnsweredPercent + '%');
                     $(".runningAmount").html(data[i].AnsweredAmount);
 
-                    if (data[i].errorMsg == '100') {
+                    if (data[i].AnsweredPercent == '100') {
                         $(".runningStatus").css("border-radius", "1em 1em 1em 1em");
                     }
                 }
@@ -568,10 +580,11 @@ function checkAnsweredFromReport() {
                     $('#divRunningBar, #divAllLeapChoice, #divTime').addClass("ui-hide");
                     $('#divAllQuestion, #divShowExplain').removeClass("ui-hide");
                     GetQuestionAndAnswer('select', 1);
+
                 } else {
                     GetQuestionAndAnswer()
                     QuizTimer()
-                    setProgressbar();
+               
                     PageNum = 1
                 }
             }
