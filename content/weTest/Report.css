@@ -49,4 +49,20 @@ h1 {border-bottom-style:solid;border-bottom-width: 1px;}
 
 .Logovocab{background: url(/images/Wetest/vocab.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 30px;height:30px;margin-left: 5px;cursor:pointer;}
 .Logogrammar{background: url(/images/Wetest/gramma.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 30px;height:30px;margin-left: 5px;cursor:pointer;}
-
+#ChooseLevel{margin-top: 25px;}
+#SelectLevel {margin-left: 45px;}
+select {border-style: solid;
+    border-radius: 1em;
+    line-height: 30px;
+    padding: 10px;
+    height:  56px;
+    color: #0a3820;
+    border-color: #0a3820;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;
+    width: fit-content;
+    margin: auto;
+    min-width: 20%;
+    border-width: 3px;
+}
