@@ -518,6 +518,7 @@ function SetGoal(data) {
                 $('#VocabularyTimeResult').removeClass('ui-hide');
                 $('#VocabularyPS').removeClass('PS');
                 $('#VocabularyPS').html(data[i].VocabScorePercent);
+                $('#VocabTime').html(data[i].VocabDatePercent);
             } else {
                 $('#VocabularyTimeResult').addClass('ui-hide');
                 $('#VocabularyPS').html("0%");
@@ -527,6 +528,7 @@ function SetGoal(data) {
                 $('#GrammarTimeResult').removeClass('ui-hide');
                 $('#GrammarPS').removeClass('PS');
                 $('#GrammarPS').html(data[i].GrammarScorePercent);
+                $('#GrammarTime').html(data[i].GrammarDatePercent);
             } else {
                 $('#GrammarTimeResult').addClass('ui-hide');
                 $('#GrammarPS').html("0%");
