@@ -139,18 +139,18 @@
             <span>You must have a Wetest Key for register<br />
                 <br />
                 ** Price per Account is <span id="PackagePrice"></span>Bath / 1 Year **<br />
+                 <br />
+                ** Please Type "<span id="RegisterRandomCode"></span>" at your memo for verify your slip**<br />
             </span>
             <br />
             <span class="ui-Warning-green ui-hide" id="spnWarningDiscount">Promotion code / Discount code is already !<br />
                 <br />
             </span>
-            <span class="ui-Warning-red" id="spnWarning">Please press "Payment" for pay<br />
+            <span class="ui-Warning-red  ui-hide" id="spnWarning">Please press "Payment" for pay<br />
                 You can use Mobile Banking for this.</span>
-            <br />
-            <br />
+
             <div class="btn ui-hide" id="btnPayment">Payment</div>
             <div class="Imagebtn btnQR"></div>
-            <br />
             <br />
 
             <div class="flexDiv">
@@ -169,6 +169,11 @@
                         <input type='text' id='SlipName' />
                         <input type='file' id='fileSlip' class="ui-hide notborder" />
                         <div class='Imagebtn btnSlipPhoto'></div>
+                    </div>
+                    <br />
+                     <div>
+                         <span>Date</span> <input type='text' id='txtDate' />
+                         <span>Time</span> <input type='text' id='txtTime' />
                     </div>
                 </div>
             </div>
@@ -231,7 +236,6 @@
             <div class="btn btnSelected" id="btnConfirmPayment">Confirm Payment</div>
         </div>
     </div>
-
 
     <div name='alert' id="dialogAlert" class='my-popup alert ui-popup-container ui-popup-hidden'>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
