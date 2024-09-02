@@ -6,6 +6,7 @@ CheckLoginStatus();
 // ======================= Object Event ======================= //
 $(document)
 // ======================= Activity ======================= //
+//20240830 -- เพิ่ม Filter Level
  .on('click', '#btnLesson', function (e, data) {
      $('#btnLesson').addClass('btnSelected');
      $('#btnRandom').removeClass('btnSelected');
@@ -22,9 +23,11 @@ $(document)
              $('#btnSearch').removeClass('unActive')
          }
      }
+     GetLevel();
  })
  .on('click', '#btnRandom', function (e, data) {
      $('#btnLesson').removeClass('btnSelected');
+     $('#ChooseLevel').addClass('ui-hide');
      $('#btnRandom').addClass('btnSelected');
      IsLesson = '0'
      if (typeof selectedStartDate != 'undefined') {
@@ -75,6 +78,7 @@ $(document)
  .on('click', '#btnRandomAll', function (e, data) {
      $('#btnRandomAll').toggleClass('btnSelected');
      $('.btnSkill').toggleClass('Selected');
+ 
  })
 //20240718 -- Choose Random Skill
  .on('click', '.btnSkill', function (e, data) {
@@ -210,8 +214,9 @@ function OpenFilterdate() {
 }
 //20240722 -- Search Report with Filter
 //20240823 -- Check Session
+//20240830 -- เพิ่ม Filter Level
 function SearchReport() {
-    var startdate, enddate;
+    var startdate, enddate,LevelId;
     if ($('#rdbThisWeek').is(":checked")) {
         startdate = 'week';
     }
@@ -221,6 +226,11 @@ function SearchReport() {
     if ($('#rdbChooseDate').is(":checked")) {
         startdate = selectedStartDate
         enddate = selectedEndDate
+    }
+
+    if ($('#ChooseLevel').hasClass('ui-hide') == false) {
+        LevelId = $('#ddlLevel').val();
+        console.log(LevelId);
     }
 
     var arrSkill = new Array();
@@ -237,7 +247,7 @@ function SearchReport() {
 
     if (skill == '') { skill = 'All'; }
 
-    var post1 = 'StartDate=' + startdate + '&EndDate=' + enddate + '&PracticeType=' + IsLesson + '&arrSkill=' + skill;
+    var post1 = 'StartDate=' + startdate + '&EndDate=' + enddate + '&PracticeType=' + IsLesson + '&arrSkill=' + skill + '&LevelId=' + LevelId;
 
     $.ajax({
         type: 'POST',
@@ -297,6 +307,30 @@ function CheckLoginStatus() {
                     $('#UserLevel').html('Your Level : ' + data[i].UserLevel + '<br />');
 
                 }
+            }
+        }
+    });
+}
+//20240830 -- สร้าง DropdownLevel
+function GetLevel() {
+
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/GetLevel',
+        success: function (data) {
+            var selectHTML = "";
+            if (data[0].result == 'success') {
+                if (data.length > 1) {
+                    selectHTML = '<select id="ddlLevel">';
+                    var LevelId;
+                    for (var i = 0; i < data.length; i++) {
+                        selectHTML += "<option value='" + data[i].LevelId + "'>" + data[i].LevelName + "</option>";
+                        LevelId = data[0].LevelId
+                    }
+                    selectHTML += "</select>";
+                    $('#SelectLevel').html(selectHTML);
+                    $('#ChooseLevel').removeClass('ui-hide');
+                } else { $('#ChooseLevel').addClass('ui-hide'); }
             }
         }
     });
