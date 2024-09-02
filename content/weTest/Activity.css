@@ -101,10 +101,10 @@
 .LeapAnsweredChoice {width: 30px; height: 35px; background: url(/images/Wetest/leapAns.png); background-repeat: no-repeat; background-size: contain; background-position: left; margin: auto; margin-bottom: 5px;margin-top: 5px;cursor:pointer;}
 
 .btnAnswerType {border-radius: 1em;color:white;line-height: 30px;padding: 10px;height: 30px;cursor: pointer;box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038;width: fit-content;margin: auto;min-width: 20%;text-align: center;}
-    .btnAnswerType.AllAnswer {background-color: #0a3820;border-style:solid;}
-    .btnAnswerType.RightAnswer {background-color: #63c089;}
-    .btnAnswerType.WrongAnswer {background-color: #a61e24;}
-    .btnAnswerType.LeapAnswer {background-color: #abadaf;}
+.btnAnswerType.AllAnswer {background-color: #0a3820;border-style:solid;}
+.btnAnswerType.RightAnswer {background-color: #63c089;}
+.btnAnswerType.WrongAnswer {background-color: #a61e24;}
+.btnAnswerType.LeapAnswer {background-color: #abadaf;}
 
 .iconAnswer{float: left; margin: auto; margin-bottom: 5px;margin-top: 5px;cursor:pointer;}
 .iconAnswer.iconRightAnswer {margin-left: 15px;height: 25px; width: 25px; height: 25px;background: url(/images/Wetest/RightIcon.png);background-repeat: no-repeat; background-size: contain; background-position: left;}
