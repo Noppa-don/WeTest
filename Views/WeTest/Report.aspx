@@ -14,7 +14,7 @@
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="MainContent" runat="server">
 
-       <div class="banner">
+    <div class="banner">
         <div class="AppData">
             <div class="logo"></div>
             <div class='pagename'></div>
@@ -46,12 +46,14 @@
 
         <div class="flexDiv">
             <div class="Filter firstflexdiv">
-                <div id="PracticeType" class="flexDiv">
-                    Practice from
-             <div class="btn firstflexdiv" id="btnLesson">Lesson</div>
+                <div id="PracticeType" class="flexDiv"> Practice from
+                    <div class="btn firstflexdiv" id="btnLesson">Lesson</div>
                     <div class="btn " id="btnRandom">Random</div>
+                   
                 </div>
-
+                <div id="ChooseLevel" class="flexDiv ui-hide"> choose Level
+                        <div id="SelectLevel"></div>
+                </div>
                 <div id="TimeData" class="flexDiv">
                     <div>
                         <label for="rdbThisWeek" class="rdb">This week</label><input type="radio" name="radio-1" class="firstflexdiv" id="rdbThisWeek" />
