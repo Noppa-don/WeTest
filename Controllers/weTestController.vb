@@ -1986,7 +1986,8 @@ Namespace Controllers
                 End If
 
 
-                cmdMsSql = cmdSQL(cn, "Insert Into tblStudentLevel(StudentId,LevelId) values(@StudentId,@LevelRegister);")
+                cmdMsSql = cmdSQL(cn, "Update tblStudentLevel Set IsActive = 0 where StudentId = @StudentId;
+                                       Insert Into tblStudentLevel(StudentId,LevelId) values(@StudentId,@LevelRegister);")
                 With cmdMsSql
                     .Parameters.Add("@StudentId", SqlDbType.VarChar).Value = Session("StudentId").ToString
                     .Parameters.Add("@LevelRegister", SqlDbType.VarChar).Value = LevelRegister.ToString
@@ -2613,7 +2614,7 @@ Namespace Controllers
                 ' ==================================================
                 'Get GoalDate , GoalAmount, DatePercent
                 cmdMsSql = cmdSQL(cn, "select GoalType,SkillId,CONVERT(varchar(10),enddate, 103) as GoalDate
-                                                ,datediff(day,Startdate,Enddate) as GoalAmount
+                                                ,datediff(day,getdate(),Enddate) as GoalAmount
                                                 ,(100 - ((DATEDIFF(DAY,getdate(),enddate)*100) / DATEDIFF(DAY,startdate,enddate))) as DatePercent 
                                                 from tblstudentGoal where StudentId = @stdid and isactive = 1;")
                 With cmdMsSql
@@ -2674,12 +2675,12 @@ Namespace Controllers
                                     Case "31667BAB-89FF-43B3-806F-174774C8DFBF".ToLower
                                         objList.VocabGoal = dtSkill(i)("GoalDate").ToString
                                         objList.VocabGoalAmount = dtSkill(i)("GoalAmount").ToString
-                                        objList.VocabDatePercent = dtSkill.Rows(i)("DatePercent").ToString
+                                        objList.VocabDatePercent = dtSkill.Rows(i)("DatePercent").ToString & "%"
                                         objList.VocabScorePercent = GetskillScorePercent("31667BAB-89FF-43B3-806F-174774C8DFBF", cn)
                                     Case "5BBD801D-610F-40EB-89CB-5957D05C4A0B".ToLower
                                         objList.GrammarGoal = dtSkill(i)("GoalDate").ToString
                                         objList.GrammarGoalAmount = dtSkill(0)("GoalAmount").ToString
-                                        objList.GrammarDatePercent = dtSkill.Rows(i)("DatePercent").ToString
+                                        objList.GrammarDatePercent = dtSkill.Rows(i)("DatePercent").ToString & "%"
                                         objList.GrammarScorePercent = GetskillScorePercent("5BBD801D-610F-40EB-89CB-5957D05C4A0B", cn)
                                 End Select
                         End Select
@@ -2988,6 +2989,7 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
         '20240718 -- ปรับวิธีการบันทึกข้อสอบแบบสุ่มตามตัวชี้วัด
+        '20240830 -- ปรับ Query สุ่มข้อสอบจากระดับชั้นปัจจุบัน
         <AcceptVerbs(HttpVerbs.Post)>
         Function RandomPractice()
             Dim L1 As New List(Of clsMain)
@@ -3017,15 +3019,17 @@ Namespace Controllers
                 End With
 
                 If Request.Form("arrSkill") = "All" Then
-                    cmdMsSql3 = cmdSQL(cn, "insert into tblTestSetQuestionDetail Select newid(),@tsqsId,row_number() over (order by questionId),QuestionId,1,getdate() from (
+                    cmdMsSql3 = cmdSQL(cn, "insert into tblTestSetQuestionDetail 
+                                            Select newid(),@tsqsId,row_number() over (order by questionId),QuestionId,1,getdate() from (
                                             select top (@ExamAmount) q.questionId from tblquestion q 
-                                            inner join tblQuestionset qs on q.qsetid = qs.QSetId inner join tblQuestionCategory qc on qs.QCategoryId  = qc.QCategoryId
+                                            inner join tblQuestionset qs on q.qsetid = qs.QSetId 
+                                            inner join tblQuestionCategory qc on qs.QCategoryId  = qc.QCategoryId
                                             inner join tblbook b on qc.BookGroupId = b.BookGroupId
-                                            where b.BookSyllabus = '51' and b.LevelId in (select levelid from tbllevel 
-                                            where levelno <= (select top 1 levelno from tbllevel l left join tblStudentLevel sl on l.LevelId = sl.LevelId 
-                                            where studentId = @stdId)) and q.isactive = 1 and qs.isactive = 1 and qc.isactive = 1  and qei.isactive = 1
-                                            and q.QuestionId not in (select questionId from tblquizquestion qq inner join tblQuizSession qs on qq.QuizId = qs.quizid 
-                                            where qs.studentId = @stdId) order by newid())a;")
+                                            inner join tblstudentLevel sl on b.LevelId = sl.LevelId where b.BookSyllabus = '51'
+                                            and q.isactive = 1 and qs.isactive = 1 and qc.isactive = 1 and b.IsActive = 1 
+                                            and sl.IsActive = 1 and q.QuestionId not in (
+                                            select questionId from tblquizquestion qq inner join tblQuizSession qs 
+                                            on qq.QuizId = qs.quizid where qs.studentId = @stdId) order by newid())a;")
                     With cmdMsSql3
                         .Parameters.Add("@ExamAmount", SqlDbType.TinyInt).Value = CInt(Request.Form("ExamAmount"))
                         .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
@@ -3042,19 +3046,20 @@ Namespace Controllers
 
                     skt = skt.Substring(1, skt.Length - 1)
                     Dim sqlBuilder As StringBuilder = New StringBuilder()
-                    sqlBuilder.Append("insert into tblTestSetQuestionDetail Select distinct newid(),@tsqsId,row_number() over (order by (SELECT NULL)) as qno,Question_Id,1,getdate()
+                    sqlBuilder.Append("insert into tblTestSetQuestionDetail 
+                                        Select distinct newid(),@tsqsId,row_number() over (order by (SELECT NULL)) as qno,Question_Id,1,getdate()
                                         from (select top (@ExamAmount) qei.question_Id from tblQuestionEvaluationIndexItem qei
                                         inner join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id
                                         inner join tblTestSetQuestionDetail tsqd on tsqd.questionId = qei.Question_Id
                                         inner join tblTestSetQuestionSet tsqs on tsqd.tsqsid = tsqs.TSQSId
-                                        inner join tblTestset t on tsqs.testsetId = t.testsetid and t.LevelId in(select levelid from tbllevel where levelno <= (
-                                        select top 1 levelno from tbllevel l left join tblStudentLevel sl on l.LevelId = sl.LevelId where studentId = @stdId order by levelno))
-                                        where ei.Parent_Id in(")
+                                        inner join tblTestset t on tsqs.testsetId = t.testsetid inner join tblStudentLevel sl on t.levelId = sl.LevelId 
+                                        where sl.studentId = @stdId and ei.Parent_Id in(")
 
                     sqlBuilder.Append(skt)
 
-                    sqlBuilder.Append(") And qei.isactive = 1 And ei.IsActive = 1 And tsqd.IsActive = 1 And tsqs.IsActive = 1 And t.IsActive = 1 
-                                        order by newid())a order by qno;")
+                    sqlBuilder.Append(") And qei.isactive = 1 And ei.IsActive = 1 And tsqd.IsActive = 1 
+                                        And tsqs.IsActive = 1 and sl.IsActive = 1
+                                        And t.IsActive = 1 order by newid())a order by qno;")
 
                     cmdMsSql3 = cmdSQL(cn, sqlBuilder.ToString())
 
@@ -3154,7 +3159,7 @@ Namespace Controllers
                     If Request.Form("PracticeType").ToString = "0" Then
                         objList.errorMsg = GetRandomReport(Request.Form("StartDate").ToString, Request.Form("EndDate").ToString, Request.Form("PracticeType").ToString)
                     Else
-                        objList.errorMsg = GetLessonReport(Request.Form("StartDate").ToString, Request.Form("EndDate").ToString, Request.Form("PracticeType").ToString)
+                        objList.errorMsg = GetLessonReport(Request.Form("StartDate").ToString, Request.Form("EndDate").ToString, Request.Form("PracticeType").ToString, Request.Form("LevelId").ToString)
                     End If
 
                     objList.dataType = "success"
@@ -3198,7 +3203,8 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
         '20240722 -- GetLessonReport
-        Function GetLessonReport(StartDate, EndDate, PracticeType)
+        '20240830 -- เพิ่ม Filter Level
+        Function GetLessonReport(StartDate, EndDate, PracticeType, LevelId)
 
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
             Dim reportdata As String = ""
@@ -3247,8 +3253,11 @@ Namespace Controllers
                         sqlBuilder.Append(" AND q.starttime between @StartDate and @EndDate ")
                 End Select
 
-                sqlBuilder.Append("  order by Quizdate desc,starttime desc;")
+                If LevelId <> "" Then
+                    sqlBuilder.Append(" And t.LevelId = @LevelId")
+                End If
 
+                sqlBuilder.Append("  order by Quizdate desc, starttime desc;")
 
                 cmdMsSql = cmdSQL(cn, sqlBuilder.ToString())
 
@@ -3257,6 +3266,7 @@ Namespace Controllers
                     .Parameters.Add("@IsStandard", SqlDbType.VarChar).Value = PracticeType
                     .Parameters.Add("@StartDate", SqlDbType.VarChar).Value = StartDate
                     .Parameters.Add("@EndDate", SqlDbType.VarChar).Value = EndDate
+                    .Parameters.Add("@LevelId", SqlDbType.VarChar).Value = LevelId
                 End With
 
                 dt = getDataTable(cmdMsSql)
