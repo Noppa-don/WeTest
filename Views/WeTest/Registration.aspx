@@ -42,7 +42,6 @@
     </div>
 
     <div class='wrapper'>
-
         <div class='register ui-hide'>
             <div class="registerData">
                 <div class="registerDetail">
@@ -170,11 +169,6 @@
                         <input type='file' id='fileSlip' class="ui-hide notborder" />
                         <div class='Imagebtn btnSlipPhoto'></div>
                     </div>
-                    <br />
-                     <div>
-                         <span>Date</span> <input type='text' id='txtDate' />
-                         <span>Time</span> <input type='text' id='txtTime' />
-                    </div>
                 </div>
             </div>
             <br />
@@ -184,7 +178,7 @@
                 Please contact to @Italt</span>
         </div>
 
-    </div>
+    </div> 
 
     <div class="package ui-hide">
 
