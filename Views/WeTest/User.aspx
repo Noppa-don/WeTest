@@ -259,5 +259,14 @@
             </div>
         </div>
     </div>
-
+    <div name='alert' id="dialogMustPurchase" class='my-popup alert ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon done'></div>
+            <div class='ui-text'>You have not purchased an Wetest  package! <br /><br /> Please press 'Buy now'</div>
+            <div class="ui-twoButton">
+                <div class='btn btnCancel btnlaterPurchase'>Later</div>
+                <div class='btn btnSelected btnGotoPackage'>Buy now</div>
+            </div>
+        </div>
+    </div>
 </asp:Content>
