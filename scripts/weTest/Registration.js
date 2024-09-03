@@ -536,9 +536,11 @@ function UpdateTrialDate() {
 }
 //20240806 -- Update วันที่รอ Approvee Slip
 function UpdateWaitApproveSlip() {
-    var DiscountId = $('#btnConfirmPayment').attr('DiscountId')
-    console.log(DiscountId);
-    var post1 = 'DiscountCode=' + DiscountId + '&PackageId=1702F1EF-8FD5-443A-A68D-4599BC9F9E54';
+    var DiscountId = $('#btnConfirmPayment').attr('DiscountId');
+    var PackageId = '1702F1EF-8FD5-443A-A68D-4599BC9F9E54';
+    var VerifyCode = $('#RegisterRandomCode').text()
+    console.log(VerifyCode);
+    var post1 = 'DiscountCode=' + DiscountId + '&PackageId=' + PackageId + '&VerifyCode=' + VerifyCode;
 
     $.ajax({
         type: 'POST',
@@ -561,6 +563,7 @@ function UpdateWaitApproveSlip() {
 //20240723 -- Check EditMode And Get User Data
 //20240814 -- ดึงรูป User มาแสดงเมื่อเข้าเมนูแก้ไข
 //20240826 -- ปรับการตรวจสอบ Mode เมื่อเข้าหน้าจอ Register (register edituser purchees)
+//20240902 -- เพิ่มการสุ่ม Code หลัก
 function checkMode() {
     $.ajax({
         type: 'POST',
@@ -584,6 +587,13 @@ function checkMode() {
                 } else if (data[i].Result == 'purchess') {
                     EditMode = false;
                     $('.package').removeClass('ui-hide');
+                    var result = '';
+                    var characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+                    for (i = 0; i < 6; i++) {
+                        const randomInd = Math.floor(Math.random() * characters.length);
+                        result += characters.charAt(randomInd);
+                    }
+                    $('#RegisterRandomCode').html(result);
                     $('.register,.footerRegister .btnNext').addClass('ui-hide');
 
                 }
