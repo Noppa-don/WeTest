@@ -611,6 +611,7 @@ Namespace Controllers
         '20240806 -- Update ExpiredDate case Upload Slip แล้ว
         '20240816 -- เพิ่มการ Insert tblRegister
         '20240820 -- เพิ่มการ Insert DiscountId
+        '20240902 -- เพิ่มการบันทึก Verify Code และ Update Expired Date = Package Expired Date
         <AcceptVerbs(HttpVerbs.Post)>
         Function UpdateWaitApproveSlip()
 
@@ -633,14 +634,16 @@ Namespace Controllers
                     DiscountId = Request.Form("DiscountCode").ToString()
                 End If
 
-                cmdMsSql = cmdSQL(cn, "update tblStudent set ExpiredDate =  getdate() + (@TrialTime / 24)   where StudentId = @stdId;
-                                       insert into tblregister select newid(),@stdId,'1702F1EF-8FD5-443A-A68D-4599BC9F9E54'
-                                       ,null,1 ,1,@DiscountId,'500',null,1,getdate()")
+                cmdMsSql = cmdSQL(cn, "update tblStudent set ExpiredDate =  (select getdate() + packagetime/24 
+                                        from tblpackage where PackageId = @PackageId) where StudentId = @stdId;
+                                       insert into tblregister select newid(),@stdId,@PackageId ,null,1 ,1,@DiscountId,'500',null,1,getdate(),@Verifycode;")
 
                 With cmdMsSql
                     .Parameters.Add("@stdId", SqlDbType.VarChar).Value = stdId
                     .Parameters.Add("@TrialTime", SqlDbType.Int).Value = CInt(TrialTime)
                     .Parameters.Add("@DiscountId", SqlDbType.VarChar).Value = DiscountId
+                    .Parameters.Add("@Verifycode", SqlDbType.VarChar).Value = Request.Form("VerifyCode").ToString
+                    .Parameters.Add("@PackageId", SqlDbType.VarChar).Value = Request.Form("PackageId").ToString
                     .ExecuteNonQuery()
                 End With
 
@@ -788,8 +791,6 @@ Namespace Controllers
             objList = Nothing
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-
-
 
         Function CheckDuplicateUser()
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
@@ -2542,7 +2543,6 @@ Namespace Controllers
                     objList.dataType = "no"
                     objList.errorMsg = "Congratulations! You are at the highest level"
                 End If
-
                 L1.Add(objList)
                 objList = Nothing
 
@@ -2613,6 +2613,8 @@ Namespace Controllers
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
                 'Get GoalDate , GoalAmount, DatePercent
+
+
                 cmdMsSql = cmdSQL(cn, "select GoalType,SkillId,CONVERT(varchar(10),enddate, 103) as GoalDate
                                                 ,datediff(day,getdate(),Enddate) as GoalAmount
                                                 ,(100 - ((DATEDIFF(DAY,getdate(),enddate)*100) / DATEDIFF(DAY,startdate,enddate))) as DatePercent 
@@ -2765,6 +2767,7 @@ Namespace Controllers
         '20240822 -- ปรับวิธีการดึง Total Goal case เลยวันที่ตั้งค่าไว้
         '20240826 -- ปรับวิธีการตรวจสอบ Expired Date 
         '20240827 -- ปรับวิธีการคำนวน % Goal
+        '20240902 -- ปรับการตรวจสอบ ExpiredDate
         Function GetUserData(stdId As String)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable, dtSkill As DataTable
             Dim objList As New clsStudentData()
@@ -2777,16 +2780,27 @@ Namespace Controllers
                 If stdId Is Nothing Then
                     objList.Result = "sessionlost"
                 Else
-                    cmdMsSql = cmdSQL(cn, "select ExpiredDate from tblstudent where StudentId = @stdid  and ExpiredDate > getdate() and isactive = 1;")
+                    cmdMsSql = cmdSQL(cn, "select case when ExpiredDate < getdate() then 0 else 1 end as ExpiredStatus 
+                                            from tblstudent where StudentId = @stdid and isactive = 1;")
                     With cmdMsSql
                         .Parameters.Add("@stdid", SqlDbType.VarChar).Value = stdId
                     End With
 
                     dt = getDataTable(cmdMsSql)
 
-                    If dt.Rows.Count <> 0 AndAlso dt.Rows(0)("ExpiredDate").ToString <> "" Then
+                    If dt.Rows.Count = 0 Then
+                        'Not Register
+                        objList.Result = "not"
+                        Session("RefillKey") = True
+                        'Expired
+                    Else
+                        If dt.Rows(0)("ExpiredStatus").ToString = "0" Then
+                            objList.Result = "expired"
+                            Session("RefillKey") = True
+                        Else
+                            objList.Result = "ok"
+                        End If
 
-                        objList.Result = "ok"
                         cmdMsSql = cmdSQL(cn, "select top 1 s.StudentId,Firstname,Surname,MobileNo,Email,Username,l.LevelShortName,CONVERT (varchar(10),s.ExpiredDate , 103) AS expiredDate
                                                 ,DATEDIFF(DAY,getdate(),ExpiredDate) as ExpiredDateAmount from tblStudent s inner join tblStudentLevel sl on s.studentId = sl.StudentId 
                                                 inner join tblLevel l on sl.levelId = l.LevelId where s.studentId = @stdid and s.IsActive = 1 and sl.IsActive = 1  
@@ -2809,10 +2823,7 @@ Namespace Controllers
                             objList.ExpiredDateAmount = dt(0)("ExpiredDateAmount").ToString
                             objList.UserLevel = dt(0)("LevelShortName").ToString
                         End If
-                    Else
-                        'Not Register
-                        objList.Result = "not"
-                        Session("RefillKey") = True
+
                     End If
 
                 End If
@@ -3601,6 +3612,7 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
         '20240820 -- ดึงข้อมูลรายละเอียดสลิป
+        '20240902 -- เพิ่มแสดงเบอร์โทรศัพท์ที่หน้ารายละเอียด
         <AcceptVerbs(HttpVerbs.Post)>
         Function GetSlip()
             Dim L1 As New List(Of clsSlip)
@@ -3615,9 +3627,9 @@ Namespace Controllers
 
                 cmdMsSql = cmdSQL(cn, "Select 'Date : ' + CONVERT(varchar(10), r.lastupdate, 103) + '  Time : ' + FORMAT(r.lastupdate,'hh:mm tt') as SlipTime
                                         ,PackageName + ' ' + cast(packageprice as varchar) + ' Bath'  as SlipDetail
-                                        ,' ' + s.Firstname + ' ' + s.Surname as StudentName,s.StudentId
+                                        ,' ' + s.Firstname + ' ' + s.Surname as StudentName,s.StudentId,s.MobileNo
                                         From tblRegister r inner Join tblstudent s on r.studentId = s.studentId inner Join tblpackage p on p.packageId = r.packageId 
-                                        left join tblDiscount d on r.DiscountId = d.DiscountId where rhid = @rhid")
+                                        left join tblDiscount d on r.DiscountId = d.DiscountId where rhid = @rhid;")
                 With cmdMsSql
                     .Parameters.Add("@rhid", SqlDbType.VarChar).Value = Request.Form("rhid")
                     .ExecuteNonQuery()
@@ -3631,7 +3643,8 @@ Namespace Controllers
                         SlipDetail &= "<div class=""UploadDateTime"">" & dt.Rows(0)("SlipTime") & "</div>
                                        <div class=""PackageName"">Package : " & dt.Rows(0)("SlipDetail") & "</div>
                                        <div class=""Discount"">Discount : -</div>
-                                       <div class=""UploadName"">Name : " & dt.Rows(0)("StudentName") & "</div>"
+                                       <div class=""UploadName"">Name : " & dt.Rows(0)("StudentName") & "</div>
+                                       <div class=""UploadMobileNo"">Mobile No. : " & dt.Rows(0)("MobileNo") & "</div>"
                     Next
                     objList.Result = "success"
                     objList.ResultTxt = SlipDetail
