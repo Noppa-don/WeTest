@@ -45,7 +45,7 @@ $(document)
     //20240820 -- cancel confirm slip
     .on('click', '.btnCancelConfirmSlip', function (e, data) {
         $('.PaymentList').removeClass('ui-hide');
-        $('.PaymentDetail,.footerslip').addClass('ui-hide');
+        $('.PaymentDetail,.footerslip,.footerUpdateRejectSlip').addClass('ui-hide');
 
     })
     //20240820 -- confirm slip
@@ -66,9 +66,9 @@ $(document)
     .on('click', '#dialogReject .btnRejectConfirm', function (e, data) {
         var RHId = $(this).attr('RHId');
         var RejectReason = $('#txtReason').val();
-        console.log(RejectReason);
-        SaveConfirmSlip(RHId, 3, RejectReason);
         popupClose($(this).closest('.my-popup'));
+        SaveConfirmSlip(RHId, 3, RejectReason);
+
     })
     .on('click', '#dialogConfirm .btnNo,#dialogReject .btnNo', function (e, data) {
         popupClose($(this).closest('.my-popup'));
@@ -78,6 +78,14 @@ $(document)
         $('.jobdiv').removeClass('Active');
         $(this).addClass('Active');
     })
+    //20240902 -- Select Reject Job
+    .on('click', '.UploadNewSlip', function (e, data) {
+        var RHId = $(this).attr('RHId');
+        ShowJobDetail(RHId)
+        $('.PaymentList').addClass('ui-hide');
+        $('.PaymentDetail,.footerUpdateRejectSlip').removeClass('ui-hide');
+    })
+
 
 function CheckUserLogin() {
     $.ajax({
@@ -107,13 +115,14 @@ function GetJobDetail(JobStatus) {
                     $('.JobDetail').html(data[i].errorMsg);
                     if (JobStatus == 1) {
                         $('.jobDetailItem').addClass('seeDetail');
-                    } else {
+                    } else if (JobStatus == 3) {
+                        $('.jobDetailItem').addClass('UploadNewSlip');
+                    }else{}
                         $('.jobDetailItem').removeClass('seeDetail');
                     }
                
                 }
             }
-        }
     });
 }
 //20240820 -- ดึงข้อมูลรายละเอียดสลิป
