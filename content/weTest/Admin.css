@@ -43,5 +43,5 @@
 .slipDetail {line-height:50px;float: left;}
 .slipPhoto {width: 350px; height: 390px;background-size: cover;float: inline-start;margin-left: 80px;}
 .btnReject {background: url(/images/Wetest/reject.png);background-repeat: no-repeat;background-size: contain;background-position: center;}
-.btnConfirmSlip {background: url(/images/Wetest/confirm.png);background-repeat: no-repeat;background-size: contain;background-position: center;}
+.btnConfirmSlip,.btnUploadNewSlip {background: url(/images/Wetest/confirm.png);background-repeat: no-repeat;background-size: contain;background-position: center;}
 .btnCancelConfirmSlip {background: url(/images/Wetest/cancel.png);background-repeat: no-repeat;background-size: contain;background-position: center;float: inline-end;}
