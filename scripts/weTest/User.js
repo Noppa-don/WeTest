@@ -1,4 +1,4 @@
-﻿var xobjClick, xobjAlert, OTPNum, selectedGoalDate, formatSelectedGoalDate, GoalType,SkillId;
+﻿var xobjClick, xobjAlert, OTPNum, selectedGoalDate, formatSelectedGoalDate, GoalType, SkillId;
 var totalGoalAmount;
 var ExpiredDateAmount;
 // ========================= Page Load ====================================================================== //
@@ -27,7 +27,7 @@ $(document)
             CheckUserLogin();
         }
     })
-    .on('click', '#dialogAlert #btnOK', function (e, data) {
+    .on('click', '#dialogAlert #btnOK, #dialogMustPurchase .btnlaterPurchase', function (e, data) {
         popupClose($(this).closest('.my-popup'));
     })
     .on('click', '.registerlink', function (e, data) {
@@ -35,24 +35,49 @@ $(document)
     })
 
 // ======================= MainMenu =========================== //
+//20240902 -- Check Expired Date
     .on('click', '#btnMockUpExam', function (e, data) {
-        CheckExamAgain();
+        if ($('#btnMockUpExam').hasClass('expired') == true) {
+            $('#dialogMustPurchase').attr('action', 'focus');
+            popupOpen($('#dialogMustPurchase'), 99999);
+        } else {
+            CheckExamAgain();
+        }
     })
+//20240902 -- Check Expired Date
     .on('click', '#btnPracticeMenu', function (e, data) {
-        window.location = '/Wetest/Practice';
+        if ($('#btnPracticeMenu').hasClass('expired') == true) {
+            $('#dialogMustPurchase').attr('action', 'focus');
+            popupOpen($('#dialogMustPurchase'), 99999);
+        } else {
+            window.location = '/Wetest/Practice';
+        }
     })
 //20240715 -- Menu Goal
 //20240828 -- แยกดึงข้อมูล Goal ออกจากการดึงข้อมูล User เพื่อให้ทำงานรวดเร็วขึ้น
+//20240902 -- Check Expired Date
     .on('click', '#btnGoalMenu', function (e, data) {
-        $('.MainMenu,.Assignment').addClass('ui-hide');
-        $('.Goal,.footerGoal').removeClass('ui-hide');
-        $('.pagename').html('- Goal');
-        GetGoalData();
+        if ($('#btnGoalMenu').hasClass('expired') == true) {
+            $('#dialogMustPurchase').attr('action', 'focus');
+            popupOpen($('#dialogMustPurchase'), 99999);
+        } else {
+            $('.MainMenu,.Assignment').addClass('ui-hide');
+            $('.Goal,.footerGoal').removeClass('ui-hide');
+            $('.pagename').html('- Goal');
+            GetGoalData();
+        }
     })
 //20240715 -- Menu Report
+//20240902 -- Check Expired Date
     .on('click', '#btnReport', function (e, data) {
-        window.location = '/Wetest/Report';
+        if ($('#btnReport').hasClass('expired') == true) {
+            $('#dialogMustPurchase').attr('action', 'focus');
+            popupOpen($('#dialogMustPurchase'), 99999);
+        } else {
+            window.location = '/Wetest/Report';
+        }
     })
+
     .on('click', '#dialogSelect .btnSelected', function (e, data) {
         popupClose($(this).closest('.my-popup'));
         GotoExam();
@@ -123,7 +148,7 @@ $(document)
        });
    })
 //20240731 -- ไปหน้าจอแพกเกจ
-    .on('click', '.btnbuy', function (e, data) {
+    .on('click', '.btnbuy, .btnGotoPackage', function (e, data) {
         window.location = '/Wetest/Registration';
     })
 //20240731 -- ไปหน้าจอแพกเกจ
@@ -131,8 +156,14 @@ $(document)
         UpdateTrialDate();
     })
 //20240813 -- ไปหน้าจอ Assignment
+//20240902 -- Check Expired Date
     .on('click', '.Assignment', function (e, data) {
-        window.location = '/Wetest/Assignment';
+        if ($('#btnMockUpExam').hasClass('expired') == true) {
+            $('#dialogMustPurchase').attr('action', 'focus');
+            popupOpen($('#dialogMustPurchase'), 99999);
+        } else {
+            window.location = '/Wetest/Assignment';
+        }
     })
 //20240723 -- Setting
    .on('click', '.btnAccountMenu.Setting', function (e, data) {
@@ -150,8 +181,7 @@ $(document)
                 }
             }
         });
-})
-
+    })
 
 // ========================= Goal ============================= //
 //20240715 -- Set Total Goal
@@ -379,6 +409,7 @@ function SaveGoal() {
 }
 //20240716 -- Set User Data
 //20240716 -- ปรับการแสดงผล Total Goal case เลยวันที่ที่ตั้งค่าไว้
+//20240902 -- Check Expired Date
 function SetUserData(data) {
     for (var i = 0; i < data.length; i++) {
         if (data[i].Result == 'ok') {
@@ -399,6 +430,21 @@ function SetUserData(data) {
         } else if (data[i].Result == 'not') {
             $('#dialogPurchase').attr('action', 'focus');
             popupOpen($('#dialogPurchase'), 99999);
+        } else if (data[i].Result == 'expired') {
+
+            $('.login').addClass('ui-hide');
+            $('.UserData,.MainMenu,.Assignment').removeClass('ui-hide');
+            $('.pagename').html('');
+            $('.UserNameandLevel').html('Welcome, ' + data[i].Firstname + '<br />' + data[i].UserLevel);
+            $('.expiredDate').html(data[i].ExpiredDate)
+            ExpiredDateAmount = data[i].ExpiredDateAmount;
+            $('.UserData').append(data[i].UserPhoto);
+            $('#UserLevel').html('Your Level : ' + data[i].UserLevel + '<br />');
+            $('.MainMenu').removeClass('ui-hide');
+            $('#btnGoalMenu ,#btnPracticeMenu,#btnMockUpExam,#btnReport,.Assignment').addClass('expired');
+
+            $('#dialogMustPurchase').attr('action', 'focus');
+            popupOpen($('#dialogMustPurchase'), 99999);
         } else {
             $('#dialogAlert').attr('action', 'focus');
             $('#dialogAlert .ui-text').html(data[i].Msg);
