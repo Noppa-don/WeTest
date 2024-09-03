@@ -96,6 +96,10 @@
             <div class="Imagebtn btnReject fistflexdiv"></div>
             <div class="Imagebtn btnConfirmSlip ui-Right"></div>
         </div>
+        <div class='footerButton footerUpdateRejectSlip ui-hide'>
+            <div class="Imagebtn btnReject2 fistflexdiv"></div>
+            <div class="Imagebtn btnUploadNewSlip ui-Right"></div>
+        </div>
     </div>
 
     <div name='select' id="dialogConfirm" class='my-popup confirm ui-popup-container ui-popup-hidden'>
