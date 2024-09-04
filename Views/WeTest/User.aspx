@@ -269,4 +269,11 @@
             </div>
         </div>
     </div>
+    <div name='alert' id="dialogRejectAlert" class='my-popup alert ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon wrong'></div>
+            <div class='ui-text'>Your slip was not allowed Please contact us @Italt</div>
+            <div id="btnOKReject" class='btn btnSelected'>OK</div>
+        </div>
+    </div>
 </asp:Content>
