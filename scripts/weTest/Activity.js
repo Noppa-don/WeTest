@@ -592,6 +592,7 @@ function GetAnswerChoicePanel(ChoiceMode) {
     });
 }
 //20240722 -- ตรวจสอบว่าเป็นการกดดูเฉลยหรือไม่
+//20240903 -- มาจากเฉลยให้เป็นปุ่ม Exit
 function checkAnsweredFromReport() {
     $.ajax({
         type: 'POST',
@@ -603,7 +604,7 @@ function checkAnsweredFromReport() {
                     $('#divRunningBar, #divAllLeapChoice, #divTime').addClass("ui-hide");
                     $('#divAllQuestion, #divShowExplain').removeClass("ui-hide");
                     GetQuestionAndAnswer('select', 1);
-
+                    $('#divSendQuiz').removeClass('SendQuiz').addClass('FinishQuiz');
                 } else {
                     GetQuestionAndAnswer()
                     QuizTimer()
