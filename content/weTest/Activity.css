@@ -31,14 +31,14 @@
 .divAnswerbarAns.RightAns{background-color:darkseagreen; color:white;}
 .divAnswerbarAns.WrongAns{background-color:indianred; color:white;}
 
-#divSideMenuBar {margin-right: auto; margin-left: auto;} 
-#divPause {background: url(/images/Wetest/Pause.png);background-repeat: no-repeat;background-size: contain;background-position: left;
-           width: 90%;height: 20%;cursor:pointer;margin: auto;} 
+#divSideMenuBar {margin-right: auto; margin-left: auto;width:10%} 
+#divPause {background: url(/images/Wetest/Pause.png);background-repeat: no-repeat;background-size: 45%;background-position: center;
+           height: 20%;cursor:pointer;margin: auto;} 
 #divAllQuestion,#divAllLeapChoice {background: url(/images/Wetest/AllQuestion.png);background-repeat: no-repeat;
-                                   background-size: contain;background-position: left;width: 90%;height: 20%;
+                                   background-size: 45%;background-position: center;height: 20%;
                                    margin: auto;cursor:pointer;} 
-#divShowExplain {background: url(/images/Wetest/key.png);background-repeat: no-repeat;background-size: contain;
-                 background-position: left;width: 90%;height: 20%;margin: auto;cursor:pointer;} 
+#divShowExplain {background: url(/images/Wetest/key.png);background-repeat: no-repeat;background-size: 45%;
+                 background-position: center;height: 20%;margin: auto;cursor:pointer;} 
 .footer {display: flex;}
 
 .footerButton {display: flex;justify-content:center;float:left;width:90%;padding:20px;}
@@ -91,7 +91,7 @@
 
 #PanelLeapChoice, #PanelResultChoice {display:flex;margin-bottom: 30px;}
 .pageLeapchoice {float:left;}
-#divTime {font-size: 2em;}
+#divTime { font-size: 2em; text-align: center; padding-top: 10px; padding-bottom: 10px;}
 
 .ExplainQ {background-color: #f1d196;padding: 20px;margin: 20px;border-radius: 0.5em;}
 .fistflexdiv.RightCircle {width: 30px; height: 35px; background: url(/images/Wetest/circle.png); background-repeat: no-repeat; background-size: contain; background-position: left; margin: auto; margin-bottom: 5px;margin-top: 5px;}
