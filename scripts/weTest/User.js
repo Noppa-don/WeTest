@@ -40,6 +40,9 @@ $(document)
         if ($('#btnMockUpExam').hasClass('expired') == true) {
             $('#dialogMustPurchase').attr('action', 'focus');
             popupOpen($('#dialogMustPurchase'), 99999);
+        } else if ($('#btnMockUpExam').hasClass('reject') == true) {
+            $('#dialogRejectAlert').attr('action', 'focus');
+            popupOpen($('#dialogRejectAlert'), 99999);
         } else {
             CheckExamAgain();
         }
@@ -49,6 +52,9 @@ $(document)
         if ($('#btnPracticeMenu').hasClass('expired') == true) {
             $('#dialogMustPurchase').attr('action', 'focus');
             popupOpen($('#dialogMustPurchase'), 99999);
+        } else if ($('#btnPracticeMenu').hasClass('reject') == true) {
+            $('#dialogRejectAlert').attr('action', 'focus');
+            popupOpen($('#dialogRejectAlert'), 99999);
         } else {
             window.location = '/Wetest/Practice';
         }
@@ -60,6 +66,9 @@ $(document)
         if ($('#btnGoalMenu').hasClass('expired') == true) {
             $('#dialogMustPurchase').attr('action', 'focus');
             popupOpen($('#dialogMustPurchase'), 99999);
+        } else if ($('#btnGoalMenu').hasClass('reject') == true) {
+            $('#dialogRejectAlert').attr('action', 'focus');
+            popupOpen($('#dialogRejectAlert'), 99999);
         } else {
             $('.MainMenu,.Assignment').addClass('ui-hide');
             $('.Goal,.footerGoal').removeClass('ui-hide');
@@ -73,6 +82,9 @@ $(document)
         if ($('#btnReport').hasClass('expired') == true) {
             $('#dialogMustPurchase').attr('action', 'focus');
             popupOpen($('#dialogMustPurchase'), 99999);
+        } else if ($('#btnReport').hasClass('reject') == true) {
+            $('#dialogRejectAlert').attr('action', 'focus');
+            popupOpen($('#dialogRejectAlert'), 99999);
         } else {
             window.location = '/Wetest/Report';
         }
@@ -82,7 +94,7 @@ $(document)
         popupClose($(this).closest('.my-popup'));
         GotoExam();
     })
-    .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel,#dialogLogout .btnCancel,#dialogDeleteAccount .btnCancel', function (e, data) {
+    .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel,#dialogLogout .btnCancel,#dialogDeleteAccount .btnCancel,#dialogRejectAlert #btnOKReject', function (e, data) {
         popupClose($(this).closest('.my-popup'));
     })
 //20240723 -- toggle User Menu
@@ -158,9 +170,12 @@ $(document)
 //20240813 -- ไปหน้าจอ Assignment
 //20240902 -- Check Expired Date
     .on('click', '.Assignment', function (e, data) {
-        if ($('#btnMockUpExam').hasClass('expired') == true) {
+        if ($('.Assignment').hasClass('expired') == true) {
             $('#dialogMustPurchase').attr('action', 'focus');
             popupOpen($('#dialogMustPurchase'), 99999);
+        } else if ($('.Assignment').hasClass('reject') == true) {
+            $('#dialogRejectAlert').attr('action', 'focus');
+            popupOpen($('#dialogRejectAlert'), 99999);
         } else {
             window.location = '/Wetest/Assignment';
         }
@@ -170,17 +185,22 @@ $(document)
    })
 //20240816 -- RefillKey
     .on('click', '.btnAccountMenu.RefillKey', function (e, data) {
-        $.ajax({
-            type: 'POST',
-            url: '/weTest/SetRefillKeyMode',
-            success: function (data) {
-                for (var i = 0; i < data.length; i++) {
-                    if (data[i].dataType == 'success') {
-                        window.location = '/Wetest/Registration';
+        if ($('#btnGoalMenu').hasClass('reject') == true) {
+            $('#dialogRejectAlert').attr('action', 'focus');
+            popupOpen($('#dialogRejectAlert'), 99999);
+        } else {
+            $.ajax({
+                type: 'POST',
+                url: '/weTest/SetRefillKeyMode',
+                success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i].dataType == 'success') {
+                            window.location = '/Wetest/Registration';
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     })
 
 // ========================= Goal ============================= //
@@ -431,7 +451,6 @@ function SetUserData(data) {
             $('#dialogPurchase').attr('action', 'focus');
             popupOpen($('#dialogPurchase'), 99999);
         } else if (data[i].Result == 'expired') {
-
             $('.login').addClass('ui-hide');
             $('.UserData,.MainMenu,.Assignment').removeClass('ui-hide');
             $('.pagename').html('');
@@ -445,6 +464,20 @@ function SetUserData(data) {
 
             $('#dialogMustPurchase').attr('action', 'focus');
             popupOpen($('#dialogMustPurchase'), 99999);
+        } else if (data[i].Result == 'reject') {
+            $('.login').addClass('ui-hide');
+            $('.UserData,.MainMenu,.Assignment').removeClass('ui-hide');
+            $('.pagename').html('');
+            $('.UserNameandLevel').html('Welcome, ' + data[i].Firstname + '<br />' + data[i].UserLevel);
+            $('.expiredDate').html(data[i].ExpiredDate)
+            ExpiredDateAmount = data[i].ExpiredDateAmount;
+            $('.UserData').append(data[i].UserPhoto);
+            $('#UserLevel').html('Your Level : ' + data[i].UserLevel + '<br />');
+            $('.MainMenu').removeClass('ui-hide');
+            $('#btnGoalMenu ,#btnPracticeMenu,#btnMockUpExam,#btnReport,.Assignment,.btnAccountMenu.RefillKey').addClass('reject');
+
+            $('#dialogRejectAlert').attr('action', 'focus');
+            popupOpen($('#dialogRejectAlert'), 99999);
         } else {
             $('#dialogAlert').attr('action', 'focus');
             $('#dialogAlert .ui-text').html(data[i].Msg);
