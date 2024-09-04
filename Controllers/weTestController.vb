@@ -2601,7 +2601,8 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-        '20240828 -- Function Get Goal Data 
+        '20240828 -- Function Get Goal Data
+        '20240903 -- ปรับ Query เมื่อหมดเวลาที่ตั้ง Goal ไว้
         <AcceptVerbs(HttpVerbs.Post)>
         Function GetGoalData()
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable, dtSkill As DataTable
@@ -2616,9 +2617,9 @@ Namespace Controllers
 
 
                 cmdMsSql = cmdSQL(cn, "select GoalType,SkillId,CONVERT(varchar(10),enddate, 103) as GoalDate
-                                                ,datediff(day,getdate(),Enddate) as GoalAmount
-                                                ,(100 - ((DATEDIFF(DAY,getdate(),enddate)*100) / DATEDIFF(DAY,startdate,enddate))) as DatePercent 
-                                                from tblstudentGoal where StudentId = @stdid and isactive = 1;")
+                                        ,datediff(day,getdate(),Enddate) as GoalAmount ,case when enddate < getdate() then 100 
+                                        else (100 - ((DATEDIFF(DAY,getdate(),enddate)*100) / DATEDIFF(DAY,startdate,enddate))) end as DatePercent 
+                                        from tblstudentGoal where StudentId = @stdid and isactive = 1;")
                 With cmdMsSql
                     .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("StudentId").ToString
                 End With
@@ -2636,7 +2637,7 @@ Namespace Controllers
                                 Dim TotalScore As Integer
                                 Dim UserScore As Integer
 
-                                cmdMsSql = cmdSQL(cn, "select case when sum(q.totalscore) is null then 0 else sum(q.totalscore) end as UserScore 
+                                cmdMsSql = cmdSQL(cn, "Select Case When sum(q.totalscore) Is null Then 0 Else sum(q.totalscore) End As UserScore 
                                             from tblQuiz q inner join tblquizSession qs on q.quizId = qs.QuizId 
                                             inner join tblstudentGoal sg on qs.studentId = sg.StudentId
                                             where qs.StudentId = @stdid and q.starttime between sg.Startdate and sg.enddate and sg.isactive = 1")
@@ -2780,8 +2781,9 @@ Namespace Controllers
                 If stdId Is Nothing Then
                     objList.Result = "sessionlost"
                 Else
-                    cmdMsSql = cmdSQL(cn, "select case when ExpiredDate < getdate() then 0 else 1 end as ExpiredStatus 
-                                            from tblstudent where StudentId = @stdid and isactive = 1;")
+                    cmdMsSql = cmdSQL(cn, "select case when ExpiredDate < getdate() then 0 else 1 end as ExpiredStatus,r.RegisterStatus 
+                                            from tblstudent s left join tblregister r on s.StudentId = r.studentid 
+                                            where s.StudentId = @stdid and s.isactive = 1;")
                     With cmdMsSql
                         .Parameters.Add("@stdid", SqlDbType.VarChar).Value = stdId
                     End With
@@ -2798,7 +2800,12 @@ Namespace Controllers
                             objList.Result = "expired"
                             Session("RefillKey") = True
                         Else
-                            objList.Result = "ok"
+                            If dt.Rows(0)("RegisterStatus").ToString = "3" Then
+                                objList.Result = "reject"
+                            Else
+                                objList.Result = "ok"
+                            End If
+
                         End If
 
                         cmdMsSql = cmdSQL(cn, "select top 1 s.StudentId,Firstname,Surname,MobileNo,Email,Username,l.LevelShortName,CONVERT (varchar(10),s.ExpiredDate , 103) AS expiredDate
@@ -3215,6 +3222,7 @@ Namespace Controllers
         End Function
         '20240722 -- GetLessonReport
         '20240830 -- เพิ่ม Filter Level
+        '20240903 -- ปรับ Query ให้ Order by วันที่ให้ถูกต้อง
         Function GetLessonReport(StartDate, EndDate, PracticeType, LevelId)
 
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
@@ -3240,7 +3248,7 @@ Namespace Controllers
                                         case when FORMAT (q.endtime, 'hh:mm tt') is null then 'none' else FORMAT (q.endtime, 'hh:mm tt') end as endtime ,q.QuizName,
                                         case when cast(cast(q.TotalScore as int) as varchar) + '/' + cast(cast(q.FullScore as int) as varchar) is null 
                                         then '0/' + cast(cast(q.FullScore as int) as varchar) else cast(cast(q.TotalScore as int) as varchar) + '/' + cast(cast(q.FullScore as int) as varchar) end as Score,
-                                        eiparent.EI_Id,q.testsetId,q.quizId from tblTestset t inner join tbltestsetquestionset tqs on t.TestsetId = tqs.TestSetId 
+                                        eiparent.EI_Id,q.testsetId,q.quizId,q.StartTime as orderTime  from tblTestset t inner join tbltestsetquestionset tqs on t.TestsetId = tqs.TestSetId 
                                         inner join tblTestSetQuestionDetail tqd on tqs.tsqsid = tqd.TSQSId inner join tblQuestionEvaluationIndexItem qei on tqd.questionId = qei.question_Id 
                                         inner join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id inner join tblEvaluationIndex eiParent on eiParent.EI_Id = ei.parent_id")
                 If skt <> "'All'" Then
@@ -3264,11 +3272,11 @@ Namespace Controllers
                         sqlBuilder.Append(" AND q.starttime between @StartDate and @EndDate ")
                 End Select
 
-                If LevelId <> "" Then
+                If LevelId <> "" And LevelId <> "undefined" Then
                     sqlBuilder.Append(" And t.LevelId = @LevelId")
                 End If
 
-                sqlBuilder.Append("  order by Quizdate desc, starttime desc;")
+                sqlBuilder.Append(" order by orderTime desc;")
 
                 cmdMsSql = cmdSQL(cn, sqlBuilder.ToString())
 
@@ -3318,6 +3326,7 @@ Namespace Controllers
             Return reportdata
         End Function
         '20240722 -- GetRandomReport
+        '20240903 -- ปรับ Query ให้ Order by วันที่ให้ถูกต้อง
         Function GetRandomReport(StartDate, EndDate, PracticeType)
 
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
@@ -3343,7 +3352,7 @@ Namespace Controllers
                                         case when FORMAT (q.endtime, 'hh:mm tt') is null then 'none' else FORMAT (q.endtime, 'hh:mm tt') end as endtime ,
                                         case when cast(cast(q.TotalScore as int) as varchar) + '/' + cast(cast(q.FullScore as int) as varchar) is null 
                                         then '0/' + cast(cast(q.FullScore as int) as varchar) else cast(cast(q.TotalScore as int) as varchar) + '/' + cast(cast(q.FullScore as int) as varchar) end as Score,
-                                        q.testsetId,q.quizId from tblTestset t inner join tbltestsetquestionset tqs on t.TestsetId = tqs.TestSetId 
+                                        q.testsetId,q.quizId,q.StartTime as orderTime from tblTestset t inner join tbltestsetquestionset tqs on t.TestsetId = tqs.TestSetId 
                                         inner join tblTestSetQuestionDetail tqd on tqs.tsqsid = tqd.TSQSId inner join tblQuestionEvaluationIndexItem qei on tqd.questionId = qei.question_Id 
                                         inner join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id inner join tblEvaluationIndex eiParent on eiParent.EI_Id = ei.parent_id")
                 If skt <> "'All'" Then
@@ -3367,7 +3376,7 @@ Namespace Controllers
                         sqlBuilder.Append(" AND q.starttime between @StartDate and @EndDate ")
                 End Select
 
-                sqlBuilder.Append("  order by Quizdate desc;")
+                sqlBuilder.Append("  order by orderTime desc;")
 
 
                 cmdMsSql = cmdSQL(cn, sqlBuilder.ToString())
