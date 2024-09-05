@@ -6,6 +6,9 @@ var MultiFileSlowAmount;
 // ========================= Page Load ======================== //
 $(function () {
     $('div[data-role=page]').page({ theme: 'c', });
+    $('#divActivity').css('height', $(window).height());
+    $('#divQuestionAndAnswer').css('height', $('#divQ').height());
+
     GetStartTime();
     checkAnsweredFromReport();
     GetConfigMultiFile();
@@ -593,6 +596,7 @@ function GetAnswerChoicePanel(ChoiceMode) {
 }
 //20240722 -- ตรวจสอบว่าเป็นการกดดูเฉลยหรือไม่
 //20240903 -- มาจากเฉลยให้เป็นปุ่ม Exit
+//20240905 -- มาจากเฉลยไม่แสดงปุ่ม Pause
 function checkAnsweredFromReport() {
     $.ajax({
         type: 'POST',
@@ -601,14 +605,14 @@ function checkAnsweredFromReport() {
 
             for (var i = 0; i < data.length; i++) {
                 if (data[i].dataType == 'showanswer') {
-                    $('#divRunningBar, #divAllLeapChoice, #divTime').addClass("ui-hide");
+                    $('#divRunningBar, #divAllLeapChoice, #divTime,#divPause').addClass("ui-hide");
                     $('#divAllQuestion, #divShowExplain').removeClass("ui-hide");
                     GetQuestionAndAnswer('select', 1);
                     $('#divSendQuiz').removeClass('SendQuiz').addClass('FinishQuiz');
+
                 } else {
                     GetQuestionAndAnswer()
                     QuizTimer()
-
                     PageNum = 1
                 }
             }
