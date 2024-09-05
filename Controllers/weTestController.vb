@@ -365,6 +365,7 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
         '20240826 -- ปรับการตรวจสอบ Keycode และบันทึกข้อมูลต่างๆ
+        '20240905 -- check Expired date,Update IsUsed
         <AcceptVerbs(HttpVerbs.Post)>
         Function CheckKeyCode()
             Dim L1 As New List(Of clsMain)
@@ -375,7 +376,7 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-                cmdMsSql = cmdSQL(cn, "select KeyCodeId from tblKeycode where KeyCode = @KeyCode and IsActive = 1 and IsUsed = 0;")
+                cmdMsSql = cmdSQL(cn, "select KeyCodeId from tblKeycode where KeyCode = @KeyCode and KeyCodeExpiredDate >= getdate() and IsActive = 1 and IsUsed = 0;")
                 With cmdMsSql
                     .Parameters.Add("@KeyCode", SqlDbType.VarChar).Value = Request.Form("KeyCode")
                     .ExecuteNonQuery()
@@ -391,6 +392,7 @@ Namespace Controllers
                                             from tblkeycode where keycodeId = @KeyCodeId) where studentId = @stdId;
                                             Insert Into tblregister(StudentId,KeyCodeId,RegisterStatus)
                                             values(@stdId,@KeyCodeId,2);
+                                            Update tblkeycode set isused = 1 where KeyCodeId = @KeyCodeId;
                                             select CONVERT (varchar(10),getdate() + keycodedateAmount, 103) AS expiredDate 
                                             from tblKeycode where keycodeId = @KeyCodeId;")
                     With cmdMsSql
@@ -2617,7 +2619,8 @@ Namespace Controllers
 
 
                 cmdMsSql = cmdSQL(cn, "select GoalType,SkillId,CONVERT(varchar(10),enddate, 103) as GoalDate
-                                        ,datediff(day,getdate(),Enddate) as GoalAmount ,case when enddate < getdate() then 100 
+                                        ,case when datediff(day,getdate(),Enddate) < 0 then 0 else datediff(day,getdate(),Enddate) end as GoalAmount
+                                        ,case when enddate < getdate() then 100 
                                         else (100 - ((DATEDIFF(DAY,getdate(),enddate)*100) / DATEDIFF(DAY,startdate,enddate))) end as DatePercent 
                                         from tblstudentGoal where StudentId = @stdid and isactive = 1;")
                 With cmdMsSql
@@ -2768,6 +2771,7 @@ Namespace Controllers
         '20240826 -- ปรับวิธีการตรวจสอบ Expired Date 
         '20240827 -- ปรับวิธีการคำนวน % Goal
         '20240902 -- ปรับการตรวจสอบ ExpiredDate
+        '20240905 -- ปรับการตรวจสอบกรณียังไม่ได้ Update trial date
         Function GetUserData(stdId As String)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable, dtSkill As DataTable
             Dim objList As New clsStudentData()
@@ -2780,7 +2784,7 @@ Namespace Controllers
                 If stdId Is Nothing Then
                     objList.Result = "sessionlost"
                 Else
-                    cmdMsSql = cmdSQL(cn, "select case when ExpiredDate < getdate() then 0 else 1 end as ExpiredStatus,r.RegisterStatus 
+                    cmdMsSql = cmdSQL(cn, "select case when ExpiredDate is null then 0 when ExpiredDate < getdate() then 0 else 1 end as ExpiredStatus,r.RegisterStatus 
                                             from tblstudent s left join tblregister r on s.StudentId = r.studentid 
                                             where s.StudentId = @stdid and s.isactive = 1;")
                     With cmdMsSql
