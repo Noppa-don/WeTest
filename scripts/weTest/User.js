@@ -182,6 +182,8 @@ $(document)
     })
 //20240723 -- Setting
    .on('click', '.btnAccountMenu.Setting', function (e, data) {
+       $('.UserMenu,.MainMenu,.Goal,.DetailGoal,.Assignment').addClass('ui-hide');
+       $('.Setting,.footerSetting').removeClass('ui-hide');
    })
 //20240816 -- RefillKey
     .on('click', '.btnAccountMenu.RefillKey', function (e, data) {
@@ -235,55 +237,61 @@ $(document)
             $('.MainMenu,.Assignment').removeClass('ui-hide');
             $('.Goal,.footerGoal').addClass('ui-hide');
             $('.pagename').html('');
+        } else if ($('.Setting').hasClass('ui-hide') == false) {
+            $('.MainMenu,.Assignment').removeClass('ui-hide');
+            $('.Setting,.footerSetting').addClass('ui-hide');
+            $('.pagename').html('');
         } else if ($('.DetailGoal').hasClass('ui-hide') == false) {
             $('.Goal,.btnSetDetailGoal').removeClass('ui-hide');
             $('.DetailGoal').addClass('ui-hide');
         }
     })
-//20240716 -- Clear Button
-    .on('click', '.btnClear', function (e, data) {
-        $('#dialogClearGoal').attr('action', 'focus');
-        popupOpen($('#dialogClearGoal'), 99999);
-    })
-//20240716 -- Clear Goal Data
-    .on('click', '#btnConfirmClear', function (e, data) {
-        ClearGoalDate();
-        popupClose($(this).closest('.my-popup'));
-    })
-//20240716 -- Set Reading Goal
-    .on('click', '#ReadingTime', function (e, data) {
-        return 0;
-        GoalType = 'Reading';
-        SkillId = 'Reading';
-        SkillGoaldate();
-    })
-//20240716 -- Set Listening Goal
-    .on('click', '#ListeningTime', function (e, data) {
-        return 0;
-        GoalType = 'Listening';
-        SkillId = 'Listening';
-        SkillGoaldate();
-    })
-//20240716 -- Set Vocab Goal
-    .on('click', '#VocabTime', function (e, data) {
-        GoalType = 'Vocabulary';
-        SkillId = '31667BAB-89FF-43B3-806F-174774C8DFBF';
-        SkillGoaldate();
-    })
-//20240716 -- Set Grammar Goal
-    .on('click', '#GrammarTime', function (e, data) {
-        GoalType = 'Grammar';
-        SkillId = '5BBD801D-610F-40EB-89CB-5957D05C4A0B';
-        SkillGoaldate();
-    })
-//20240716 -- Set Situation Goal
-    .on('click', '#SituationTime', function (e, data) {
-        return 0;
-        GoalType = 'Situation';
-        SkillId = 'Situation';
-        SkillGoaldate();
-    })
-
+        //20240716 -- Clear Button
+        .on('click', '.btnClear', function (e, data) {
+            $('#dialogClearGoal').attr('action', 'focus');
+            popupOpen($('#dialogClearGoal'), 99999);
+        })
+    //20240716 -- Clear Goal Data
+        .on('click', '#btnConfirmClear', function (e, data) {
+            ClearGoalDate();
+            popupClose($(this).closest('.my-popup'));
+        })
+    //20240716 -- Set Reading Goal
+        .on('click', '#ReadingTime', function (e, data) {
+            return 0;
+            GoalType = 'Reading';
+            SkillId = 'Reading';
+            SkillGoaldate();
+        })
+    //20240716 -- Set Listening Goal
+        .on('click', '#ListeningTime', function (e, data) {
+            return 0;
+            GoalType = 'Listening';
+            SkillId = 'Listening';
+            SkillGoaldate();
+        })
+    //20240716 -- Set Vocab Goal
+        .on('click', '#VocabTime', function (e, data) {
+            GoalType = 'Vocabulary';
+            SkillId = '31667BAB-89FF-43B3-806F-174774C8DFBF';
+            SkillGoaldate();
+        })
+    //20240716 -- Set Grammar Goal
+        .on('click', '#GrammarTime', function (e, data) {
+            GoalType = 'Grammar';
+            SkillId = '5BBD801D-610F-40EB-89CB-5957D05C4A0B';
+            SkillGoaldate();
+        })
+    //20240716 -- Set Situation Goal
+        .on('click', '#SituationTime', function (e, data) {
+            return 0;
+            GoalType = 'Situation';
+            SkillId = 'Situation';
+            SkillGoaldate();
+        })
+        .on('click', 'a.toggler', function (e, data) {
+            $(this).toggleClass('off');
+        });
 
 // ========================================================================================================== //
 
@@ -298,6 +306,7 @@ function checkInvalidLoginData() {
 
     return CheckError
 }
+//20240904 -- Check GOAL Noti
 function CheckUserLogin() {
     var post1 = 'Username=' + $('#userName').val() + '&Password=' + $('#userPass').val();
 
@@ -307,6 +316,9 @@ function CheckUserLogin() {
         data: post1,
         success: function (data) {
             SetUserData(data);
+            if (data[0].Result == 'ok') {
+                CheckGoalNoti();
+            }
         }
     });
 }
@@ -624,6 +636,23 @@ function SetGoal(data) {
         }
     }
 }
+//20240904 -- Check Goal Date Noti
+function CheckGoalNoti() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/GetGoalNoti',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                console.log(data[i].Result);
+                if (data[i].Result == 'noti' || data[i].Result == 'notset') {
+                    $('#dialogAlert').attr('action', 'focus');
+                    $('#dialogAlert .ui-text').html(data[i].Msg);
+                    popupOpen($('#dialogAlert'), 99999);
+                }
 
+            }
+        }
+    });
+}
 
 
