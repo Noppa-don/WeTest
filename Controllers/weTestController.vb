@@ -2703,7 +2703,6 @@ Namespace Controllers
                         objList.GrammarScorePercent = "0%"
                     End If
 
-
                     objList.ReadingGoal = ""
                     objList.ReadingGoalAmount = ""
                     objList.ReadingDatePercent = "0%"
@@ -2874,6 +2873,50 @@ Namespace Controllers
                 Return "0%"
             End If
 
+        End Function
+        '20240904 -- Function Get Goal Notification
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function GetGoalNoti()
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable, dtSkill As DataTable
+            Dim L1 As New List(Of clsStudentData)
+            Dim objList As New clsStudentData()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+                Dim SettingNoti As Integer = CInt(Getconfig("NotiGoalTime"))
+
+                cmdMsSql = cmdSQL(cn, "select DATEDIFF(day,getdate(),EndDate) as GoalEndDate 
+                                        from tblStudentGoal where studentId = @stdid and isactive = 1 and GoalType = 1;")
+                With cmdMsSql
+                    .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentId").ToString
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows.Count() = 0 Then
+                    'You don't set any goal
+                    objList.Result = "notset"
+                    objList.Msg = "You don't set any goal"
+                ElseIf CInt(dt.Rows(0)("GoalEndDate")) <= SettingNoti And CInt(dt.Rows(0)("GoalEndDate")) > 0 Then
+                    'แจ้งเตือน
+                    objList.Result = "noti"
+                    objList.Msg = "Close to the GOAL"
+                Else
+                    objList.Result = "not"
+                End If
+                L1.Add(objList)
+                objList = Nothing
+            Catch ex As Exception
+                objList.Result = "Error"
+                objList.Msg = ex.Message
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
 
 #End Region
@@ -3731,7 +3774,7 @@ Namespace Controllers
             , ListeningGoal As String, ListeningGoalAmount As String, ListeningDatePercent As String, ListeningScorePercent As String _
             , VocabGoal As String, VocabGoalAmount As String, VocabDatePercent As String, VocabScorePercent As String _
             , GrammarGoal As String, GrammarGoalAmount As String, GrammarDatePercent As String, GrammarScorePercent As String _
-            , SituationGoal As String, SituationGoalAmount As String, SituationDatePercent As String, SituationScorePercent As String
+            , SituationGoal As String, SituationGoalAmount As String, SituationDatePercent As String, SituationScorePercent As String, GoalAlertDateAmount As String
 
         End Class
         Private Class clsItemQAndA
