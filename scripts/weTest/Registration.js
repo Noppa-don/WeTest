@@ -204,6 +204,16 @@ $(document)
         window.location = '/Wetest/User';
     })
 
+   //20240905 -- Back to Choose Package,User
+    .on('click', '.footerPayment .btnBack', function (e, data) {
+
+        if ($('.payment').hasClass('ui-hide')) {
+            window.location = '/Wetest/User';
+        }else{        
+            $('.payment,#btnConfirmPayment').addClass('ui-hide');
+            $('.package').removeClass('ui-hide');
+        }
+    })
 
 // ============================================================ //
 
@@ -444,6 +454,7 @@ function GetPackagePrice() {
         }
     });
 }
+
 function CheckKeycode() {
     var post1 = 'KeyCode=' + $('#txtCode').val();
         $.ajax({
