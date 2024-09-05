@@ -1,5 +1,11 @@
 ﻿.ui-page {background-color: #f7eee9;}
+body{overflow-y:hidden;overflow-x:hidden;}
 #divActivity {background-color:#f7eee9;}
+#divActivity .footer{height:120px;position:unset;bottom:unset;width:unset;display:flex;flex-direction:row;}
+#divActivity .footer .footerButton {flex:1;}
+#divActivity .footer .SendQuiz {width:10%;margin:unset;height:60px;margin-top:10px;}
+
+#divActivity .footer .FinishQuiz {width:10%;margin:unset;height:60px;margin-top:10px;}
 
 #divTopControlBar {width: 100%;height: 100px;background-color: #0a3820;}
 
@@ -16,10 +22,11 @@
 #divQuestionRun {width:90%;border-style:solid; border-color:white; border-radius:1.2em;margin: 10px 10px 10px 10px;}
 #divBtnReportProblem {margin-right:50px;float:right;background: url(/images/Wetest/QuuestionProblem.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 90px;cursor:pointer;margin-right:10px;}
 
-
-#divPlayground {background-color:#f7eee9;display: flex;width: 100%;padding:15px;}
-
+/*#divPlayground {background-color:#f7eee9;display: flex;width: 100%;padding:15px;}*/
+#divPlayground{display:flex;flex-direction:row;flex:1;overflow-y:hidden;}
 #divQ {width:90%;float:left;}
+#divQ {overflow-y:auto;padding:15px;}
+#divActivity,#divQuestionAndAnswer{display:flex;flex-direction:column;}
 
 #divQuestion {background-color:white;width:97%; border-radius:0.5em;padding:20px;}
 .divAnswerRow {display:flex;width:100%;margin-top:15px; border-radius:0.5em;}
