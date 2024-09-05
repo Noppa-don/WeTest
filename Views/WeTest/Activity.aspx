@@ -34,7 +34,7 @@
             </div>
 
             <div id="divSideMenuBar">
-                <div id="divShowExplain"></div>
+                <div id="divShowExplain" class="ui-hide"></div>
                 <div id="divTime"><span id="minutes"></span>:<span id="seconds"></span></div>
                 <div id="divPause"></div>
                 <div id="divAllLeapChoice"></div>
