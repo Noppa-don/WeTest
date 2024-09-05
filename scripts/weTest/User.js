@@ -164,7 +164,7 @@ $(document)
         window.location = '/Wetest/Registration';
     })
 //20240731 -- ไปหน้าจอแพกเกจ
-    .on('click', '.btnlater', function (e, data) {
+    .on('click', '.btnlater,.btnlaterPurchase', function (e, data) {
         UpdateTrialDate();
     })
 //20240813 -- ไปหน้าจอ Assignment
@@ -187,22 +187,17 @@ $(document)
    })
 //20240816 -- RefillKey
     .on('click', '.btnAccountMenu.RefillKey', function (e, data) {
-        if ($('#btnGoalMenu').hasClass('reject') == true) {
-            $('#dialogRejectAlert').attr('action', 'focus');
-            popupOpen($('#dialogRejectAlert'), 99999);
-        } else {
-            $.ajax({
-                type: 'POST',
-                url: '/weTest/SetRefillKeyMode',
-                success: function (data) {
-                    for (var i = 0; i < data.length; i++) {
-                        if (data[i].dataType == 'success') {
-                            window.location = '/Wetest/Registration';
-                        }
+        $.ajax({
+            type: 'POST',
+            url: '/weTest/SetRefillKeyMode',
+            success: function (data) {
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].dataType == 'success') {
+                        window.location = '/Wetest/Registration';
                     }
                 }
-            });
-        }
+            }
+        });
     })
 
 // ========================= Goal ============================= //
@@ -246,52 +241,52 @@ $(document)
             $('.DetailGoal').addClass('ui-hide');
         }
     })
-        //20240716 -- Clear Button
-        .on('click', '.btnClear', function (e, data) {
-            $('#dialogClearGoal').attr('action', 'focus');
-            popupOpen($('#dialogClearGoal'), 99999);
-        })
-    //20240716 -- Clear Goal Data
-        .on('click', '#btnConfirmClear', function (e, data) {
-            ClearGoalDate();
-            popupClose($(this).closest('.my-popup'));
-        })
-    //20240716 -- Set Reading Goal
-        .on('click', '#ReadingTime', function (e, data) {
-            return 0;
-            GoalType = 'Reading';
-            SkillId = 'Reading';
-            SkillGoaldate();
-        })
-    //20240716 -- Set Listening Goal
-        .on('click', '#ListeningTime', function (e, data) {
-            return 0;
-            GoalType = 'Listening';
-            SkillId = 'Listening';
-            SkillGoaldate();
-        })
-    //20240716 -- Set Vocab Goal
-        .on('click', '#VocabTime', function (e, data) {
-            GoalType = 'Vocabulary';
-            SkillId = '31667BAB-89FF-43B3-806F-174774C8DFBF';
-            SkillGoaldate();
-        })
-    //20240716 -- Set Grammar Goal
-        .on('click', '#GrammarTime', function (e, data) {
-            GoalType = 'Grammar';
-            SkillId = '5BBD801D-610F-40EB-89CB-5957D05C4A0B';
-            SkillGoaldate();
-        })
-    //20240716 -- Set Situation Goal
-        .on('click', '#SituationTime', function (e, data) {
-            return 0;
-            GoalType = 'Situation';
-            SkillId = 'Situation';
-            SkillGoaldate();
-        })
-        .on('click', 'a.toggler', function (e, data) {
-            $(this).toggleClass('off');
-        });
+//20240716 -- Clear Button
+    .on('click', '.btnClear', function (e, data) {
+        $('#dialogClearGoal').attr('action', 'focus');
+        popupOpen($('#dialogClearGoal'), 99999);
+    })
+//20240716 -- Clear Goal Data
+    .on('click', '#btnConfirmClear', function (e, data) {
+        ClearGoalDate();
+        popupClose($(this).closest('.my-popup'));
+    })
+//20240716 -- Set Reading Goal
+    .on('click', '#ReadingTime', function (e, data) {
+        return 0;
+        GoalType = 'Reading';
+        SkillId = 'Reading';
+        SkillGoaldate();
+    })
+//20240716 -- Set Listening Goal
+    .on('click', '#ListeningTime', function (e, data) {
+        return 0;
+        GoalType = 'Listening';
+        SkillId = 'Listening';
+        SkillGoaldate();
+    })
+//20240716 -- Set Vocab Goal
+    .on('click', '#VocabTime', function (e, data) {
+        GoalType = 'Vocabulary';
+        SkillId = '31667BAB-89FF-43B3-806F-174774C8DFBF';
+        SkillGoaldate();
+    })
+//20240716 -- Set Grammar Goal
+    .on('click', '#GrammarTime', function (e, data) {
+        GoalType = 'Grammar';
+        SkillId = '5BBD801D-610F-40EB-89CB-5957D05C4A0B';
+        SkillGoaldate();
+    })
+//20240716 -- Set Situation Goal
+    .on('click', '#SituationTime', function (e, data) {
+        return 0;
+        GoalType = 'Situation';
+        SkillId = 'Situation';
+        SkillGoaldate();
+    })
+    .on('click', 'a.toggler', function (e, data) {
+        $(this).toggleClass('off');
+    });
 
 // ========================================================================================================== //
 
@@ -566,10 +561,9 @@ function GetGoalData() {
     });
 }
 //20240828 -- Bind Goal Data ตามจุดต่างๆ
+//20240905 -- ให้แสดงค่าเป็น 0% เมื่อไม่ได้ทำการตั้ง Goal
 function SetGoal(data) {
     for (var i = 0; i < data.length; i++) {
-        console.log(data[i].Result);
-        console.log(data[i].TotalGoal);
         if (data[i].Result == 'ok') {
             if (data[i].TotalGoal != '') {
                 $('#lastestGOAL').html('Your lastest GOAL : ' + data[i].TotalGoal + ' ( Time left ' + data[i].TotalGoalAmount + ' days )');
@@ -591,18 +585,22 @@ function SetGoal(data) {
                 $('#ReadingTimeResult').removeClass('ui-hide');
                 $('#ReadingPS').removeClass('PS');
                 $('#ReadingPS').html(data[i].ReadingScorePercent);
+                $('#ReadingTime').html(data[i].ReadingDatePercent);
             } else {
                 $('#ReadingTimeResult').addClass('ui-hide');
                 $('#ReadingPS').html("0%");
+                $('#ReadingTime').html("0%");
             }
             if (data[i].ListeningGoal != '') {
                 $('#ListeningTimeResult').html('Due date : ' + data[i].ListeningGoal + '<br />(Time left ' + data[i].ListeningGoalAmount + ' days)');
                 $('#ListeningTimeResult').removeClass('ui-hide');
                 $('#ListeningPS').removeClass('PS');
                 $('#ListeningPS').html(data[i].ListeningScorePercent);
+                $('#ListeningTime').html(data[i].ListeningDatePercent);
             } else {
                 $('#ListeningTimeResult').addClass('ui-hide');
                 $('#ListeningPS').html("0%");
+                $('#ListeningTime').html("0%");
             }
             if (data[i].VocabGoal != '') {
                 $('#VocabularyTimeResult').html('Due date : ' + data[i].VocabGoal + '<br />(Time left ' + data[i].VocabGoalAmount + ' days)');
@@ -613,6 +611,7 @@ function SetGoal(data) {
             } else {
                 $('#VocabularyTimeResult').addClass('ui-hide');
                 $('#VocabularyPS').html("0%");
+                $('#VocabTime').html("0%");
             }
             if (data[i].GrammarGoal != '') {
                 $('#GrammarTimeResult').html('Due date : ' + data[i].GrammarGoal + '<br />(Time left ' + data[i].GrammarGoalAmount + ' days)');
@@ -623,6 +622,7 @@ function SetGoal(data) {
             } else {
                 $('#GrammarTimeResult').addClass('ui-hide');
                 $('#GrammarPS').html("0%");
+                $('#GrammarTime').html("0%");
             }
             if (data[i].SituationGoal != '') {
                 $('#SituationTimeResult').html('Due date : ' + data[i].SituationGoal + '<br />(Time left ' + data[i].SituationGoalAmount + ' days)');
@@ -631,6 +631,7 @@ function SetGoal(data) {
                 $('#SituationPS').html(data[i].GrammarScorePercent);
             } else {
                 $('#SituationTimeResult').addClass('ui-hide');
+                $('#SituationPS').html("0%");
                 $('#SituationPS').html("0%");
             }
         }
