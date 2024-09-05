@@ -172,7 +172,7 @@
                 </div>
             </div>
             <br />
-            <div class="btn" id="btnskip">Skip</div>
+            <div class="btn ui-hide" id="btnskip">Skip</div>
             <br />
             <span class="warningText">If you have a question and promblem.<br />
                 Please contact to @Italt</span>
