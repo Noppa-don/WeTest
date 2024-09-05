@@ -2,14 +2,14 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server"></asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
-<link href="../content/Wetest/Wetest.css?ver=1.1.6" rel="stylesheet" type="text/css" />
-<link href="../content/Wetest/User.css?ver=1.1.6" rel="stylesheet" type="text/css" />
-<link href="../content/Wetest/jquery-ui-1.8.18.custom.min" type="text/css" />
+    <link href="../content/Wetest/Wetest.css?ver=1.1.6" rel="stylesheet" type="text/css" />
+    <link href="../content/Wetest/User.css?ver=1.1.6" rel="stylesheet" type="text/css" />
+    <link href="../content/Wetest/jquery-ui-1.8.18.custom.min" type="text/css" />
 
-<script src="../scripts/Wetest/User.js?ver=1.1.6" type="text/javascript"></script>
-<script src="../scripts/Wetest/jGlobal.js" type="text/javascript"></script>
-<script src="../scripts/Wetest/jquery-ui-1.8.10.offset.datepicker.min.js?ver=1.1.3" type="text/javascript"></script>
-<script src="../scripts/Wetest/jquery-ui-1.10.1.custom.min.js?ver=1.1.3" type="text/javascript"></script>
+    <script src="../scripts/Wetest/User.js?ver=1.1.6" type="text/javascript"></script>
+    <script src="../scripts/Wetest/jGlobal.js" type="text/javascript"></script>
+    <script src="../scripts/Wetest/jquery-ui-1.8.10.offset.datepicker.min.js?ver=1.1.3" type="text/javascript"></script>
+    <script src="../scripts/Wetest/jquery-ui-1.10.1.custom.min.js?ver=1.1.3" type="text/javascript"></script>
 
 </asp:Content>
 
@@ -28,11 +28,11 @@
                 <div class="Accountlogo firstflexdiv"></div>
                 <div>Account</div>
             </div>
-             <div class="btnAccountMenu RefillKey flexDiv">
+            <div class="btnAccountMenu RefillKey flexDiv">
                 <div class="Accountlogo firstflexdiv"></div>
                 <div>Refill Wetest Key</div>
             </div>
-             <div class="btnAccountMenu Setting flexDiv">
+            <div class="btnAccountMenu Setting flexDiv">
                 <div class="Accountlogo firstflexdiv"></div>
                 <div>Setting</div>
             </div>
@@ -113,7 +113,23 @@
             </div>
         </div>
         <div class="Setting ui-hide">
-           Notification
+            Notification<br />
+            <div class="flexDiv settingItem">
+                <span class="firstflexdiv settingType">New Assignment</span>
+                <input type="checkbox" class="btnSetting btnNewAssign" />
+            </div>
+            <div class="flexDiv settingItem">
+                <span class="firstflexdiv settingType">DueDate</span>
+                <input type="checkbox" class="btnSetting btnDuedate" />
+            </div>
+            <div class="flexDiv settingItem">
+                <span class="firstflexdiv settingType">Close to the GOAL</span>
+                <input type="checkbox" class="btnSetting btnGoalAlert" />
+            </div>
+            <div class="flexDiv settingItem">
+                <span class="firstflexdiv settingType">Ads</span>
+                <input type="checkbox" class="btnSetting btnAds" />
+            </div>
         </div>
 
     </div>
@@ -168,6 +184,9 @@
         <div class='footerButton footerGoal ui-hide'>
             <div class="Imagebtn btnBack fistflexdiv"></div>
             <div class="Imagebtn btnSetDetailGoal unActive ui-Right"></div>
+        </div>
+         <div class='footerButton footerSetting ui-hide'>
+            <div class="Imagebtn btnBack fistflexdiv"></div>
         </div>
     </div>
 
@@ -252,7 +271,12 @@
     <div name='select' id="dialogPurchase" class='my-popup confirm ui-popup-container ui-popup-hidden'>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
             <div class='ui-icon done'></div>
-            <div class='ui-text'>You have not purchased an Wetest  package! <br /><br /> Please press 'Buy now' or 'Later' for use trial version.</div>
+            <div class='ui-text'>
+                You have not purchased an Wetest  package!
+                <br />
+                <br />
+                Please press 'Buy now' or 'Later' for use trial version.
+            </div>
             <div class="ui-twoButton">
                 <div class='btn btnCancel btnlater'>Later</div>
                 <div class='btn btnSelected btnbuy'>Buy now</div>
@@ -262,7 +286,12 @@
     <div name='alert' id="dialogMustPurchase" class='my-popup alert ui-popup-container ui-popup-hidden'>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
             <div class='ui-icon done'></div>
-            <div class='ui-text'>You have not purchased an Wetest  package! <br /><br /> Please press 'Buy now'</div>
+            <div class='ui-text'>
+                You have not purchased an Wetest  package!
+                <br />
+                <br />
+                Please press 'Buy now'
+            </div>
             <div class="ui-twoButton">
                 <div class='btn btnCancel btnlaterPurchase'>Later</div>
                 <div class='btn btnSelected btnGotoPackage'>Buy now</div>
