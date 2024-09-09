@@ -89,7 +89,6 @@ $(document)
             window.location = '/Wetest/Report';
         }
     })
-
     .on('click', '#dialogSelect .btnSelected', function (e, data) {
         popupClose($(this).closest('.my-popup'));
         GotoExam();
@@ -181,9 +180,10 @@ $(document)
         }
     })
 //20240723 -- Setting
+//20240906 -- Get Setting Item
    .on('click', '.btnAccountMenu.Setting', function (e, data) {
-       $('.UserMenu,.MainMenu,.Goal,.DetailGoal,.Assignment').addClass('ui-hide');
-       $('.Setting,.footerSetting').removeClass('ui-hide');
+       GetSettingItem();
+    
    })
 //20240816 -- RefillKey
     .on('click', '.btnAccountMenu.RefillKey', function (e, data) {
@@ -232,9 +232,9 @@ $(document)
             $('.MainMenu,.Assignment').removeClass('ui-hide');
             $('.Goal,.footerGoal').addClass('ui-hide');
             $('.pagename').html('');
-        } else if ($('.Setting').hasClass('ui-hide') == false) {
+        } else if ($('.Noti').hasClass('ui-hide') == false) {
             $('.MainMenu,.Assignment').removeClass('ui-hide');
-            $('.Setting,.footerSetting').addClass('ui-hide');
+            $('.Noti,.footerSetting').addClass('ui-hide');
             $('.pagename').html('');
         } else if ($('.DetailGoal').hasClass('ui-hide') == false) {
             $('.Goal,.btnSetDetailGoal').removeClass('ui-hide');
@@ -287,7 +287,6 @@ $(document)
     .on('click', 'a.toggler', function (e, data) {
         $(this).toggleClass('off');
     });
-
 // ========================================================================================================== //
 
 // ================================================ Function ================================================ //
@@ -453,7 +452,7 @@ function SetUserData(data) {
         }
         else if (data[i].Result == 'sessionlost') {
             $('.login').removeClass('ui-hide');
-            $('.MainMenu,.Goal,.Setting,.DetailGoal,.Assignment').addClass('ui-hide');
+            $('.MainMenu,.Goal,.Noti,.DetailGoal,.Assignment').addClass('ui-hide');
         } else if (data[i].Result == 'not') {
             $('#dialogPurchase').attr('action', 'focus');
             popupOpen($('#dialogPurchase'), 99999);
@@ -652,6 +651,22 @@ function CheckGoalNoti() {
                 }
 
             }
+        }
+    });
+}
+//20240906 -- Get Setting Item
+function GetSettingItem() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/GetSettingItem',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].Result == 'success') {
+                    $('#NotiItem').html(data[i].ResultTxt);
+                }
+            }
+            $('.UserMenu,.MainMenu,.Goal,.DetailGoal,.Assignment').addClass('ui-hide');
+            $('.Noti,.footerSetting').removeClass('ui-hide');
         }
     });
 }
