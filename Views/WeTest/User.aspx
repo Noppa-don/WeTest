@@ -108,31 +108,14 @@
                     <br />
                     <div>Total Practice score</div>
                 </div>
-
-
             </div>
         </div>
-        <div class="Setting ui-hide">
-            Notification<br />
-            <div class="flexDiv settingItem">
-                <span class="firstflexdiv settingType">New Assignment</span>
-                <input type="checkbox" class="btnSetting btnNewAssign" />
-            </div>
-            <div class="flexDiv settingItem">
-                <span class="firstflexdiv settingType">DueDate</span>
-                <input type="checkbox" class="btnSetting btnDuedate" />
-            </div>
-            <div class="flexDiv settingItem">
-                <span class="firstflexdiv settingType">Close to the GOAL</span>
-                <input type="checkbox" class="btnSetting btnGoalAlert" />
-            </div>
-            <div class="flexDiv settingItem">
-                <span class="firstflexdiv settingType">Ads</span>
-                <input type="checkbox" class="btnSetting btnAds" />
-            </div>
+        <div class="Noti ui-hide">
+            Notification<br /><br />
+            <div id="NotiItem"></div> 
         </div>
-
     </div>
+
     <div class="DetailGoal ui-hide">
         <div class="flexDiv">
             <span id="lastestBigGOAL" class="fistflexdiv"></span>
@@ -185,7 +168,7 @@
             <div class="Imagebtn btnBack fistflexdiv"></div>
             <div class="Imagebtn btnSetDetailGoal unActive ui-Right"></div>
         </div>
-         <div class='footerButton footerSetting ui-hide'>
+        <div class='footerButton footerSetting ui-hide'>
             <div class="Imagebtn btnBack fistflexdiv"></div>
         </div>
     </div>
