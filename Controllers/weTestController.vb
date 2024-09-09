@@ -2685,7 +2685,7 @@ Namespace Controllers
                                         objList.VocabScorePercent = GetskillScorePercent("31667BAB-89FF-43B3-806F-174774C8DFBF", cn)
                                     Case "5BBD801D-610F-40EB-89CB-5957D05C4A0B".ToLower
                                         objList.GrammarGoal = dtSkill(i)("GoalDate").ToString
-                                        objList.GrammarGoalAmount = dtSkill(0)("GoalAmount").ToString
+                                        objList.GrammarGoalAmount = dtSkill(i)("GoalAmount").ToString
                                         objList.GrammarDatePercent = dtSkill.Rows(i)("DatePercent").ToString & "%"
                                         objList.GrammarScorePercent = GetskillScorePercent("5BBD801D-610F-40EB-89CB-5957D05C4A0B", cn)
                                 End Select
@@ -2922,6 +2922,57 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+        '20240906 -- Function Get Setting Item
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function GetSettingItem()
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim L1 As New List(Of clsNoti)
+            Dim objList As New clsNoti()
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                cmdMsSql = cmdSQL(cn, "select n.NotiId,NotiName,sn.SNId
+                                        from tblNotification n left  join  tblStudentNoti sn on n.NotiId = sn.NotiId 
+                                        and sn.StudentId = @stdid and sn.IsActive = 1 where  n.IsActive = 1;")
+
+                With cmdMsSql
+                    .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentId").ToString
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                Dim SettingiItem As String = ""
+
+                For i = 0 To dt.Rows.Count() - 1
+                    SettingiItem &= "<div class='flexDiv settingItem'>
+                                    <span class='firstflexdiv settingType'>" & dt.Rows(i)("NotiName").ToString & "</span>
+                                    <input type='checkbox' class='btnSetting' id='" & dt.Rows(i)("NotiId").ToString & "'"
+                    If dt.Rows(i)("SNId").ToString <> "" Then
+                        SettingiItem &= " checked "
+                    End If
+                    SettingiItem &= " /></div>"
+                Next
+
+                If dt.Rows.Count() <> 0 Then
+                    objList.Result = "success"
+                    objList.ResultTxt = SettingiItem
+                End If
+                L1.Add(objList)
+                objList = Nothing
+            Catch ex As Exception
+                objList.Result = "Error"
+                objList.ResultTxt = ex.Message
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
 
 #End Region
 
@@ -2948,7 +2999,7 @@ Namespace Controllers
 
                     Dim Skn As String = skillName(i)
 
-                    cmdMsSql = cmdSQL(cn, "select row_number() over(order by t.testsetid)As TestsetNo,t.TestsetId,qrs.QuizId 
+                    cmdMsSql = cmdSQL(cn, "Select row_number() over(order by t.testsetid)As TestsetNo,t.TestsetId,qrs.QuizId 
                                             from tblTestset t left join (select TestSetId,count(q.quizid) as quizId 
                                             from tblquiz q inner join tblQuizSession qs on q.QuizId = qs.QuizId 
                                             where StudentId = @stdId and q.QuizMode = 2 group by testsetid)qrs 
@@ -3833,6 +3884,10 @@ Namespace Controllers
         Public Class clsSlip
             Inherits clsMain
             Public Result As String, ResultTxt As String, slipURL As String
+        End Class
+        Public Class clsNoti
+            Inherits clsMain
+            Public Result As String, ResultTxt As String, isNoti As String
         End Class
 
 #End Region
