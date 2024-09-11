@@ -101,8 +101,8 @@
             <div class="flexDiv">
                 skills
              <div class="btn btnSkill firstflexdiv" id="btnRandomAll">All</div>
-                <div class="btnSkill btnReading" id="25DA1FAB-EB20-4B1D-8409-C2FB08FC61B3"></div>
-                <div class="btnSkill btnListen" id="Listening"></div>
+                <div class="btnSkill btnReading" id="Reading"></div>
+                <div class="btnSkill btnListen" id="Listen"></div>
                 <div class="btnSkill btnVocab" id="31667BAB-89FF-43B3-806F-174774C8DFBF"></div>
                 <div class="btnSkill btnGrammar" id="5BBD801D-610F-40EB-89CB-5957D05C4A0B"></div>
                 <div class="btnSkill btnSituation" id="Situation"></div>
