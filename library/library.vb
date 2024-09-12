@@ -12,6 +12,7 @@ Imports System.Web.Mvc
 Imports MySql.Data.MySqlClient
 Imports Newtonsoft.Json
 
+'20240909 -- เพิ่ม Connection licenseKey
 Public Class mConnection
     Inherits Controller
     Public Function sqlCon(Optional ByVal strDB As String = Nothing) As String
@@ -19,6 +20,10 @@ Public Class mConnection
         Select Case strDB.ToString.ToLower
             Case "questionnaire"
                 Return ConnectionStrings("connQuestionnaire").ConnectionString
+            Case "wetest"
+                Return ConnectionStrings("constrWetest").ConnectionString
+            Case "licensekey"
+                Return ConnectionStrings("constrLicenseKey").ConnectionString
             Case Else
                 Return ConnectionStrings("portaltest").ConnectionString
         End Select
