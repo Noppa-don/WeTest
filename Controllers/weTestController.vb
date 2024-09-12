@@ -367,6 +367,7 @@ Namespace Controllers
         '20240826 -- ปรับการตรวจสอบ Keycode และบันทึกข้อมูลต่างๆ
         '20240905 -- check Expired date,Update IsUsed
         '20240909 -- check Keycode จาก LicenseKey
+        '20240911 -- ตรวจสอบจำนวนการลงทะเบียน
         <AcceptVerbs(HttpVerbs.Post)>
         Function CheckKeyCode()
             Dim L1 As New List(Of clsMain)
@@ -381,7 +382,7 @@ Namespace Controllers
                 cnl = New SqlConnection(sqlCon("licenseKey"))
                 If cnl.State = 0 Then cnl.Open()
                 ' ==================================================
-                cmdMsSql = cmdSQL(cnl, "select KeyCodeId from tblKeycode where KeyCode = @KeyCode and KeyCodeExpiredDate >= getdate() and IsActive = 1 and IsUsed = 0;")
+                cmdMsSql = cmdSQL(cnl, "select KeyCodeId,KeyCodeDateAmount from wetest_tblKeycode where KeyCode = @KeyCode and KeyCodeExpiredDate >= getdate() and IsActive = 1 and (IsUsed = 0 or RegisteredAmount < KeycodeUseAmount) ;")
                 With cmdMsSql
                     .Parameters.Add("@KeyCode", SqlDbType.VarChar).Value = Request.Form("KeyCode")
                     .ExecuteNonQuery()
@@ -393,20 +394,19 @@ Namespace Controllers
                     objList.dataType = "error"
                     objList.errorMsg = "WeTest Key is wrong !<br><br>Please try again or contact @Italt."
                 Else
-                    cmdMsSql = cmdSQL(cn, "Update tblstudent set ExpiredDate = getdate() + (select KeyCodeDateAmount 
-                                            from tblkeycode where keycodeId = @KeyCodeId) where studentId = @stdId;
-                                            Insert Into tblregister(StudentId,KeyCodeId,RegisterStatus)
-                                            values(@stdId,@KeyCodeId,2);")
+                    cmdMsSql = cmdSQL(cn, "Update tblstudent set ExpiredDate = getdate() + @KeyCodeDateAmount where studentId = @stdId;
+                                            Insert Into tblregister(StudentId,KeyCodeId,RegisterStatus) values(@stdId,@KeyCodeId,2);")
 
                     With cmdMsSql
                         .Parameters.Add("@KeyCodeId", SqlDbType.VarChar).Value = dt("0")("KeyCodeId").ToString
+                        .Parameters.Add("@KeyCodeDateAmount", SqlDbType.Int).Value = CInt(dt("0")("KeyCodeDateAmount"))
                         .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
                         .ExecuteNonQuery()
                     End With
 
-                    cmdMsSql = cmdSQL(cnl, "Update tblkeycode set isused = 1 where KeyCodeId = @KeyCodeId;
+                    cmdMsSql = cmdSQL(cnl, "Update wetest_tblKeycode set isused = 1,RegisteredAmount = RegisteredAmount + 1 where KeyCodeId = @KeyCodeId;
                                             select CONVERT (varchar(10),getdate() + keycodedateAmount, 103) AS expiredDate 
-                                            from tblKeycode where keycodeId = @KeyCodeId;")
+                                            from wetest_tblKeycode where keycodeId = @KeyCodeId;")
 
                     With cmdMsSql
                         .Parameters.Add("@KeyCodeId", SqlDbType.VarChar).Value = dt("0")("KeyCodeId").ToString
@@ -1419,6 +1419,7 @@ Namespace Controllers
         End Function
         '20240730 -- ดึง Logo และ text ตามเมนูที่เข้าทำ Quiz
         '20240731 -- ปรับการดึง Icon ตามสกิลที่เลือกสร้างชุดข้อสอบ
+        '20240911 -- ปรับการดึง Icon ตามสกิลที่เลือกสร้างชุดข้อสอบ
         <AcceptVerbs(HttpVerbs.Post)>
         Function GetQuizLogo()
             Dim L1 As New List(Of clsQuizData)
@@ -1465,6 +1466,10 @@ Namespace Controllers
                                     skilltxt &= " <div Class='Logovocab'></div>"
                                 Case "5BBD801D-610F-40EB-89CB-5957D05C4A0B"
                                     skilltxt &= " <div Class='Logogrammar'></div>"
+                                Case "FB4B4A71-B777-4164-BA4D-5C1EA9522226"
+                                    skilltxt &= " <div Class='Logoread'></div>"
+                                Case "44502C7F-D3BE-4D46-9134-3FE40DA230E9"
+                                    skilltxt &= " <div Class='Logolisten'></div>"
                             End Select
                             If i = 1 Then
                                 skilltxt &= "<br />"
@@ -2996,6 +3001,8 @@ Namespace Controllers
         Function Practice() As ActionResult
             Return View()
         End Function
+        '20240712 -- ปรับ Query ให้ดึงเฉพาะระดับชั้นที่ตรงและน้อยกว่าที่ User สามารถเล่นได้
+        '20240912 -- ปรับ Query ให้ดึงข้อสอบจากตัวชี้วัดให้ถูกต้อง
         <AcceptVerbs(HttpVerbs.Post)>
         Function GetLesson()
             Dim L1 As New List(Of clsPracticeSet)
@@ -3008,21 +3015,24 @@ Namespace Controllers
                 ' ==================================================
 
 
-                Dim skillName() As String = {"Reading", "Listening", "Grammar", "Situation", "Vocabulary"}
+                Dim skillName() As String = {"Reading", "Listening", "Grammar", "Vocabulary"}
+                Dim skillId() As String = {"FB4B4A71-B777-4164-BA4D-5C1EA9522226", "44502C7F-D3BE-4D46-9134-3FE40DA230E9", "5BBD801D-610F-40EB-89CB-5957D05C4A0B", "31667BAB-89FF-43B3-806F-174774C8DFBF"}
 
-                '20240712 -- ปรับ Query ให้ดึงเฉพาะระดับชั้นที่ตรงและน้อยกว่าที่ User สามารถเล่นได้
                 For i = 0 To skillName.Count() - 1
 
-                    Dim Skn As String = skillName(i)
+                    Dim Skn As String = skillId(i)
 
-                    cmdMsSql = cmdSQL(cn, "Select row_number() over(order by t.testsetid)As TestsetNo,t.TestsetId,qrs.QuizId 
+                    cmdMsSql = cmdSQL(cn, "Select row_number() over(order by a.testsetid) As TestsetNo,a.TestsetId,a.QuizId 
+                                            from (select distinct t.TestsetId,qrs.QuizId 
                                             from tblTestset t left join (select TestSetId,count(q.quizid) as quizId 
                                             from tblquiz q inner join tblQuizSession qs on q.QuizId = qs.QuizId 
                                             where StudentId = @stdId and q.QuizMode = 2 group by testsetid)qrs 
-                                            on t.TestsetId = qrs.TestSetId where t.testsetname Like '%' + @skillName + '%'
-                                            and t.levelId = @LevelId and t.isactive = 1 and t.IsPractice = 1;")
+                                            on t.TestsetId = qrs.TestSetId inner join tblTestSetQuestionSet tsqs on t.testsetId = tsqs.TestSetId
+                                            inner join tblTestSetQuestionDetail tsqd on tsqs.TSQSId = tsqd.TSQSId inner join tblQuestionEvaluationIndexItem qei on tsqd.QuestionId = qei.Question_Id
+                                            inner join tblEvaluationIndex ei on qei.ei_id = ei.EI_Id and ei.Parent_Id = @skillId
+                                            where t.levelId = @LevelId and t.isactive = 1 and t.IsPractice = 1)a;")
                     With cmdMsSql
-                        .Parameters.Add("@skillName", SqlDbType.VarChar).Value = Skn
+                        .Parameters.Add("@skillId", SqlDbType.VarChar).Value = Skn
                         .Parameters.Add("@LevelId", SqlDbType.VarChar).Value = LevelId
                         .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId")
                         .ExecuteNonQuery()
@@ -3038,7 +3048,7 @@ Namespace Controllers
                         skilltxtShort = ""
                         For j = 0 To dt.Rows.Count() - 1
 
-                            skilltxt &= "<div id=" & dt.Rows(j)("TestsetId").ToString & " class=""Lessondiv Lesson" & Skn & """>" & dt.Rows(j)("TestsetNo").ToString
+                            skilltxt &= "<div id=" & dt.Rows(j)("TestsetId").ToString & " class=""Lessondiv Lesson" & skillName(i) & """>" & dt.Rows(j)("TestsetNo").ToString
 
                             If dt.Rows(j)("QuizId").ToString <> "" Then
                                 skilltxt &= "<div class='CheckQuiz'></div>"
@@ -3051,7 +3061,7 @@ Namespace Controllers
                             End If
                         Next
                         Dim objList As New clsPracticeSet()
-                        objList.skillSet = Skn
+                        objList.skillSet = skillName(i)
                         objList.skillTxtAll = skilltxt
                         objList.skillTxtShort = skilltxtShort
                         objList.skillAmount = dt.Rows.Count()
@@ -3059,7 +3069,7 @@ Namespace Controllers
                         objList = Nothing
                     Else
                         Dim objList As New clsPracticeSet()
-                        objList.skillSet = Skn
+                        objList.skillSet = skillName(i)
                         objList.skillTxtAll = ""
                         objList.skillTxtShort = ""
                         objList.skillAmount = dt.Rows.Count()
@@ -3182,10 +3192,10 @@ Namespace Controllers
                 End If
 
                 Dim objList As New clsMain()
-                    objList.dataType = "success"
-                    objList.errorMsg = TestsetId
-                    L1.Add(objList)
-                    objList = Nothing
+                objList.dataType = "success"
+                objList.errorMsg = TestsetId
+                L1.Add(objList)
+                objList = Nothing
 
             Catch ex As Exception
                 Dim objList As New clsMain()
@@ -3513,6 +3523,7 @@ Namespace Controllers
         '20240722 -- GetLessonReport
         '20240830 -- เพิ่ม Filter Level
         '20240903 -- ปรับ Query ให้ Order by วันที่ให้ถูกต้อง
+        '20240911 -- ปรับการแสดงผล
         Function GetLessonReport(StartDate, EndDate, PracticeType, LevelId)
 
             Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
@@ -3592,6 +3603,10 @@ Namespace Controllers
                                 ItemClass = "vocabItem"
                             Case "5BBD801D-610F-40EB-89CB-5957D05C4A0B"
                                 ItemClass = "grammarItem"
+                            Case "FB4B4A71-B777-4164-BA4D-5C1EA9522226"
+                                ItemClass = "readingItem"
+                            Case "44502C7F-D3BE-4D46-9134-3FE40DA230E9"
+                                ItemClass = "listenItem"
                             Case Else
                                 ItemClass = "noeiItem"
                         End Select
