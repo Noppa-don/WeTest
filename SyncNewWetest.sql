@@ -64,3 +64,18 @@ SELECT MultimediaObjId,QSetId,MFileName,MFileType,ReferenceId,ReferenceType,IsAc
 FROM WeTest.dbo.tblMultimediaObject
 
 --tblEvaluationIndexNew
+TRUNCATE TABLE WeTest_dev.dbo.tblEvaluationIndex
+INSERT INTO WeTest_dev.dbo.tblEvaluationIndex
+SELECT * FROM WeTest.dbo.tblEvaluationIndexNew
+
+--tblQuestionEvaluationIndex
+TRUNCATE TABLE WeTest_dev.dbo.tblQuestionEvaluationIndexItem
+INSERT INTO WeTest_dev.dbo.tblQuestionEvaluationIndexItem
+SELECT * FROM WeTest.dbo.tblQuestionEvaluationIndexItem
+
+--tblEvaluationIndexSubject
+TRUNCATE TABLE WeTest_dev.dbo.tblEvaluationIndexSubject
+INSERT INTO WeTest_dev.dbo.tblEvaluationIndexSubject(ES_Id,EI_Id,Subject_Id,IsActive,LastUpdate,IsWpp,ClientId)
+SELECT ES_Id,EI_Id,Subject_Id,1,getdate(),null,null FROM WeTest.dbo.tblEvaluationIndexWithSubject
+
+
