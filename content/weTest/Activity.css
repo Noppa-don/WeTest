@@ -125,9 +125,11 @@ body{overflow-y:hidden;overflow-x:hidden;}
 
 .divAnswerbar .fistflexdiv,.divAnswerbarAns .fistflexdiv,#divQuestion .fistflexdiv {padding-right: 15px;}
 #divIcon {padding-top: 15px;    height: 50px;}
+
 .Logovocab{background: url(/images/Wetest/vocab.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 30px;height:30px;margin-left: 5px;cursor:pointer;}
 .Logogrammar{background: url(/images/Wetest/gramma.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 30px;height:30px;margin-left: 5px;cursor:pointer;}
 .Logolisten{background: url(/images/Wetest/Listening.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 30px;height:30px;margin-left: 5px;cursor:pointer;}
+.Logoread{background: url(/images/Wetest/reading.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 30px;height:30px;margin-left: 5px;cursor:pointer;}
 
 .UserAns{background: url(/images/Wetest/circle.png);background-repeat: no-repeat!important;background-size: contain!important;text-align: center; width: 33px;}
 
