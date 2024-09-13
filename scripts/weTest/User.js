@@ -286,7 +286,13 @@ $(document)
     })
     .on('click', 'a.toggler', function (e, data) {
         $(this).toggleClass('off');
-    });
+    })
+//20240716 -- Check Noti
+    .on('click', '.btnSetting', function (e, data) {
+        var IsCheck = $(this).is(":checked");
+        var NotiId = $(this).attr('id');
+        UpdateNoti(IsCheck, NotiId);
+    })
 // ========================================================================================================== //
 
 // ================================================ Function ================================================ //
@@ -440,7 +446,7 @@ function SetUserData(data) {
     for (var i = 0; i < data.length; i++) {
         if (data[i].Result == 'ok') {
             $('.login').addClass('ui-hide');
-            $('.UserData,.MainMenu,.Assignment').removeClass('ui-hide');
+            $('.UserData,.MainMenu').removeClass('ui-hide');
             $('.pagename').html('');
             //20240716 -- ดึงข้อมูล User เพิ่มเติม
             $('.UserNameandLevel').html('Welcome, ' + data[i].Firstname + '<br />' + data[i].UserLevel);
@@ -458,7 +464,7 @@ function SetUserData(data) {
             popupOpen($('#dialogPurchase'), 99999);
         } else if (data[i].Result == 'expired') {
             $('.login').addClass('ui-hide');
-            $('.UserData,.MainMenu,.Assignment').removeClass('ui-hide');
+            $('.UserData,.MainMenu').removeClass('ui-hide');
             $('.pagename').html('');
             $('.UserNameandLevel').html('Welcome, ' + data[i].Firstname + '<br />' + data[i].UserLevel);
             $('.expiredDate').html(data[i].ExpiredDate)
@@ -472,7 +478,7 @@ function SetUserData(data) {
             popupOpen($('#dialogMustPurchase'), 99999);
         } else if (data[i].Result == 'reject') {
             $('.login').addClass('ui-hide');
-            $('.UserData,.MainMenu,.Assignment').removeClass('ui-hide');
+            $('.UserData,.MainMenu').removeClass('ui-hide');
             $('.pagename').html('');
             $('.UserNameandLevel').html('Welcome, ' + data[i].Firstname + '<br />' + data[i].UserLevel);
             $('.expiredDate').html(data[i].ExpiredDate)
@@ -665,8 +671,28 @@ function GetSettingItem() {
                     $('#NotiItem').html(data[i].ResultTxt);
                 }
             }
-            $('.UserMenu,.MainMenu,.Goal,.DetailGoal,.Assignment').addClass('ui-hide');
+            $('.UserMenu,.MainMenu,.Goal,.DetailGoal,.footerGoal,.Assignment').addClass('ui-hide');
             $('.Noti,.footerSetting').removeClass('ui-hide');
+        }
+    });
+}
+//20240912 -- Update Noti IsChecked
+function UpdateNoti(IsCheck, NotiId) {
+    var post1 = 'IsCheck=' + IsCheck + '&NotiId=' + NotiId;
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/UpdateNoti',
+        data: post1,
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].Result == 'notsetgoal') {
+                    console.log('notsetgoal');
+                    $('#' + NotiId).attr('checked', false);
+                    $('#dialogAlert').attr('action', 'focus');
+                    $('#dialogAlert .ui-text').html("You don't set any goal");
+                    popupOpen($('#dialogAlert'), 99999);
+                } 
+            }
         }
     });
 }
