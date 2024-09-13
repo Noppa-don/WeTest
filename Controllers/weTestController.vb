@@ -450,7 +450,7 @@ Namespace Controllers
                 If cnl.State = 0 Then cnl.Open()
                 ' ==================================================
                 cmdMsSql = cmdSQL(cnl, "select DiscountId,DiscountType,DiscountAmount,case when expiredate >= getdate() then 0 else 1 end as isExpired,isUsed
-                                        from tblDiscount where IsActive = 1 and DiscountCode = @DiscountCode")
+                                        from wetest_tblDiscount where IsActive = 1 and DiscountCode = @DiscountCode")
                 With cmdMsSql
                     .Parameters.Add("@DiscountCode", SqlDbType.VarChar).Value = Request.Form("DiscountCode")
                     .ExecuteNonQuery()
@@ -2910,27 +2910,37 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-                Dim SettingNoti As Integer = CInt(Getconfig("NotiGoalTime"))
 
-                cmdMsSql = cmdSQL(cn, "select DATEDIFF(day,getdate(),EndDate) as GoalEndDate 
-                                        from tblStudentGoal where studentId = @stdid and isactive = 1 and GoalType = 1;")
+                cmdMsSql = cmdSQL(cn, "select SNId from tblStudentNoti where isactive = 1 and studentId = @stdid 
+                                        and NotiId = '061790A3-A512-48EF-BB9C-B60C6F738768';")
                 With cmdMsSql
                     .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentId").ToString
                 End With
 
                 dt = getDataTable(cmdMsSql)
 
-                If dt.Rows.Count() = 0 Then
-                    'You don't set any goal
-                    objList.Result = "notset"
-                    objList.Msg = "You don't set any goal"
-                ElseIf CInt(dt.Rows(0)("GoalEndDate")) <= SettingNoti And CInt(dt.Rows(0)("GoalEndDate")) > 0 Then
-                    'แจ้งเตือน
-                    objList.Result = "noti"
-                    objList.Msg = "Close to the GOAL"
+                If dt.Rows.Count <> 0 Then
+                    Dim SettingNoti As Integer = CInt(Getconfig("NotiGoalTime"))
+
+                    cmdMsSql = cmdSQL(cn, "select DATEDIFF(day,getdate(),EndDate) as GoalEndDate 
+                                        from tblStudentGoal where studentId = @stdid and isactive = 1 and GoalType = 1;")
+                    With cmdMsSql
+                        .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentId").ToString
+                    End With
+
+                    dt = getDataTable(cmdMsSql)
+
+                    If CInt(dt.Rows(0)("GoalEndDate")) <= SettingNoti And CInt(dt.Rows(0)("GoalEndDate")) > 0 Then
+                        'แจ้งเตือน
+                        objList.Result = "noti"
+                        objList.Msg = "Close to the GOAL"
+                    Else
+                        objList.Result = "not"
+                    End If
                 Else
                     objList.Result = "not"
                 End If
+
                 L1.Add(objList)
                 objList = Nothing
             Catch ex As Exception
@@ -2993,6 +3003,76 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+        '20240912 -- Function Update Noti Status
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function UpdateNoti()
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim L1 As New List(Of clsNoti)
+            Dim objList As New clsNoti()
+            Dim isCheck As String
+            If Request.Form("IsCheck").ToLower = "true" Then isCheck = "1" Else isCheck = "0"
+
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+                Dim GoalResult As Boolean = True
+                If Request.Form("NotiId").ToString.ToUpper = "061790A3-A512-48EF-BB9C-B60C6F738768" And isCheck = "1" Then
+                    cmdMsSql = cmdSQL(cn, "Select SGId from tblStudentGoal where StudentId = @stdid 
+                                            and isactive = 1 and EndDate > getdate();")
+                    With cmdMsSql
+                        .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentId").ToString
+                    End With
+
+                    dt = getDataTable(cmdMsSql)
+
+                    If dt.Rows.Count() = 0 Then
+                        GoalResult = False
+                    End If
+                End If
+
+                If GoalResult Then
+                    cmdMsSql = cmdSQL(cn, "Select NotiId from tblStudentNoti where  NotiId = @notiId And StudentId = @stdid;")
+
+                    With cmdMsSql
+                        .Parameters.Add("@notiId", SqlDbType.VarChar).Value = Request.Form("NotiId").ToString
+                        .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentId").ToString
+                    End With
+
+                    dt = getDataTable(cmdMsSql)
+
+                    If dt.Rows.Count = 0 Then
+                        cmdMsSql = cmdSQL(cn, "Insert Into tblStudentNoti(studentId, NotiId) values(@stdid,@notiId);")
+                    Else
+                        cmdMsSql = cmdSQL(cn, "Update tblStudentNoti Set isActive = @isCheck where NotiId = @notiId And StudentId = @stdid;")
+                    End If
+
+                    With cmdMsSql
+                        .Parameters.Add("@notiId", SqlDbType.VarChar).Value = Request.Form("NotiId").ToString
+                        .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentId").ToString
+                        .Parameters.Add("@isCheck", SqlDbType.VarChar).Value = isCheck
+                        .ExecuteNonQuery()
+                    End With
+
+                    objList.Result = "success"
+                Else
+                    objList.Result = "notsetgoal"
+                End If
+
+                L1.Add(objList)
+                objList = Nothing
+            Catch ex As Exception
+                objList.Result = "Error"
+                objList.ResultTxt = ex.Message
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
 
 
 #End Region
