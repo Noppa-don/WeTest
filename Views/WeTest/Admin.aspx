@@ -87,8 +87,21 @@
         </div>
     </div>
     <div class="PaymentDetail flexdiv ui-hide">
-        <div class="slipDetail"></div>
+       <div class="firstflexdiv">
+            <div class="slipDetail"></div>
+           <br />
+            <div class="divUploadSlip">
+                    <span>Add bank tranfer image here</span>
+                    <br />
+                    <div class="flexDiv">
+                        <input type='text' id='SlipName' />
+                        <input type='file' id='fileSlip' class="ui-hide notborder" />
+                        <div class='Imagebtn btnSlipPhoto'></div>
+                    </div>
+                </div>
+       </div> 
         <div class="slipPhoto"></div>
+        
         <div class="Imagebtn btnCancelConfirmSlip"></div>
     </div>
     <div class="footer">
