@@ -57,7 +57,7 @@
 .my-popup .ui-body-cbig {border: none;background: none;}
 
 .flexDiv {display: flex;}
-.fistflexdiv {float:left}
+.firstflexdiv {float:left}
 
 .ui-datepicker-header {display: flex; justify-content: space-between;}
 .ui-datepicker-calendar{width:100%;}
