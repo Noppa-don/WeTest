@@ -8,7 +8,7 @@
 .divPhoto {width: 20%;float: right;text-align: center;}
 .divPhoto .ui-input-text {display:none!important;}
 
-.userType {display: inline-grid;grid-template-columns: 1fr 1fr;text-align: center;width: 100%;}
+.userType {display: inline-grid; grid-template-columns: 1fr 1fr;text-align: center;width: 100%;}
 .captionName {position: absolute;line-height: 40px;}
 
 .txtData, .spnData {margin-left: 150px;}
