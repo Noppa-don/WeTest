@@ -368,6 +368,7 @@ Namespace Controllers
         '20240905 -- check Expired date,Update IsUsed
         '20240909 -- check Keycode จาก LicenseKey
         '20240911 -- ตรวจสอบจำนวนการลงทะเบียน
+        '20240913 -- ตรวจสอบ Keycode ที่ Expired = null คือ ไม่มีวันหมดอายุ
         <AcceptVerbs(HttpVerbs.Post)>
         Function CheckKeyCode()
             Dim L1 As New List(Of clsMain)
@@ -382,7 +383,9 @@ Namespace Controllers
                 cnl = New SqlConnection(sqlCon("licenseKey"))
                 If cnl.State = 0 Then cnl.Open()
                 ' ==================================================
-                cmdMsSql = cmdSQL(cnl, "select KeyCodeId,KeyCodeDateAmount from wetest_tblKeycode where KeyCode = @KeyCode and KeyCodeExpiredDate >= getdate() and IsActive = 1 and (IsUsed = 0 or RegisteredAmount < KeycodeUseAmount) ;")
+                cmdMsSql = cmdSQL(cnl, "select KeyCodeId,KeyCodeDateAmount from wetest_tblKeycode 
+                                        where KeyCode = @KeyCode and (KeyCodeExpiredDate >= getdate() or KeyCodeExpiredDate is null)
+                                        and IsActive = 1 and (IsUsed = 0 or RegisteredAmount < KeycodeUseAmount) ;")
                 With cmdMsSql
                     .Parameters.Add("@KeyCode", SqlDbType.VarChar).Value = Request.Form("KeyCode")
                     .ExecuteNonQuery()
@@ -435,6 +438,7 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+        '20240913 -- ตรวจสอบ Discount ที่ Expired = null คือ ไม่มีวันหมดอายุ
         <AcceptVerbs(HttpVerbs.Post)>
         Function CheckDiscount()
             Dim L1 As New List(Of clsDiscount)
@@ -449,8 +453,9 @@ Namespace Controllers
                 cnl = New SqlConnection(sqlCon("licenseKey"))
                 If cnl.State = 0 Then cnl.Open()
                 ' ==================================================
-                cmdMsSql = cmdSQL(cnl, "select DiscountId,DiscountType,DiscountAmount,case when expiredate >= getdate() then 0 else 1 end as isExpired,isUsed
-                                        from wetest_tblDiscount where IsActive = 1 and DiscountCode = @DiscountCode")
+                cmdMsSql = cmdSQL(cnl, "select DiscountId,DiscountType,DiscountAmount,
+                                        case when (expiredate >= getdate() or expiredate is null) then 0 else 1 end as isExpired,
+                                        isUsed from wetest_tblDiscount where IsActive = 1 and DiscountCode = @DiscountCode;")
                 With cmdMsSql
                     .Parameters.Add("@DiscountCode", SqlDbType.VarChar).Value = Request.Form("DiscountCode")
                     .ExecuteNonQuery()
@@ -1130,7 +1135,6 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-                'select count(qs.quizscoreId) from tblQuizScore qs where QuizId = 'DFD6C669-9696-4F2E-97EE-0B8EC34D4760'
 
                 cmdMsSql = cmdSQL(cn, "select count(qs.quizscoreId) as AnsweredNum,q.FullScore from tblQuizScore qs inner join tblquiz q on qs.QuizId = q.QuizId where qs.QuizId = @QuizId group by q.FullScore;")
                 With cmdMsSql
@@ -1451,7 +1455,7 @@ Namespace Controllers
                                                 On qq.QuestionId = qei.Question_Id inner Join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id 
                                                 inner join tblEvaluationIndex pei on ei.Parent_Id = pei.ei_id                                                        
                                                 And pei.EI_Id in('31667BAB-89FF-43B3-806F-174774C8DFBF','5BBD801D-610F-40EB-89CB-5957D05C4A0B',
-                                                'FB4B4A71-B777-4164-BA4D-5C1EA9522226','25DA1FAB-EB20-4B1D-8409-C2FB08FC61B3') where qq.QuizId = @QuizId 
+                                                'FB4B4A71-B777-4164-BA4D-5C1EA9522226','25DA1FAB-EB20-4B1D-8409-C2FB08FC61B3','44502C7F-D3BE-4D46-9134-3FE40DA230E9') where qq.QuizId = @QuizId 
                                                 and qq.isactive = 1 and qei.IsActive = 1;")
                         With cmdMsSql
                             .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
@@ -2583,17 +2587,20 @@ Namespace Controllers
 
         End Function
         '20240814 -- ดึง Config จำนวนครั้งในการเล่นไฟล์เสียง
+        '20240913 -- ปรับให้ดึง Config ต่างๆ ที่ต้องใช้ตอนเริ่ม Quiz
         <AcceptVerbs(HttpVerbs.Post)>
-        Function GetConfigMultiFile()
-            Dim L1 As New List(Of clsMultiAmount)
-            Dim objList As New clsMultiAmount()
+        Function GetQuizConfigVal()
+            Dim L1 As New List(Of clsQuizConfigVal)
+            Dim objList As New clsQuizConfigVal()
             Try
                 Dim MultimediaAmount As Integer = CInt(Getconfig("MultimediaAmount"))
                 Dim MultimediaSlowAmount As Integer = CInt(Getconfig("MultimediaSlowAmount"))
+                Dim IsTest As Integer = CInt(Getconfig("IsTest"))
 
                 objList.Result = "success"
                 objList.MultiAmount = MultimediaAmount
                 objList.MultiSlowAmount = MultimediaSlowAmount
+                objList.IsTest = IsTest
                 L1.Add(objList)
                 objList = Nothing
 
@@ -3072,8 +3079,6 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-
-
 
 #End Region
 
@@ -3983,7 +3988,7 @@ Namespace Controllers
                 Dim jobDetail As String = ""
                 If dt.Rows.Count <> 0 Then
                     For i = 0 To dt.Rows.Count() - 1
-                        jobDetail &= "<div Class=""flexDiv jobDetailItem"" RHId=""" & dt.Rows(i)("RHId").ToString & """><div Class=""UploadDate"">" & dt.Rows(i)("SlipDate") & "</div>
+                        jobDetail &= "<div Class=""flexDiv jobDetailItem "" RHId=""" & dt.Rows(i)("RHId").ToString & """><div Class=""UploadDate"">" & dt.Rows(i)("SlipDate") & "</div>
                                             <div Class=""UploadTime"">" & dt.Rows(i)("SlipTime") & "</div>
                                             <div Class=""UploadDetail"">" & dt.Rows(i)("SlipDetail") & dt.Rows(i)("StudentName") & "</div></div>"
                     Next
@@ -4164,9 +4169,9 @@ Namespace Controllers
             Public Result As String, ResultTxt As String, OverDue As String, Today As String, ThisWeek As String, NextWeek As String
         End Class
         '20240814 -- Assignment Data
-        Public Class clsMultiAmount
+        Public Class clsQuizConfigVal
             Inherits clsMain
-            Public Result As String, ResultTxt As String, MultiAmount As Integer, MultiSlowAmount As Integer
+            Public Result As String, ResultTxt As String, MultiAmount As Integer, MultiSlowAmount As Integer, IsTest As Integer
         End Class
         Public Class clsDiscount
             Inherits clsMain
