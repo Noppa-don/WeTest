@@ -11,7 +11,7 @@ $(function () {
 
     GetStartTime();
     checkAnsweredFromReport();
-    GetConfigMultiFile();
+    GetQuizConfigVal();
     SetLogo();
 });
 
@@ -636,10 +636,11 @@ function SetLogo() {
     });
 }
 //20240814 -- ดึงจำนวนครั้งในการเล่นไฟล์เสียง
-function GetConfigMultiFile() {
+//20240913 -- ปรับให้ดึง Config ต่างๆ ที่ต้องใช้ตอนเริ่ม Quiz
+function GetQuizConfigVal() {
     $.ajax({
         type: 'POST',
-        url: '/weTest/GetConfigMultiFile',
+        url: '/weTest/GetQuizConfigVal',
         success: function (data) {
 
             for (var i = 0; i < data.length; i++) {
@@ -647,6 +648,10 @@ function GetConfigMultiFile() {
                 if (data[i].Result == 'success') {
                     MultiFileAmount = data[i].MultiAmount;
                     MultiFileSlowAmount = data[i].MultiSlowAmount;
+                    console.log(data[i].IsTest);
+                    if (data[i].IsTest == 0) {
+                        $('#divShowExplain').addClass('ui-hide');
+                    }
                 } else {
                     console.log(data[i].ResultTxt)
                 }
