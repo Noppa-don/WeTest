@@ -39,7 +39,7 @@ $(document)
     .on('click', '.seeDetail', function (e, data) {
         var RHId = $(this).attr('RHId');
         ShowJobDetail(RHId)
-        $('.PaymentList').addClass('ui-hide');
+        $('.PaymentList,.divUploadSlip').addClass('ui-hide');
         $('.PaymentDetail,.footerslip').removeClass('ui-hide');
     })
     //20240820 -- cancel confirm slip
@@ -83,9 +83,35 @@ $(document)
         var RHId = $(this).attr('RHId');
         ShowJobDetail(RHId)
         $('.PaymentList').addClass('ui-hide');
-        $('.PaymentDetail,.footerUpdateRejectSlip').removeClass('ui-hide');
-    })
+        $('.PaymentDetail,.footerUpdateRejectSlip,.divUploadSlip').removeClass('ui-hide');
 
+    })
+    //20240913 -- Upload NewSlip File
+    .on('click', '.btnSlipPhoto', function (e, data) {
+        event.preventDefault();
+        $("#fileSlip").click();
+    })
+    //20240913 -- Upload NewSlip File
+    .on('change', '#fileSlip', function (e, data) {
+     var _URL = window.URL || window.webkitURL;
+     var image;
+     if ((file = this.files[0])) {
+         image = new Image();
+         image.onload = function () {
+             src = this.src;
+             var filesUpload = $("#fileSlip").get(0).files;
+             $('#SlipName').val(filesUpload[0].name);
+             $('.slipPhoto').css('background-image', 'url(' + src + ')');
+             e.preventDefault();
+         }
+     };
+     image.src = _URL.createObjectURL(file);
+    })
+    //20240913 -- Update Reject Slip
+    .on('click', '.btnUploadNewSlip', function (e, data) {
+        $('#dialogConfirm').attr('action', 'focus');
+        popupOpen($('#dialogConfirm'), 99999);
+    })
 
 function CheckUserLogin() {
     $.ajax({
@@ -117,12 +143,11 @@ function GetJobDetail(JobStatus) {
                         $('.jobDetailItem').addClass('seeDetail');
                     } else if (JobStatus == 3) {
                         $('.jobDetailItem').addClass('UploadNewSlip');
-                    }else{}
-                        $('.jobDetailItem').removeClass('seeDetail');
                     }
-               
+
                 }
             }
+        }
     });
 }
 //20240820 -- ดึงข้อมูลรายละเอียดสลิป
@@ -163,6 +188,8 @@ function SaveConfirmSlip(RHId, RegisterStatus, RejectReason) {
         }
     });
 }
+
+
 
 
 
