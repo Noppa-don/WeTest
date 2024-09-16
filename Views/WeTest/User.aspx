@@ -111,8 +111,9 @@
             </div>
         </div>
         <div class="Noti ui-hide">
-            Notification<br /><br />
-            <div id="NotiItem"></div> 
+            Notification<br />
+            <br />
+            <div id="NotiItem"></div>
         </div>
     </div>
 
@@ -276,7 +277,7 @@
                 Please press 'Buy now'
             </div>
             <div class="ui-twoButton">
-                <div class='btn btnCancel btnlaterPurchase'>Later</div>
+                <div class='btn btnCancel btnClose'>Close</div>
                 <div class='btn btnSelected btnGotoPackage'>Buy now</div>
             </div>
         </div>
