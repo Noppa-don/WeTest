@@ -101,6 +101,7 @@ $(document)
         $('#captionConfirmPassword, #captionPassword,.txtData,#btnStudent, #btnOther,.footerRegister').removeClass('ui-hide');
         $('.spnData,.otp,.footerOTP').addClass('ui-hide');
     })
+
 // ======================= Payment ======================= //
     .on('focus keypress', '#txtDiscountCode', function (e, data) {
         $(this).removeClass("InvalidData");
@@ -203,7 +204,6 @@ $(document)
     .on('click', '#btnConfirmCheckKeycode', function (e, data) {
         window.location = '/Wetest/User';
     })
-
    //20240905 -- Back to Choose Package,User
     .on('click', '.footerPayment .btnBack', function (e, data) {
 
@@ -454,7 +454,6 @@ function GetPackagePrice() {
         }
     });
 }
-
 function CheckKeycode() {
     var post1 = 'KeyCode=' + $('#txtCode').val();
         $.ajax({
