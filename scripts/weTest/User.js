@@ -62,6 +62,7 @@ $(document)
 //20240715 -- Menu Goal
 //20240828 -- แยกดึงข้อมูล Goal ออกจากการดึงข้อมูล User เพื่อให้ทำงานรวดเร็วขึ้น
 //20240902 -- Check Expired Date
+//20240916 -- แก้ปัญหา Log-in เข้าเมนู Goal ครั้งแรกไม่แสดงปุ่ม Back
     .on('click', '#btnGoalMenu', function (e, data) {
         if ($('#btnGoalMenu').hasClass('expired') == true) {
             $('#dialogMustPurchase').attr('action', 'focus');
@@ -71,7 +72,7 @@ $(document)
             popupOpen($('#dialogRejectAlert'), 99999);
         } else {
             $('.MainMenu,.Assignment').addClass('ui-hide');
-            $('.Goal,.footerGoal').removeClass('ui-hide');
+            $('.Goal,.footer,.footerGoal').removeClass('ui-hide');
             $('.pagename').html('- Goal');
             GetGoalData();
         }
@@ -229,11 +230,11 @@ $(document)
 //20240716 -- Back Button
     .on('click', '.btnBack', function (e, data) {
         if ($('.Goal').hasClass('ui-hide') == false) {
-            $('.MainMenu,.Assignment').removeClass('ui-hide');
+            $('.MainMenu').removeClass('ui-hide');
             $('.Goal,.footerGoal').addClass('ui-hide');
             $('.pagename').html('');
         } else if ($('.Noti').hasClass('ui-hide') == false) {
-            $('.MainMenu,.Assignment').removeClass('ui-hide');
+            $('.MainMenu').removeClass('ui-hide');
             $('.Noti,.footerSetting').addClass('ui-hide');
             $('.pagename').html('');
         } else if ($('.DetailGoal').hasClass('ui-hide') == false) {
