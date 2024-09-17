@@ -80,3 +80,9 @@ select {border-style: solid;
      display: inline-flex;}
 
 .ui-popup-screen {opacity: 0.97!important;}
+
+.UserMenu{margin-top: 80px; position: absolute;right: 60px;}
+.btnAccountMenu{border-style: solid;border-radius: 1em;line-height: 30px;padding: 10px; height: 30px;color: #f9f9f9;border-color: #0a3820;cursor: pointer;box-shadow: 0 4px 6px -1px #00000038, 0 2px 4px -1px #00000038; margin: auto; min-width: 20%;background-color: #0a3820;text-align: center;margin-top: 15px;}
+.Accountlogo {background: url(/images/Wetest/AccountMenu.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 30px;}
+.Logoutlogo {background: url(/images/Wetest/Logout.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 30px;}
+.Deletelogo {background: url(/images/Wetest/DeleteAccount.png);background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 30px;}
