@@ -43,7 +43,7 @@ $(document)
      }
  })
  .on('change', '#rdbThisWeek', function (e, data) {
-     if(this.checked) {
+     if (this.checked) {
          selectedStartDate = 'week';
          $('.calendarlogo').addClass('unActive');
          $('#StartDate').val('');
@@ -69,21 +69,32 @@ $(document)
          $('.filterdate').removeClass('ui-hide');
          $('#btnSearch').addClass('unActive')
      }
- 
+
  })
  .on('click', '.btnBack', function (e, data) {
      window.location = '/Wetest/User';
- }) 
+ })
 //20240718 -- Choose Random All Skill
+//20240916 -- ปรับการ toggle class ให้แสดงผลถูกต้อง
  .on('click', '#btnRandomAll', function (e, data) {
      $('#btnRandomAll').toggleClass('btnSelected');
-     $('.btnSkill').toggleClass('Selected');
- 
+     if ($('#btnRandomAll').hasClass('btnSelected')) {
+         $('.btnSkill').addClass('Selected');
+     } else {
+         $('.btnSkill').removeClass('Selected');
+     }
+     SearchReport();
  })
 //20240718 -- Choose Random Skill
+//20240916 -- ปรับการ toggle class ให้แสดงผลถูกต้อง
  .on('click', '.btnSkill', function (e, data) {
      $(this).toggleClass('Selected');
-     $('#btnRandomAll').removeClass('Selected');
+     var numItems = $('.Selected').length
+     if (numItems == 5) {
+         $('#btnRandomAll').addClass('btnSelected');
+     } else {
+         $('#btnRandomAll').removeClass('btnSelected');
+     }
      SearchReport();
  })
 //20240718 open dialog start date
@@ -121,7 +132,7 @@ $(document)
      }
      popupClose($(this).closest('.my-popup'));
 
-     if( $('#StartDate').val() != '' && $('#EndDate').val() != ''){
+     if ($('#StartDate').val() != '' && $('#EndDate').val() != '') {
          $('#btnSearch').removeClass('unActive')
      }
  })
@@ -216,7 +227,7 @@ function OpenFilterdate() {
 //20240823 -- Check Session
 //20240830 -- เพิ่ม Filter Level
 function SearchReport() {
-    var startdate, enddate,LevelId;
+    var startdate, enddate, LevelId;
     if ($('#rdbThisWeek').is(":checked")) {
         startdate = 'week';
     }
@@ -239,7 +250,9 @@ function SearchReport() {
         arrSkill.push('All');
     } else {
         $('.Selected').each(function (i, obj) {
-            arrSkill.push($(this).attr('id'));
+            if ($(this).hasClass('btnSituation') == false) {
+                arrSkill.push($(this).attr('id'));
+            }
         });
     }
 
