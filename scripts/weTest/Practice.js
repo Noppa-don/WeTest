@@ -92,14 +92,25 @@ $(document)
      }
  })
 //20240717 -- Choose Random All Skill
+//20240916 -- ปรับการ toggle class ให้แสดงผลถูกต้อง
  .on('click', '#btnRandomAll', function (e, data) {
      $('#btnRandomAll').toggleClass('btnSelected');
-     $('.btnSkill').toggleClass('Selected');
+     if ($('#btnRandomAll').hasClass('btnSelected')) {
+         $('.btnSkill').addClass('Selected');
+     } else {
+         $('.btnSkill').removeClass('Selected');
+     }
  })
 //20240717 -- Choose Random Skill
+//20240916 -- ปรับการ toggle class ให้แสดงผลถูกต้อง
  .on('click', '.btnSkill', function (e, data) {
      $(this).toggleClass('Selected');
-     $('#btnRandomAll').removeClass('Selected');
+     var numItems = $('.Selected').length
+     if (numItems == 5) {
+         $('#btnRandomAll').addClass('btnSelected');
+     } else {
+         $('#btnRandomAll').removeClass('btnSelected');
+     }
  })
 //20240717 -- Start Random
  .on('click', '.btnStart', function (e, data) {
