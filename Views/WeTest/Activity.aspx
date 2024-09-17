@@ -18,7 +18,7 @@
             <div id="divRunningBar">
                 <div id="divIconRun"></div>
                 <div id="divQuestionRun">
-                      <div class="runningAmount"></div>
+                    <div class="runningAmount"></div>
                     <div class="runningStatus"></div>
                 </div>
                 <div id="divGoal"></div>
@@ -38,7 +38,7 @@
                 <div id="divTime"><span id="minutes"></span>:<span id="seconds"></span></div>
                 <div id="divPause"></div>
                 <div id="divAllLeapChoice"></div>
-                <div id="divAllQuestion" class="ui-hide"></div> 
+                <div id="divAllQuestion" class="ui-hide"></div>
             </div>
         </div>
         <div class='footer'>
@@ -73,10 +73,13 @@
             <br />
             <br />
             <br />
-            <div>
-                <div id="divGotoLogin"></div>
-                <div id="divGotoMainMenu"></div>
+            <div class='footer'>
+                <div class="footerButton">
+                    <div id="divGotoLogin"></div>
+                    <div id="divGotoMainMenu"></div>
+                </div>
             </div>
+
         </div>
 
     </div>
@@ -148,8 +151,8 @@
             </div>
         </div>
     </div>
-  
-      <%-- 20240715 แยก Dialog แสดงข้อเพื่อแสดงเฉลย --%>
+
+    <%-- 20240715 แยก Dialog แสดงข้อเพื่อแสดงเฉลย --%>
     <div name='lp' id="dialogResultChoice" class='my-popup confirm ui-popup-container ui-popup-hidden'>
         <div class='ui-icon close'></div>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
