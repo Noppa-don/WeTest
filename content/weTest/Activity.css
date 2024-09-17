@@ -1,5 +1,5 @@
 ﻿.ui-page {background-color: #f7eee9;}
-body{overflow-y:hidden;overflow-x:hidden;}
+body{overflow-y:hidden;overflow-x:hidden; background-color: #f7eee9;}
 #divActivity {background-color:#f7eee9;}
 #divActivity .footer{height:120px;position:unset;bottom:unset;width:unset;display:flex;flex-direction:row;}
 #divActivity .footer .footerButton {flex:1;}
