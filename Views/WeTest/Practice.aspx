@@ -5,7 +5,9 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
     <link href="../content/Wetest/Wetest.css?ver=1.1.6" rel="stylesheet" type="text/css" />
     <link href="../content/Wetest/Practice.css?ver=1.1.6" rel="stylesheet" type="text/css" />
+
     <script src="../scripts/Wetest/Practice.js?ver=1.1.6" type="text/javascript"></script>
+    <script src="../scripts/Wetest/User.js?ver=1.1.6" type="text/javascript"></script>
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="MainContent" runat="server">
 
@@ -14,13 +16,17 @@
             <div class="logo"></div>
             <div class='pagename'></div>
         </div>
-        <div class="UserData flexDiv ui-hide">
+<div class="UserData flexDiv ui-hide">
             <div class="UserNameandLevel"></div>
         </div>
         <div class="UserMenu ui-hide">
             <div class="btnAccountMenu EditAccount flexDiv">
                 <div class="Accountlogo firstflexdiv"></div>
                 <div>Account</div>
+            </div>
+            <div class="btnAccountMenu RefillKey flexDiv">
+                <div class="Accountlogo firstflexdiv"></div>
+                <div>Refill Wetest Key</div>
             </div>
             <div class="btnAccountMenu Setting flexDiv">
                 <div class="Accountlogo firstflexdiv"></div>
@@ -132,6 +138,26 @@
             <div class="ui-twoButton">
                 <div class='btn btnCancel'>No</div>
                 <div class='btn btnSelected'>Yes</div>
+            </div>
+        </div>
+    </div>
+        <div name='select' id="dialogLogout" class='my-popup confirm ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon done'></div>
+            <div class='ui-text'>Do you want to Logout ?</div>
+            <div class="ui-twoButton">
+                <div class='btn btnCancel'>No</div>
+                <div class='btn btnConfirmLogout'>Yes</div>
+            </div>
+        </div>
+    </div>
+    <div name='select' id="dialogDeleteAccount" class='my-popup confirm ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon done'></div>
+            <div class='ui-text'>Do you want to Delete your account ?</div>
+            <div class="ui-twoButton">
+                <div class='btn btnCancel'>No</div>
+                <div class='btn btnConfirmDelete'>Yes</div>
             </div>
         </div>
     </div>
