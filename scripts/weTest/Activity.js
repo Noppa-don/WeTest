@@ -4,9 +4,10 @@ var MultiFileCount = 1;
 var MultiFileAmount;
 var MultiFileSlowAmount;
 // ========================= Page Load ======================== //
+//20240916 -- ปรับขนาดหน้าจอแสดง Level ที่สามารถสอบได้
 $(function () {
     $('div[data-role=page]').page({ theme: 'c', });
-    $('#divActivity').css('height', $(window).height());
+    $('#divActivity,#divShowLevel').css('height', $(window).height());
     $('#divQuestionAndAnswer').css('height', $('#divQ').height());
 
     GetStartTime();
@@ -133,7 +134,7 @@ $(document)
                      $('#lr' + data[i].errorMsg).removeClass("LR" + data[i].errorMsg);
                      $('#lr' + data[i].errorMsg).addClass("LR" + data[i].errorMsg + "Selected");
                  } else if (data[i].dataType == 'showanswer') {
-                     $('#divRunningBar, #divAllLeapChoice, #divTime').addClass("ui-hide");
+                     $('#divRunningBar, #divAllLeapChoice, #divTime,#divPause').addClass("ui-hide");
                      $('#divAllQuestion, #divShowExplain').removeClass("ui-hide");
                      $('.btnNext').removeClass('UnActive');
                      $('#divSendQuiz').removeClass('SendQuiz').addClass('FinishQuiz');
