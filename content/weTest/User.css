@@ -1,5 +1,4 @@
 ﻿* {touch-action: manipulation;}
-
 .wrapper {margin-top:150px;}
 .login .smallLogo {background-repeat: no-repeat;background-size: contain;background-position: left;width: 50px;height: 40px;position: absolute;}
 .userlogo {background: url(/images/Wetest/User.png);}
