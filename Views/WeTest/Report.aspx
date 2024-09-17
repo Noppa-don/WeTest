@@ -3,11 +3,12 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
-    <link href="/content/weTest/Wetest.css?ver=1.1.6" rel="stylesheet" type="text/css" />
-    <link href="/content/weTest/Report.css?ver=1.1.6" rel="stylesheet" type="text/css" />
+    <link href="/content/weTest/Wetest.css?ver=1.1.7" rel="stylesheet" type="text/css" />
+    <link href="/content/weTest/Report.css?ver=1.1.7" rel="stylesheet" type="text/css" />
     <link href="../content/Wetest/jquery-ui-1.8.18.custom.min" type="text/css" />
 
     <script src="/scripts/weTest/Report.js?ver=1.1.6" type="text/javascript"></script>
+    <script src="/scripts/weTest/User.js?ver=1.1.6" type="text/javascript"></script>
     <script src="../scripts/Wetest/jGlobal.js" type="text/javascript"></script>
     <script src="../scripts/Wetest/jquery-ui-1.8.10.offset.datepicker.min.js?ver=1.1.3" type="text/javascript"></script>
     <script src="../scripts/Wetest/jquery-ui-1.10.1.custom.min.js?ver=1.1.3" type="text/javascript"></script>
@@ -85,12 +86,12 @@
 
         <div id="skillRandom">
             <div class="flexDiv">
-                <div class="btn btnSkill btnSelected firstflexdiv" id="btnRandomAll">All</div>
-                <div class="btnSkill Selected btnReading" id="25DA1FAB-EB20-4B1D-8409-C2FB08FC61B3"></div>
-                <div class="btnSkill Selected btnListen" id="Listening"></div>
+                <div class="btn btnSelected firstflexdiv" id="btnRandomAll">All</div>
+                <div class="btnSkill Selected btnReading" id="FB4B4A71-B777-4164-BA4D-5C1EA9522226"></div>
+                <div class="btnSkill Selected btnListen" id="44502C7F-D3BE-4D46-9134-3FE40DA230E9"></div>
                 <div class="btnSkill Selected btnVocab" id="31667BAB-89FF-43B3-806F-174774C8DFBF"></div>
                 <div class="btnSkill Selected btnGrammar" id="5BBD801D-610F-40EB-89CB-5957D05C4A0B"></div>
-                <div class="btnSkill Selected btnSituation" id="Situation"></div>
+                <div class="btnSkill Selected btnSituation"></div>
             </div>
         </div>
 
