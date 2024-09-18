@@ -439,6 +439,7 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
         '20240913 -- ตรวจสอบ Discount ที่ Expired = null คือ ไม่มีวันหมดอายุ
+        '20240917 -- ตรวจสอบจำนวนครั้งในการใช้ Discount Key
         <AcceptVerbs(HttpVerbs.Post)>
         Function CheckDiscount()
             Dim L1 As New List(Of clsDiscount)
@@ -455,7 +456,8 @@ Namespace Controllers
                 ' ==================================================
                 cmdMsSql = cmdSQL(cnl, "select DiscountId,DiscountType,DiscountAmount,
                                         case when (expiredate >= getdate() or expiredate is null) then 0 else 1 end as isExpired,
-                                        isUsed from wetest_tblDiscount where IsActive = 1 and DiscountCode = @DiscountCode;")
+                                        case when RegisteredAmount = UseAmount then 1 else 0 end as isUsed
+                                        from wetest_tblDiscount where IsActive = 1 and DiscountCode = @DiscountCode;")
                 With cmdMsSql
                     .Parameters.Add("@DiscountCode", SqlDbType.VarChar).Value = Request.Form("DiscountCode")
                     .ExecuteNonQuery()
@@ -467,7 +469,7 @@ Namespace Controllers
                 ElseIf dt.Rows(0)("isExpired").ToString = "1" Then
                     objList.Result = "Expired"
                     objList.ResultTxt = "This code is expired!<br>Please try again or Contact us @Italt<br><br>"
-                ElseIf dt.Rows(0)("isUsed").ToString = "True" Then
+                ElseIf dt.Rows(0)("isUsed").ToString = "1" Then
                     objList.Result = "Used"
                     objList.ResultTxt = "This code has alrady beeen used!<br>Please try again or contact @Italt<br><br>"
                 Else
