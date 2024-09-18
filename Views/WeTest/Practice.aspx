@@ -161,4 +161,11 @@
             </div>
         </div>
     </div>
+    <div name='alert' id="dialogAlert" class='my-popup alert ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon wrong'></div>
+            <div class='ui-text'></div>
+            <div class='btn btnOK btnSelected'>OK</div>
+        </div>
+    </div>
 </asp:Content>
