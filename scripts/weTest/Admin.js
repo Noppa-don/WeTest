@@ -46,29 +46,40 @@ $(document)
     .on('click', '.btnCancelConfirmSlip', function (e, data) {
         $('.PaymentList').removeClass('ui-hide');
         $('.PaymentDetail,.footerslip,.footerUpdateRejectSlip').addClass('ui-hide');
-
+        $('#SlipName').val('');
     })
     //20240820 -- confirm slip
     .on('click', '.btnConfirmSlip', function (e, data) {
         $('#dialogConfirm').attr('action', 'focus');
         popupOpen($('#dialogConfirm'), 99999);
     })
+    //20240917 -- confirm slip แล้วให้กลับไปหน้ารายการชำระเงิน
     .on('click', '#dialogConfirm .btnconfirm', function (e, data) {
         var RHId = $(this).attr('RHId');
         SaveConfirmSlip(RHId,2,'');
         popupClose($(this).closest('.my-popup'));
+        $('.PaymentList,.divUploadSlip').removeClass('ui-hide');
+        $('.PaymentDetail,.footerslip').addClass('ui-hide');
+        $('.jobdiv').removeClass('Active');
+        $('#doingJob').addClass('Active');
+        GetJobDetail(1);
     })
     //20240820 -- reject slip
     .on('click', '.btnReject', function (e, data) {
         $('#dialogReject').attr('action', 'focus');
         popupOpen($('#dialogReject'), 99999);
-     })
+    })
+    //20240917 -- reject slip แล้วให้กลับไปหน้ารายการชำระเงิน
     .on('click', '#dialogReject .btnRejectConfirm', function (e, data) {
         var RHId = $(this).attr('RHId');
         var RejectReason = $('#txtReason').val();
         popupClose($(this).closest('.my-popup'));
         SaveConfirmSlip(RHId, 3, RejectReason);
-
+        $('.PaymentList,.divUploadSlip').removeClass('ui-hide');
+        $('.PaymentDetail,.footerslip').addClass('ui-hide');
+        GetJobDetail(3);
+        $('.jobdiv').removeClass('Active');
+        $('#problemPayment').addClass('Active');
     })
     .on('click', '#dialogConfirm .btnNo,#dialogReject .btnNo', function (e, data) {
         popupClose($(this).closest('.my-popup'));
