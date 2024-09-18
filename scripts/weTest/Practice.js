@@ -70,14 +70,11 @@ $(document)
      popupClose($(this).closest('.my-popup'));
  })
  .on('click', '#dialogSelect .btnSelected', function (e, data) {
-     console.log($(this).attr('TestsetName'))
      popupClose($(this).closest('.my-popup'));
      GotoPractice($(this).attr('TestsetId'), $(this).attr('TestsetName'));
  })
  .on('click', '#dialogSelect .btnCancel', function (e, data) {
-
      popupClose($(this).closest('.my-popup'));
-
  })
  //20240717 -- Choose Exam Amount
  .on('click', '.btnAmount', function (e, data) {
@@ -113,12 +110,14 @@ $(document)
      }
  })
 //20240717 -- Start Random
+//20240917 -- ตรวจสอบการเลือกจำนวนข้อ,skill และแจ้งเตือน
  .on('click', '.btnStart', function (e, data) {
      if ($(".btnAmount.btnSelected").attr('id') == 'btnUserType') {
          ExamAmount = $("#UserType").val();
      } else {
          ExamAmount = $(".btnAmount.btnSelected").text();
      }
+
      var arrSkill = new Array();
 
      if ($("#btnRandomAll").hasClass('btnSelected') == true) {
@@ -131,20 +130,38 @@ $(document)
 
      skill = arrSkill.join(',');
 
-     var post1 = 'ExamAmount=' + ExamAmount + '&arrSkill=' + skill;
-     $.ajax({
-         type: 'POST',
-         url: '/weTest/RandomPractice',
-         data: post1,
-         success: function (data) {
-             for (var i = 0; i < data.length; i++) {
-                 if (data[i].dataType == 'success') {
-                     console.log(data[i].errorMsg);
-                     GotoPractice(data[i].errorMsg, 'RandomPractice');
+     if (ExamAmount == '' && (skill == '' || skill == 'btnRandomAll')) {
+         $('#dialogAlert').attr('action', 'focus');
+         $('#dialogAlert .ui-text').html('Please choose your skill and amount of practice');
+         popupOpen($('#dialogAlert'), 99999);
+         return 0;
+     } else if (ExamAmount == '' || ExamAmount == '0') {
+         $('#dialogAlert').attr('action', 'focus');
+         $('#dialogAlert .ui-text').html('Please fill amount of practice');
+         popupOpen($('#dialogAlert'), 99999);
+         return 0;
+     } else if (skill == '' || skill == 'btnRandomAll') {
+         $('#dialogAlert').attr('action', 'focus');
+         $('#dialogAlert .ui-text').html('Please choose your skill');
+         popupOpen($('#dialogAlert'), 99999);
+         return 0;
+     } else {
+
+         var post1 = 'ExamAmount=' + ExamAmount + '&arrSkill=' + skill;
+         $.ajax({
+             type: 'POST',
+             url: '/weTest/RandomPractice',
+             data: post1,
+             success: function (data) {
+                 for (var i = 0; i < data.length; i++) {
+                     if (data[i].dataType == 'success') {
+                         console.log(data[i].errorMsg);
+                         GotoPractice(data[i].errorMsg, 'RandomPractice');
+                     }
                  }
              }
-         }
-     });
+         });
+     }
  })
 //20240730 -- Select Dropdown
  .on('change', 'select', function (e, data) {
@@ -174,7 +191,10 @@ $(document)
          }
      });
  })
-
+//20240917 -- Close Alert
+ .on('click', '#dialogAlert .btnOK', function (e, data) {
+     popupClose($(this).closest('.my-popup'));
+ })
 
 function GotoPractice(TestsetId, TestsetName) {
 
