@@ -4,7 +4,6 @@ var ExpiredDateAmount;
 // ========================= Page Load ====================================================================== //
 $(function () {
     $('div[data-role=page]').page({ theme: 'c', });
-    $('#userName').focus();
     CheckLoginStatus();
 });
 
@@ -27,7 +26,7 @@ $(document)
             CheckUserLogin();
         }
     })
-    .on('click', '#dialogAlert #btnOK, #dialogMustPurchase .btnlaterPurchase', function (e, data) {
+    .on('click', '#dialogAlert #btnOK', function (e, data) {
         popupClose($(this).closest('.my-popup'));
     })
     .on('click', '.registerlink', function (e, data) {
@@ -94,7 +93,7 @@ $(document)
         popupClose($(this).closest('.my-popup'));
         GotoExam();
     })
-    .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel,#dialogLogout .btnCancel,#dialogDeleteAccount .btnCancel,#dialogRejectAlert #btnOKReject', function (e, data) {
+    .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel,#dialogLogout .btnCancel,#dialogDeleteAccount .btnCancel,#dialogRejectAlert #btnOKReject,.btnClose', function (e, data) {
         popupClose($(this).closest('.my-popup'));
     })
 //20240723 -- toggle User Menu
@@ -164,7 +163,7 @@ $(document)
         window.location = '/Wetest/Registration';
     })
 //20240731 -- ไปหน้าจอแพกเกจ
-    .on('click', '.btnlater,.btnlaterPurchase', function (e, data) {
+    .on('click', '.btnlaterPurchase', function (e, data) {
         UpdateTrialDate();
     })
 //20240813 -- ไปหน้าจอ Assignment
@@ -184,7 +183,7 @@ $(document)
 //20240906 -- Get Setting Item
    .on('click', '.btnAccountMenu.Setting', function (e, data) {
        GetSettingItem();
-    
+
    })
 //20240816 -- RefillKey
     .on('click', '.btnAccountMenu.RefillKey', function (e, data) {
@@ -316,9 +315,12 @@ function CheckUserLogin() {
         url: '/weTest/CheckUserLogin',
         data: post1,
         success: function (data) {
-            SetUserData(data);
-            if (data[0].Result == 'ok') {
-                CheckGoalNoti();
+            if (data[0].Result == 'not') {
+                $('#dialogAlert').attr('action', 'focus');
+                $('#dialogAlert .ui-text').html(data[0].Msg);
+                popupOpen($('#dialogAlert'), 99999);
+            } else {
+                SetUserData(data);
             }
         }
     });
@@ -440,12 +442,21 @@ function SaveGoal() {
         }
     });
 }
-//20240716 -- Set User Data
+//20240716 -- Set User Data 
 //20240716 -- ปรับการแสดงผล Total Goal case เลยวันที่ที่ตั้งค่าไว้
 //20240902 -- Check Expired Date
+//20240918 -- ปรับการตรวจสอบสถานะต่างๆ ของ User และแสดง Dialog ที่ถูกต้อง
 function SetUserData(data) {
     for (var i = 0; i < data.length; i++) {
-        if (data[i].Result == 'ok') {
+        if (data[i].Result == 'sessionlost') {
+            //ไม่มี Session StudentId 
+            $('.login').removeClass('ui-hide');
+            $('.MainMenu,.Goal,.Noti,.DetailGoal,.Assignment,.UserData').addClass('ui-hide');
+        } else if (data[i].Result == 'not') {
+            //ไม่เจอใน DB
+            $('.login').removeClass('ui-hide');
+            $('.MainMenu,.Goal,.Noti,.DetailGoal,.Assignment,.UserData').addClass('ui-hide');
+        } else {
             $('.login').addClass('ui-hide');
             $('.UserData,.MainMenu').removeClass('ui-hide');
             $('.pagename').html('');
@@ -455,46 +466,18 @@ function SetUserData(data) {
             ExpiredDateAmount = data[i].ExpiredDateAmount;
             $('.UserData').append(data[i].UserPhoto);
             $('#UserLevel').html('Your Level : ' + data[i].UserLevel + '<br />');
-            $('.MainMenu').removeClass('ui-hide');
-        }
-        else if (data[i].Result == 'sessionlost') {
-            $('.login').removeClass('ui-hide');
-            $('.MainMenu,.Goal,.Noti,.DetailGoal,.Assignment').addClass('ui-hide');
-        } else if (data[i].Result == 'not') {
-            $('#dialogPurchase').attr('action', 'focus');
-            popupOpen($('#dialogPurchase'), 99999);
-        } else if (data[i].Result == 'expired') {
-            $('.login').addClass('ui-hide');
-            $('.UserData,.MainMenu').removeClass('ui-hide');
-            $('.pagename').html('');
-            $('.UserNameandLevel').html('Welcome, ' + data[i].Firstname + '<br />' + data[i].UserLevel);
-            $('.expiredDate').html(data[i].ExpiredDate)
-            ExpiredDateAmount = data[i].ExpiredDateAmount;
-            $('.UserData').append(data[i].UserPhoto);
-            $('#UserLevel').html('Your Level : ' + data[i].UserLevel + '<br />');
-            $('.MainMenu').removeClass('ui-hide');
-            $('#btnGoalMenu ,#btnPracticeMenu,#btnMockUpExam,#btnReport,.Assignment').addClass('expired');
-
-            $('#dialogMustPurchase').attr('action', 'focus');
-            popupOpen($('#dialogMustPurchase'), 99999);
-        } else if (data[i].Result == 'reject') {
-            $('.login').addClass('ui-hide');
-            $('.UserData,.MainMenu').removeClass('ui-hide');
-            $('.pagename').html('');
-            $('.UserNameandLevel').html('Welcome, ' + data[i].Firstname + '<br />' + data[i].UserLevel);
-            $('.expiredDate').html(data[i].ExpiredDate)
-            ExpiredDateAmount = data[i].ExpiredDateAmount;
-            $('.UserData').append(data[i].UserPhoto);
-            $('#UserLevel').html('Your Level : ' + data[i].UserLevel + '<br />');
-            $('.MainMenu').removeClass('ui-hide');
-            $('#btnGoalMenu ,#btnPracticeMenu,#btnMockUpExam,#btnReport,.Assignment,.btnAccountMenu.RefillKey').addClass('reject');
-
-            $('#dialogRejectAlert').attr('action', 'focus');
-            popupOpen($('#dialogRejectAlert'), 99999);
-        } else {
-            $('#dialogAlert').attr('action', 'focus');
-            $('#dialogAlert .ui-text').html(data[i].Msg);
-            popupOpen($('#dialogAlert'), 99999);
+            CheckGoalNoti();
+            console.log(data[i].Result);
+            if (data[i].Result == 'refill') {
+                //หมดอายุ
+                $('#btnGoalMenu ,#btnPracticeMenu,#btnMockUpExam,#btnReport,.Assignment').addClass('expired');
+                $('#dialogMustPurchase').attr('action', 'focus');
+                popupOpen($('#dialogMustPurchase'), 99999);
+            } else if (data[i].Result == 'trial') {
+                //ทำ Placement Test เสร็จ กลับมาใช้งาน
+                $('#dialogPurchase').attr('action', 'focus');
+                popupOpen($('#dialogPurchase'), 99999);
+            }
         }
     }
 }
@@ -692,7 +675,7 @@ function UpdateNoti(IsCheck, NotiId) {
                     $('#dialogAlert').attr('action', 'focus');
                     $('#dialogAlert .ui-text').html("You don't set any goal");
                     popupOpen($('#dialogAlert'), 99999);
-                } 
+                }
             }
         }
     });
