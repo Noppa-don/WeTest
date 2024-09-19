@@ -69,40 +69,69 @@
         <div class="Setting ui-hide">
             Notification
         </div>
+
     </div>
     <div class="PaymentList flexDiv ui-hide">
         <div class="JobMenu firstflexdiv">
-            <div class="jobdiv Active" id="doingJob">งานที่ต้องทำ</div>
-            <div class="jobdiv" id="problemPayment">การชำระเงินที่มีปัญหา</div>
-            <div class="jobdiv" id="successPayment">ชำระเงินสำเร็จ</div>
+            <div class="jobdiv Active" id="doingJob" jval="1">งานที่ต้องทำ</div>
+            <div class="jobdiv" id="problemPayment" jval="2">การชำระเงินที่มีปัญหา</div>
+            <div class="jobdiv" id="successPayment" jval="3">ชำระเงินสำเร็จ</div>
         </div>
         <div class="JobDetailContainer">
             <div class="FilterJob flexDiv">
 
-                <div class="filterdiv Active firstflexdiv" id="simple">แพกเกจปกติ</div>
-                <div class="filterdiv" id="discount">ส่วนลด</div>
-                <div class="filterdiv" id="keycode">ทดลองใช้ / ใช้ฟรี</div>
+                <div class="filterdiv Active firstflexdiv" id="simplePackage" fval="1">แพกเกจปกติ</div>
+                <div class="filterdiv" id="discountPackage" fval="2">ส่วนลด</div>
+                <div class="filterdiv" id="keycodePackage" fval="3">ทดลองใช้ / ใช้ฟรี</div>
             </div>
             <div class="JobDetail"></div>
         </div>
     </div>
     <div class="PaymentDetail flexdiv ui-hide">
-       <div class="firstflexdiv">
+        <div class="firstflexdiv">
             <div class="slipDetail"></div>
-           <br />
+            <br />
             <div class="divUploadSlip">
-                    <span>Add bank tranfer image here</span>
-                    <br />
-                    <div class="flexDiv">
-                        <input type='text' id='SlipName' />
-                        <input type='file' id='fileSlip' class="ui-hide notborder" />
-                        <div class='Imagebtn btnSlipPhoto'></div>
-                    </div>
+                <span>Add bank tranfer image here</span>
+                <br />
+                <div class="flexDiv">
+                    <input type='text' id='SlipName' />
+                    <input type='file' id='fileSlip' class="ui-hide notborder" />
+                    <div class='Imagebtn btnSlipPhoto'></div>
                 </div>
-       </div> 
+            </div>
+        </div>
         <div class="slipPhoto"></div>
-        
+
         <div class="Imagebtn btnCancelConfirmSlip"></div>
+    </div>
+    <div class="report flexDiv ui-hide">
+        <div class="Filter firstflexdiv">
+            
+            <div id="TimeData" class="flexDiv">
+                <div>
+                    <label for="rdbThisWeek" class="rdb">This week</label><input type="radio" name="radio-1" class="firstflexdiv" id="rdbThisWeek" />
+                </div>
+                <div>
+                    <label for="rdbMonth" class="rdb">This month</label><input type="radio" name="radio-1" id="rdbMonth" />
+                </div>
+                <div>
+                    <label for="rdbChooseDate" class="rdb">Choose from date</label><input type="radio" name="radio-1" id="rdbChooseDate" />
+                </div>
+                <div>
+                    <input type='text' class="filterdate ui-hide" id='StartDate' />
+                </div>
+                <div class="calendarlogo unActive" id="btnStartDate"></div>
+
+                <div>
+                    <input type='text' class="filterdate ui-hide" id='EndDate' />
+                </div>
+                <div class="calendarlogo unActive" id="btnEndDate"></div>
+            </div>
+        </div>
+        <div>
+            <div class="Imagebtn unActive" id="btnSearch"></div>
+        </div>
     </div>
     <div class="footer">
         <div class='footerButton footerslip ui-hide'>
