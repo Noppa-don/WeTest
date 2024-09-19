@@ -28,6 +28,10 @@
                 <div class="Accountlogo firstflexdiv"></div>
                 <div>Account</div>
             </div>
+            <div class="btnAccountMenu RefillKey flexDiv">
+                <div class="Accountlogo firstflexdiv"></div>
+                <div>Refill Wetest Key</div>
+            </div>
             <div class="btnAccountMenu Setting flexDiv">
                 <div class="Accountlogo firstflexdiv"></div>
                 <div>Setting</div>
