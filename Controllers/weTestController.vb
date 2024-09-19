@@ -1574,7 +1574,10 @@ Namespace Controllers
 
                 If dt.Rows.Count = 0 Then
                     QuizData.resultType = "error"
-                    QuizData.resultMsg = "Not have Question for PlacementTest"
+                    QuizData.resultMsg = "Not have Placement test for use please contact @italt"
+                ElseIf dt.Rows(0)(0).ToString = "" Then
+                    QuizData.resultType = "error"
+                    QuizData.resultMsg = "Not have Question in Placement test for use please contact @italt"
                 Else
 
                     Dim Fullscore As String = dt(0)(0).ToString
@@ -2234,7 +2237,7 @@ Namespace Controllers
                 dt = getDataTable(cmdMsSql)
 
                 If dt.Rows.Count = 0 Then
-                    objList.Result = "error"
+                    objList.Result = "not"
                     objList.Msg = "Username or Password is wrong !<br><br>Please try again or contact @Italt."
                 Else
                     Session("studentid") = dt.Rows(0)(0).ToString
@@ -2814,9 +2817,9 @@ Namespace Controllers
                 If stdId Is Nothing Then
                     objList.Result = "sessionlost"
                 Else
-                    cmdMsSql = cmdSQL(cn, "select case when ExpiredDate is null then 0 when ExpiredDate < getdate() then 0 else 1 end as ExpiredStatus,r.RegisterStatus 
-                                            from tblstudent s left join tblregister r on s.StudentId = r.studentid 
-                                            where s.StudentId = @stdid and s.isactive = 1;")
+                    cmdMsSql = cmdSQL(cn, "select case when ExpiredDate is null then 0 
+                                           when ExpiredDate < getdate() then 1 else 2 end as ExpiredStatus 
+                                           from tblstudent s where s.StudentId = @stdid and s.isactive = 1;")
                     With cmdMsSql
                         .Parameters.Add("@stdid", SqlDbType.VarChar).Value = stdId
                     End With
@@ -2826,20 +2829,18 @@ Namespace Controllers
                     If dt.Rows.Count = 0 Then
                         'Not Register
                         objList.Result = "not"
-                        Session("RefillKey") = True
-                        'Expired
                     Else
-                        If dt.Rows(0)("ExpiredStatus").ToString = "0" Then
-                            objList.Result = "expired"
-                            Session("RefillKey") = True
-                        Else
-                            If dt.Rows(0)("RegisterStatus").ToString = "3" Then
-                                objList.Result = "reject"
-                            Else
-                                objList.Result = "ok"
-                            End If
 
-                        End If
+                        Select Case CInt(dt.Rows(0)("ExpiredStatus"))
+                            Case 0
+                                objList.Result = "trial"
+                                Session("RefillKey") = True
+                            Case 1
+                                objList.Result = "refill"
+                                Session("RefillKey") = True
+                            Case 2
+                                objList.Result = "ok"
+                        End Select
 
                         cmdMsSql = cmdSQL(cn, "select top 1 s.StudentId,Firstname,Surname,MobileNo,Email,Username,l.LevelShortName,CONVERT (varchar(10),s.ExpiredDate , 103) AS expiredDate
                                                 ,DATEDIFF(DAY,getdate(),ExpiredDate) as ExpiredDateAmount from tblStudent s inner join tblStudentLevel sl on s.studentId = sl.StudentId 
@@ -2863,7 +2864,6 @@ Namespace Controllers
                             objList.ExpiredDateAmount = dt(0)("ExpiredDateAmount").ToString
                             objList.UserLevel = dt(0)("LevelShortName").ToString
                         End If
-
                     End If
 
                 End If
@@ -3975,12 +3975,23 @@ Namespace Controllers
                 If cn.State = 0 Then cn.Open()
                 ' ================================================== 
 
+                Dim jobType As Integer = CInt(Request.Form("JobType"))
+                Dim jobTypestr As String = ""
+                Select Case jobType
+                    Case 1
+                        jobTypestr = " And r.PackageId Is Not null And r.discountId Is null;"
+                    Case 2
+                        jobTypestr = " And r.PackageId Is Not null And r.DiscountId Is Not null;"
+                    Case 3
+                        jobTypestr = " And r.PackageId Is null And r.KeyCodeId Is Not null;"
+                End Select
+
                 cmdMsSql = cmdSQL(cn, "Select distinct r.RHId,  CONVERT(varchar(10), r.lastupdate, 103) as SlipDate
                                         ,FORMAT(r.lastupdate,'hh:mm tt') as SlipTime
                                         ,PackageName + ' ' + cast(packageprice as varchar) + ' Bath'  as SlipDetail
                                         ,' ' + s.Firstname + ' ' + s.Surname as StudentName
                                         From tblRegister r inner Join tblstudent s on r.studentId = s.studentId 
-                                        inner Join tblpackage p on p.packageId = r.packageId where RegisterStatus = @JobStatus;")
+                                        inner Join tblpackage p on p.packageId = r.packageId where RegisterStatus = @JobStatus" & jobTypestr)
                 With cmdMsSql
                     .Parameters.Add("@JobStatus", SqlDbType.Int).Value = CInt(Request.Form("JobStatus"))
                 End With
