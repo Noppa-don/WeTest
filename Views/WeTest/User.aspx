@@ -48,7 +48,7 @@
     </div>
     <div class="Assignment ui-hide"></div>
     <div class='wrapper'>
-        <div class="login">
+        <div class="login ui-hide">
             <div>
                 <div class="smallLogo userlogo"></div>
                 <input type='text' id='userName' title='Username' placeholder='Username' />
@@ -262,7 +262,7 @@
                 Please press 'Buy now' or 'Later' for use trial version.
             </div>
             <div class="ui-twoButton">
-                <div class='btn btnCancel btnlater'>Later</div>
+                <div class='btn btnCancel btnlaterPurchase'>Later</div>
                 <div class='btn btnSelected btnbuy'>Buy now</div>
             </div>
         </div>
