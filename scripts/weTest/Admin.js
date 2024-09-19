@@ -23,18 +23,24 @@ $(document)
         }
     })
     //20240826 -- เพิ่มการส่ง JobStatus
+    //20240919 -- เพิ่ม Filter 
     .on('click', '#btnPaymentList, #doingJob', function (e, data) {
         $('.MainMenu').addClass('ui-hide');
         $('.PaymentList').removeClass('ui-hide');
-        GetJobDetail(1);
+        var SlipType = $('.filterdiv.Active').attr('FVal')
+        GetJobDetail(1, SlipType);
     })
     //20240826 -- เลือกการชำระเงินที่มีปัญหา
+    //20240919 -- เพิ่ม Filter 
     .on('click', '#problemPayment', function (e, data) {
-         GetJobDetail(3);
+        var SlipType = $('.filterdiv.Active').attr('FVal')
+        GetJobDetail(3, SlipType);
     })
     //20240826 -- เลือกการชำระเงินที่สำเร็จแล้ว
+    //20240919 -- เพิ่ม Filter 
     .on('click', '#successPayment', function (e, data) {
-        GetJobDetail(2);
+        var SlipType = $('.filterdiv.Active').attr('FVal')
+        GetJobDetail(2, SlipType);
     })
     .on('click', '.seeDetail', function (e, data) {
         var RHId = $(this).attr('RHId');
@@ -124,6 +130,34 @@ $(document)
         popupOpen($('#dialogConfirm'), 99999);
     })
 
+    //20240919 -- Select Simple Package
+    .on('click', '#simplePackage', function (e, data) {
+        $('.filterdiv').removeClass('Active');
+        $('#simplePackage').addClass('Active');
+        var JobStatus = $('.jobdiv.Active').attr('JVal')
+        GetJobDetail(JobStatus, 1);
+    })
+    //20240919 -- Select Discount Package
+    .on('click', '#discountPackage', function (e, data) {
+        $('.filterdiv').removeClass('Active');
+        $('#discountPackage').addClass('Active');
+        var JobStatus = $('.jobdiv.Active').attr('JVal')
+        GetJobDetail(JobStatus, 2);
+    })
+    //20240919 -- Select Keycode Package
+    .on('click', '#keycodePackage', function (e, data) {
+        $('.filterdiv').removeClass('Active');
+        $('#keycodePackage').addClass('Active');
+        var JobStatus = $('.jobdiv.Active').attr('JVal')
+        GetJobDetail(JobStatus, 3);
+    })
+
+    //20240919 -- Report
+    .on('click', '#btnReport', function (e, data) {
+        $('.MainMenu').addClass('ui-hide');
+        $('.report').removeClass('ui-hide');
+    })
+
 function CheckUserLogin() {
     $.ajax({
         type: 'POST',
@@ -139,8 +173,9 @@ function CheckUserLogin() {
     });
 }
 //20240826 -- เพิ่มสถานะการดึง Job แบบต่างๆ
-function GetJobDetail(JobStatus) {
-    var data = 'JobStatus=' + JobStatus
+//20240919 -- เพิ่ม Filter 
+function GetJobDetail(JobStatus, JobType) {
+    var data = 'JobStatus=' + JobStatus + '&JobType=' + JobType
     $.ajax({
         type: 'POST',
         data: data,
@@ -148,14 +183,13 @@ function GetJobDetail(JobStatus) {
         success: function (data) {
             for (var i = 0; i < data.length; i++) {
 
-                if (data[i].dataType == 'success') {
+                if (data[i].dataType == 'success') { 
                     $('.JobDetail').html(data[i].errorMsg);
                     if (JobStatus == 1) {
                         $('.jobDetailItem').addClass('seeDetail');
                     } else if (JobStatus == 3) {
                         $('.jobDetailItem').addClass('UploadNewSlip');
                     }
-
                 }
             }
         }
