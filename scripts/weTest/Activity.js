@@ -681,9 +681,13 @@ function DelayChangeExam() {
     var x = setInterval(function () {
         clearInterval(x);
         $('.btnNext, .btnBack').removeClass('wait');
-    }, 3000);
+    }, 2000);
 }
 
 
 // ========================================================================================================== //
+
+window.addEventListener("orientationchange", function () {
+    location.reload();
+});
 
