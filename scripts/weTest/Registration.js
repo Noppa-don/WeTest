@@ -516,6 +516,7 @@ function CheckDiscount() {
                         $('#dialogConfirm').attr('action', 'focus');
                         $('#dialogConfirm .ui-text').html(data[i].ResultTxt);
                         popupOpen($('#dialogConfirm'), 99999);
+                        $('#txtKeyCode').val('');
                     }
 
                 }
