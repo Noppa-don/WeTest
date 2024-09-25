@@ -7,16 +7,16 @@
     <link href="../content/Wetest/Practice.css?ver=1.1.6" rel="stylesheet" type="text/css" />
 
     <script src="../scripts/Wetest/Practice.js?ver=1.1.6" type="text/javascript"></script>
-    <script src="../scripts/Wetest/User.js?ver=1.1.6" type="text/javascript"></script>
+    <script src="../scripts/Wetest/UserMenu.js?ver=1.1.6" type="text/javascript"></script>
 </asp:Content>
-<asp:Content ID="Content3" ContentPlaceHolderID="MainContent" runat="server">
+<asp:Content ID="Content3" ContentPlaceHolderID="MainContent" runat="server">          
 
-        <div class="banner">
+    <div class="banner">
         <div class="AppData">
             <div class="logo"></div>
             <div class='pagename'></div>
         </div>
-<div class="UserData flexDiv ui-hide">
+        <div class="UserData flexDiv ui-hide">
             <div class="UserNameandLevel"></div>
         </div>
         <div class="UserMenu ui-hide">
@@ -50,38 +50,37 @@
              <div class="btn ui-Left" id="btnLesson">Lesson</div>
             <div class="btn ui-Left" id="btnRandom">Random</div>
         </div>
-
         <div id="LessonType">
             <div id="ChooseLevel" class="flexDiv ui-hide">
                 choose Level
              <div id="SelectLevel"></div>
             </div>
             <div id="Lessondivcon" class="ui-hide">
-                <div id="skillReading" class="flexDiv skilldiv">
+                <div id="skillReading" class="flexDiv skilldiv ui-hide">
                     <div class="iconReading"></div>
                     <div id="ReadingLesson" class="flexDiv">
                     </div>
                     <div id="ReadingOther" class="otherButton"></div>
                 </div>
-                <div id="skillListen" class="flexDiv skilldiv">
+                <div id="skillListening" class="flexDiv skilldiv ui-hide">
                     <div class="iconListen"></div>
                     <div id="ListeningLesson" class="flexDiv">
                     </div>
                     <div id="ListeningOther" class="otherButton"></div>
                 </div>
-                <div id="skillVocab" class="flexDiv skilldiv">
+                <div id="skillVocabulary" class="flexDiv skilldiv ui-hide">
                     <div class="iconVocab"></div>
                     <div id="VocabularyLesson" class="flexDiv">
                     </div>
                     <div id="VocabularyOther" class="otherButton"></div>
                 </div>
-                <div id="skillGrammar" class="flexDiv skilldiv">
+                <div id="skillGrammar" class="flexDiv skilldiv ui-hide">
                     <div class="iconGrammar"></div>
                     <div id="GrammarLesson" class="flexDiv">
                     </div>
                     <div id="GrammarOther" class="otherButton"></div>
                 </div>
-                <div id="skillSituation" class="flexDiv skilldiv">
+                <div id="skillSituation" class="flexDiv skilldiv ui-hide">
                     <div class="iconSituation"></div>
                     <div id="SituationLesson" class="flexDiv">
                     </div>
@@ -108,11 +107,17 @@
                 skills
              <div class="btn btnSkill firstflexdiv" id="btnRandomAll">All</div>
                 <div class="btnSkill btnReading" id="FB4B4A71-B777-4164-BA4D-5C1EA9522226"></div>
-                <div class="btnSkill btnListen" id="44502C7F-D3BE-4D46-9134-3FE40DA230E9"></div>
-                <div class="btnSkill btnVocab" id="31667BAB-89FF-43B3-806F-174774C8DFBF"></div>
+                <div class="btnSkill btnListening" id="44502C7F-D3BE-4D46-9134-3FE40DA230E9"></div>
+                <div class="btnSkill btnVocabulary" id="31667BAB-89FF-43B3-806F-174774C8DFBF"></div>
                 <div class="btnSkill btnGrammar" id="5BBD801D-610F-40EB-89CB-5957D05C4A0B"></div>
-                <div class="btnSkill btnSituation" id="Situation"></div>
+                <div class="btnSkill btnSituation" id="F6E25F3E-192B-4081-B141-74720066FB74"></div>
             </div>
+        </div>
+
+        <div class="Noti ui-hide">
+            Notification<br />
+            <br />
+            <div id="NotiItem"></div>
         </div>
     </div>
 
@@ -129,6 +134,9 @@
             <div class="Imagebtn btnBack"></div>
             <div class="Imagebtn btnStart ui-hide"></div>
         </div>
+        <div class='footerButton footerSetting ui-hide'>
+            <div class="Imagebtn btnBack fistflexdiv"></div>
+        </div>
     </div>
 
     <div name='select' id="dialogSelect" class='my-popup confirm ui-popup-container ui-popup-hidden'>
@@ -141,7 +149,7 @@
             </div>
         </div>
     </div>
-        <div name='select' id="dialogLogout" class='my-popup confirm ui-popup-container ui-popup-hidden'>
+    <div name='select' id="dialogLogout" class='my-popup confirm ui-popup-container ui-popup-hidden'>
         <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
             <div class='ui-icon done'></div>
             <div class='ui-text'>Do you want to Logout ?</div>
@@ -168,4 +176,5 @@
             <div class='btn btnOK btnSelected'>OK</div>
         </div>
     </div>
+
 </asp:Content>
