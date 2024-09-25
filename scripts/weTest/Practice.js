@@ -20,6 +20,7 @@ $(document)
 
      $('#LessonType, #ChooseLevel, #Lessondivcon').addClass("ui-hide");
      $('#RandomType ,#skillRandom,.btnStart').removeClass("ui-hide");
+     GetSkill();
  })
  .on('click', '#ReadingOther', function (e, data) {
 
@@ -54,7 +55,7 @@ $(document)
          $('.AllPracticeSet').addClass('ui-hide');
          $('#PracticeType,#LessonType').removeClass("ui-hide");
      }
-    
+
  })
  .on('click', '.Lessondiv', function (e, data) {
 
@@ -169,7 +170,7 @@ $(document)
      $.ajax({
          type: 'POST',
          url: '/weTest/GetLesson',
-         data: post1,                                                            
+         data: post1,
          success: function (data) {
              for (var i = 0; i < data.length; i++) {
                  if (data[i].skillSet == 'error') {
@@ -255,14 +256,14 @@ function GetLevel() {
                     $('#ChooseLevel').removeClass('ui-hide');
                     BindPracticeItem(LevelId)
                 } else {
-                
+
                     for (var i = 0; i < data.length; i++) {
 
                         BindPracticeItem(data[i].LevelId)
+                    }
                 }
-            }
 
-            } 
+            }
         }
     });
 }
@@ -276,10 +277,10 @@ function BindPracticeItem(LevelId) {
         success: function (data) {
             for (var i = 0; i < data.length; i++) {
                 if (data[i].skillSet == 'error') {
-                    //console.log(data[i].skillTxtAll);
                 } else {
 
                     $('#' + data[i].skillSet + 'Lesson').html(data[i].skillTxtShort);
+                    $('#skill' + data[i].skillSet).removeClass('ui-hide');
 
                     if (data[i].skillAmount < 6) {
                         $('#' + data[i].skillSet + 'Other').addClass('ui-hide');
@@ -287,6 +288,7 @@ function BindPracticeItem(LevelId) {
                         $('#' + data[i].skillSet + 'Other').removeClass('ui-hide');
                         $('#All' + data[i].skillSet).html('');
                         $('#All' + data[i].skillSet).html(data[i].skillTxtAll);
+
                     }
 
                     $('#Lessondivcon').removeClass('ui-hide');
@@ -295,6 +297,24 @@ function BindPracticeItem(LevelId) {
         }
     });
 }
+//20240924 -- ดึงปุ่มเลือกสกิลที่จะ Random จาก DB
+function GetSkill() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/GetSkill',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].skillSet == 'error') {
+                    //console.log(data[i].skillTxtAll);
+                } else {
+                    $('#btn' + data[i].skillSet).removeClass('ui-hide');
+                }
+            }
+        }
+    });
+}
+
+
 
 
 
