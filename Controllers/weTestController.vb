@@ -473,18 +473,33 @@ Namespace Controllers
                     objList.Result = "Used"
                     objList.ResultTxt = "This code has alrady beeen used!<br>Please try again or contact @Italt<br><br>"
                 Else
-                    objList.Result = "Success"
-                    Dim NetPrice As String = "0"
-                    Dim PackagePrice = Getconfig("PackagePrice")
+                    cmdMsSql = cmdSQL(cn, "select RHId from tblregister where StudentId = @stdId and DiscountId = @discountId;")
+                    With cmdMsSql
+                        .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId")
+                        .Parameters.Add("@discountId", SqlDbType.VarChar).Value = dt.Rows(0)("DiscountId").ToString
+                        .ExecuteNonQuery()
+                    End With
 
-                    If dt.Rows(0)("DiscountType").ToString = "1" Then
-                        NetPrice = (CInt(PackagePrice) - CInt(dt.Rows(0)("DiscountAmount"))).ToString
+                    dt = getDataTable(cmdMsSql)
+
+                    If dt.Rows.Count > 0 Then
+                        objList.Result = "Used"
+                        objList.ResultTxt = "This code has alrady beeen used!<br>Please try again or contact @Italt<br><br>"
                     Else
-                        NetPrice = (CInt(PackagePrice) - ((CInt(PackagePrice) * CInt(dt.Rows(0)("DiscountAmount"))) / 100)).ToString
+                        objList.Result = "Success"
+                        Dim NetPrice As String = "0"
+                        Dim PackagePrice = Getconfig("PackagePrice")
+
+                        If dt.Rows(0)("DiscountType").ToString = "1" Then
+                            NetPrice = (CInt(PackagePrice) - CInt(dt.Rows(0)("DiscountAmount"))).ToString
+                        Else
+                            NetPrice = (CInt(PackagePrice) - ((CInt(PackagePrice) * CInt(dt.Rows(0)("DiscountAmount"))) / 100)).ToString
+                        End If
+
+                        objList.ResultTxt = NetPrice
+                        objList.DiscountId = dt.Rows(0)("DiscountId").ToString
                     End If
 
-                    objList.ResultTxt = NetPrice
-                    objList.DiscountId = dt.Rows(0)("DiscountId").ToString
                 End If
                 L1.Add(objList)
                 objList = Nothing
@@ -1049,9 +1064,9 @@ Namespace Controllers
                     Session("AnsweredfromReport") = Nothing
                 Else
                     'Update Score
-
-                    cmdMsSql = cmdSQL(cn, "Select sum(score) As TotalScore,cast((sum(score)*100)/FullScore As Decimal(18,2)) As PercentScore from tblQuizScore qs inner join tblquiz q On q.quizid = qs.quizid 
-                                        where qs.QuizId = @QuizId Group by FullScore;")
+                    cmdMsSql = cmdSQL(cn, "Select sum(score) As TotalScore,cast((sum(score)*100)/FullScore As Decimal(18,2)) As PercentScore 
+                                           from tblQuizScore qs inner join tblquiz q On q.quizid = qs.quizid 
+                                            where qs.QuizId = @QuizId Group by FullScore;")
                     With cmdMsSql
                         .Parameters.Add("@QuizId", SqlDbType.VarChar).Value = Session("QuizId").ToString
                     End With
@@ -2689,10 +2704,17 @@ Namespace Controllers
                                     UserScore = CInt(dt.Rows(0)("UserScore"))
 
                                     cmdMsSql = cmdSQL(cn, "select sum(a.AnswerScore) as TotalScore 
-                                            from tbltestset t inner join tblTestSetQuestionSet ts on t.TestSetId = ts.TestSetId 
-                                            inner join tblTestSetQuestionDetail td on ts.TSQSId = td.TSQSId inner join tblAnswer a on td.QuestionId = a.QuestionId
-                                            where t.LevelId = (select top 1 LevelId from tblstudentLevel order by lastupdate desc) and t.IsActive = 1 
-                                            and ts.IsActive = 1 and td.IsActive = 1 and td.IsActive = 1 and a.IsActive = 1 and t.IsPractice = 1;")
+                                                            from tbltestset t inner join tblTestSetQuestionSet ts on t.TestSetId = ts.TestSetId 
+                                                            inner join tblTestSetQuestionDetail td on ts.TSQSId = td.TSQSId inner join tblAnswer a on td.QuestionId = a.QuestionId
+                                                            inner join tblQuestionEvaluationIndexItem qei on a.QuestionId = qei.Question_Id 
+                                                            inner join tblEvaluationIndex ei on qei.ei_id = ei.ei_id
+                                                            inner join tblSkill sk on ei.Parent_Id = sk.EI_Id and sk.isactive = 1
+                                                            where t.LevelId = (select LevelId from tblstudentLevel where isActive = 1 and StudentId = @stdid) 
+                                                            and t.IsActive = 1 and ts.IsActive = 1 and td.IsActive = 1 and td.IsActive = 1 and a.IsActive = 1 and t.IsPractice = 1;")
+
+                                    With cmdMsSql
+                                        .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentid").ToString
+                                    End With
 
                                     dt = getDataTable(cmdMsSql)
 
@@ -2795,7 +2817,6 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-
         '20240722 -- เพิ่ม ExpiredDate
         '20240723 -- เพิ่ม User Data สำหรับแก้ไข
         '20240813 -- select จำนวนวันที่จะหมดอายุเพื่อเอาไปใช้กำหนด Max Date ของ calendar
@@ -3082,6 +3103,49 @@ Namespace Controllers
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
 
+        '20240923 -- Function Check Quiz ที่ทำค้างไว้ปิดไปหรือ Session หลุดไป
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function CheckNotEndQuiz()
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim L1 As New List(Of clsMain)
+            Dim objList As New clsMain()
+
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+                cmdMsSql = cmdSQL(cn, "select top 1 q.quizId from tblQuiz q inner join tblquizsession qs 
+                                        on q.QuizId = qs.QuizId where qs.StudentId = @stdid
+                                        and EndTime is null and QuizMode = 2 order by q.LastUpdate desc;")
+
+                With cmdMsSql
+                    .Parameters.Add("@stdid", SqlDbType.VarChar).Value = Session("studentId").ToString
+                End With
+
+                dt = getDataTable(cmdMsSql)
+
+                If dt.Rows.Count <> 0 Then
+                    Session("QuizId") = dt.Rows(0)(0).ToString
+                    Session("QuizMode") = "2"
+                    objList.dataType = "havequiz"
+                Else
+                    objList.dataType = "nothave"
+                End If
+
+                L1.Add(objList)
+                objList = Nothing
+            Catch ex As Exception
+                objList.dataType = "Error"
+                objList.errorMsg = ex.Message
+            Finally
+                If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
 #End Region
 
 #Region "Practice"
@@ -3090,10 +3154,11 @@ Namespace Controllers
         End Function
         '20240712 -- ปรับ Query ให้ดึงเฉพาะระดับชั้นที่ตรงและน้อยกว่าที่ User สามารถเล่นได้
         '20240912 -- ปรับ Query ให้ดึงข้อสอบจากตัวชี้วัดให้ถูกต้อง
+        '20240924 -- เพิ่มการดึงสกิลที่จะแสดงจาก DB
         <AcceptVerbs(HttpVerbs.Post)>
         Function GetLesson()
             Dim L1 As New List(Of clsPracticeSet)
-            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dt As DataTable, dtSkill As DataTable
             Dim LevelId As String = Request.Form("LevelId")
             Try
                 ' ================ Check Permission ================
@@ -3101,13 +3166,12 @@ Namespace Controllers
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
 
+                cmdMsSql = cmdSQL(cn, "select EI_Id,EI_Name from tblskill where IsActive = 1;")
+                dtSkill = getDataTable(cmdMsSql)
 
-                Dim skillName() As String = {"Reading", "Listening", "Grammar", "Vocabulary"}
-                Dim skillId() As String = {"FB4B4A71-B777-4164-BA4D-5C1EA9522226", "44502C7F-D3BE-4D46-9134-3FE40DA230E9", "5BBD801D-610F-40EB-89CB-5957D05C4A0B", "31667BAB-89FF-43B3-806F-174774C8DFBF"}
+                For i = 0 To dtSkill.Rows.Count() - 1
 
-                For i = 0 To skillName.Count() - 1
-
-                    Dim Skn As String = skillId(i)
+                    Dim Skn As String = dtSkill.Rows(i)("EI_Id").ToString
 
                     cmdMsSql = cmdSQL(cn, "Select row_number() over(order by a.testsetid) As TestsetNo,a.TestsetId,a.QuizId 
                                             from (select distinct t.TestsetId,qrs.QuizId 
@@ -3117,7 +3181,7 @@ Namespace Controllers
                                             on t.TestsetId = qrs.TestSetId inner join tblTestSetQuestionSet tsqs on t.testsetId = tsqs.TestSetId
                                             inner join tblTestSetQuestionDetail tsqd on tsqs.TSQSId = tsqd.TSQSId inner join tblQuestionEvaluationIndexItem qei on tsqd.QuestionId = qei.Question_Id
                                             inner join tblEvaluationIndex ei on qei.ei_id = ei.EI_Id and ei.Parent_Id = @skillId
-                                            where t.levelId = @LevelId and t.isactive = 1 and t.IsPractice = 1)a;")
+                                            where t.levelId = @LevelId and t.isactive = 1 and t.IsPractice = 1 and ei.IsActive = 1 and t.IsStandart = 1)a;")
                     With cmdMsSql
                         .Parameters.Add("@skillId", SqlDbType.VarChar).Value = Skn
                         .Parameters.Add("@LevelId", SqlDbType.VarChar).Value = LevelId
@@ -3135,7 +3199,7 @@ Namespace Controllers
                         skilltxtShort = ""
                         For j = 0 To dt.Rows.Count() - 1
 
-                            skilltxt &= "<div id=" & dt.Rows(j)("TestsetId").ToString & " class=""Lessondiv Lesson" & skillName(i) & """>" & dt.Rows(j)("TestsetNo").ToString
+                            skilltxt &= "<div id=" & dt.Rows(j)("TestsetId").ToString & " class=""Lessondiv Lesson" & dtSkill.Rows(i)("EI_Name").ToString & """>" & dt.Rows(j)("TestsetNo").ToString
 
                             If dt.Rows(j)("QuizId").ToString <> "" Then
                                 skilltxt &= "<div class='CheckQuiz'></div>"
@@ -3148,7 +3212,7 @@ Namespace Controllers
                             End If
                         Next
                         Dim objList As New clsPracticeSet()
-                        objList.skillSet = skillName(i)
+                        objList.skillSet = dtSkill.Rows(i)("EI_Name").ToString
                         objList.skillTxtAll = skilltxt
                         objList.skillTxtShort = skilltxtShort
                         objList.skillAmount = dt.Rows.Count()
@@ -3156,7 +3220,7 @@ Namespace Controllers
                         objList = Nothing
                     Else
                         Dim objList As New clsPracticeSet()
-                        objList.skillSet = skillName(i)
+                        objList.skillSet = dtSkill.Rows(i)("EI_Name").ToString
                         objList.skillTxtAll = ""
                         objList.skillTxtShort = ""
                         objList.skillAmount = dt.Rows.Count()
@@ -3173,6 +3237,7 @@ Namespace Controllers
                 objList = Nothing
             Finally
                 If dt IsNot Nothing Then dt.Dispose() : dt = Nothing
+                If dtSkill IsNot Nothing Then dtSkill.Dispose() : dtSkill = Nothing
                 If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
                 If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
             End Try
@@ -3233,7 +3298,8 @@ Namespace Controllers
                 'Insert tblTestset tblTestsetQuestionSet tblTestsetQuestionDetail แล้ว return Testset Id ไปส่งให้ทำข้อสอบ practice
 
                 cmdMsSql1 = cmdSQL(cn, "Insert Into tbltestset Select @testsetid,'RandomExam',sl.LevelId,0,1,0,0,0,@stdId,1,getdate() 
-                                        from tblstudent s inner join tblStudentLevel sl on s.studentId = sl.StudentId where s.studentId = @stdId;")
+                                        from tblstudent s inner join tblStudentLevel sl on s.studentId = sl.StudentId where s.studentId = @stdId 
+                                        and sl.IsActive = 1;")
                 With cmdMsSql1
                     .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
                     .Parameters.Add("@testsetid", SqlDbType.VarChar).Value = TestsetId
@@ -3254,8 +3320,11 @@ Namespace Controllers
                                             inner join tblQuestionset qs on q.qsetid = qs.QSetId 
                                             inner join tblQuestionCategory qc on qs.QCategoryId  = qc.QCategoryId
                                             inner join tblbook b on qc.BookGroupId = b.BookGroupId
-                                            inner join tblstudentLevel sl on b.LevelId = sl.LevelId where b.BookSyllabus = '51'
-                                            and q.isactive = 1 and qs.isactive = 1 and qc.isactive = 1 and b.IsActive = 1 
+                                            inner join tblstudentLevel sl on b.LevelId = sl.LevelId 
+                                            inner join tblQuestionEvaluationIndexItem qei on q.QuestionId = qei.Question_Id
+                                            inner join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id
+                                            inner join tblSkill sk on sk.EI_Id = ei.Parent_Id where b.BookSyllabus = '51'
+                                            and q.isactive = 1 and qs.isactive = 1 and qc.isactive = 1 and b.IsActive = 1 and qei.IsActive = 1 and sk.IsActive = 1 and ei.IsActive = 1 
                                             and sl.IsActive = 1 and q.QuestionId not in (
                                             select questionId from tblquizquestion qq inner join tblQuizSession qs 
                                             on qq.QuizId = qs.quizid where qs.studentId = @stdId) order by newid())a;")
@@ -3343,6 +3412,41 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
+        '20240924 -- เพิ่มการดึงสกิลที่จะแสดงจาก DB
+        <AcceptVerbs(HttpVerbs.Post)>
+        Function GetSkill()
+            Dim L1 As New List(Of clsPracticeSet)
+            Dim cn As SqlConnection, cmdMsSql As SqlCommand, dtSkill As DataTable
+            Try
+                ' ================ Check Permission ================
+                cn = New SqlConnection(sqlCon("Wetest"))
+                If cn.State = 0 Then cn.Open()
+                ' ==================================================
+
+                cmdMsSql = cmdSQL(cn, "select EI_Id,EI_Name from tblskill where IsActive = 1;")
+                dtSkill = getDataTable(cmdMsSql)
+
+                For i = 0 To dtSkill.Rows.Count() - 1
+                    Dim objList As New clsPracticeSet()
+                    objList.skillSet = dtSkill.Rows(i)("EI_Name").ToString
+                    L1.Add(objList)
+                    objList = Nothing
+                Next
+
+            Catch ex As Exception
+                Dim objList As New clsPracticeSet()
+                objList.skillSet = "Error"
+                objList.skillTxtAll = ex.Message
+                L1.Add(objList)
+                objList = Nothing
+            Finally
+                If dtSkill IsNot Nothing Then dtSkill.Dispose() : dtSkill = Nothing
+                If cmdMsSql IsNot Nothing Then cmdMsSql.Dispose() : cmdMsSql = Nothing
+                If cn IsNot Nothing Then If cn.State = 1 Then cn.Close() : cn.Dispose() : cn = Nothing
+            End Try
+            Return Json(L1, JsonRequestBehavior.AllowGet)
+        End Function
+
         '20240909 -- สุ่มข้อสอบ และบันทึก
         Function InsertRandomQuestion(StudentId As String, skt As String, QuestionAmount As String, tsqsId As String) As DataTable
             Dim cn As SqlConnection, cmdMsSql1 As SqlCommand, cmdMsSql2 As SqlCommand, cmdMsSql3 As SqlCommand
@@ -3387,6 +3491,7 @@ Namespace Controllers
 
         End Function
         '20240909 -- ดึงข้อสอบที่ยังไม่เคยทำ
+        '20240923 -- ปรับ Query แก้ปัญหาข้อสอบซ้ำ
         Function GetNewRandomQuestion(skt As String, StudentId As String, questionAmount As String) As DataTable
             Dim cn As SqlConnection, cmdMsSql As SqlCommand
             Dim sqlBuilder As StringBuilder = New StringBuilder()
@@ -3398,7 +3503,8 @@ Namespace Controllers
 
                 sqlBuilder.Append("select top (")
                 sqlBuilder.Append(questionAmount)
-                sqlBuilder.Append(") QuestionId from tblQuestionEvaluationIndexItem qei
+                sqlBuilder.Append(") a.QuestionId from(select distinct QuestionId 
+                                from tblQuestionEvaluationIndexItem qei
                                 inner join tblQuestion q on qei.Question_Id = q.QuestionId
                                 inner join tblQuestionset qs on qs.QSetId = q.QSetId
                                 inner join tblQuestionCategory qc on qs.QCategoryId = qc.QCategoryId
@@ -3412,11 +3518,7 @@ Namespace Controllers
                 sqlBuilder.Append(") and sl.studentId = '")
                 sqlBuilder.Append(StudentId)
                 sqlBuilder.Append("' and q.IsActive = 1 and qs.IsActive = 1 and qc.IsActive = 1 and b.IsActive = 1 
-                                and qei.IsActive = 1 and q.QuestionId not in(select questionId  from tblQuizQuestion qq 
-                                inner join tblQuizSession qs on qq.QuizId = qs.QuizId 
-                                where qs.StudentId = '")
-                sqlBuilder.Append(StudentId)
-                sqlBuilder.Append("') order by newid();")
+                                and qei.IsActive = 1)a order by newid();")
 
                 cmdMsSql = cmdSQL(cn, sqlBuilder.ToString())
 
@@ -3542,6 +3644,8 @@ Namespace Controllers
 
             End Try
         End Function
+
+
 #End Region
 
 #Region "Report"
@@ -3644,7 +3748,7 @@ Namespace Controllers
                     sqlBuilder.Append(skt)
                     sqlBuilder.Append(")")
                 Else
-                    sqlBuilder.Append(" And eiParent.ei_id in('31667BAB-89FF-43B3-806F-174774C8DFBF','5BBD801D-610F-40EB-89CB-5957D05C4A0B','FB4B4A71-B777-4164-BA4D-5C1EA9522226','25DA1FAB-EB20-4B1D-8409-C2FB08FC61B3')")
+                    sqlBuilder.Append(" And eiParent.ei_id in(select ei_Id from tblskill where isactive = 1)")
                 End If
 
                 sqlBuilder.Append(" inner join tblQuiz q on q.TestSetId = t.testsetId inner join tblQuizSession qs on q.QuizId = qs.QuizId 
