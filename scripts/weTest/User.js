@@ -4,7 +4,8 @@ var ExpiredDateAmount;
 // ========================= Page Load ====================================================================== //
 $(function () {
     $('div[data-role=page]').page({ theme: 'c', });
-    CheckLoginStatus();
+    //CheckLoginStatus();
+ 
 });
 
 // ========================================================================================================== //
@@ -32,7 +33,12 @@ $(document)
     .on('click', '.registerlink', function (e, data) {
         window.location = '/Wetest/Registration';
     })
-
+    .on('click', '#dialogBackToQuiz .btnNo', function (e, data) {
+        popupClose($(this).closest('.my-popup'));
+    })
+    .on('click', '#dialogBackToQuiz .btnContinue', function (e, data) {
+        window.location = '/Wetest/Activity';
+    })
 // ======================= MainMenu =========================== //
 //20240902 -- Check Expired Date
     .on('click', '#btnMockUpExam', function (e, data) {
@@ -74,6 +80,7 @@ $(document)
             $('.Goal,.footer,.footerGoal').removeClass('ui-hide');
             $('.pagename').html('- Goal');
             GetGoalData();
+            GetSkill();
         }
     })
 //20240715 -- Menu Report
@@ -96,68 +103,6 @@ $(document)
     .on('click', '#dialogConfirm #btnOK ,#dialogSelect .btnCancel,#dialogLogout .btnCancel,#dialogDeleteAccount .btnCancel,#dialogRejectAlert #btnOKReject,.btnClose', function (e, data) {
         popupClose($(this).closest('.my-popup'));
     })
-//20240723 -- toggle User Menu
-    .on('click', '.UserNameandLevel,.UserPhoto', function (e, data) {
-        $('.UserMenu').toggleClass('ui-hide');
-    })
-//20240723 -- Logout 
-    .on('click', '.btnAccountMenu.Logout', function (e, data) {
-        $('#dialogLogout').attr('action', 'focus');
-        popupOpen($('#dialogLogout'), 99999);
-    })
-//20240723 -- Confirm Logout
-    .on('click', '.btnConfirmLogout', function (e, data) {
-        $.ajax({
-            type: 'POST',
-            url: '/weTest/Logout',
-            success: function (data) {
-                for (var i = 0; i < data.length; i++) {
-                    if (data[i].Result == 'success') {
-                        popupClose($('#dialogLogout').closest('.my-popup'));
-                        $('.UserData,.UserMenu,.MainMenu,.Goal,.DetailGoal,.footer,.UserPhoto,.Assignment').addClass('ui-hide');
-                        $('.login').removeClass('ui-hide');
-                        $('#userName,#userPass').val('');
-                    }
-                }
-            }
-        });
-    })
-//20240723 -- Delete Account
-   .on('click', '.btnAccountMenu.DeleteAccount', function (e, data) {
-       $('#dialogDeleteAccount').attr('action', 'focus');
-       popupOpen($('#dialogDeleteAccount'), 99999);
-   })
-//20240723 -- Confirm Delete Account
-   .on('click', '.btnConfirmDelete', function (e, data) {
-       $.ajax({
-           type: 'POST',
-           url: '/weTest/DeleteAccount',
-           success: function (data) {
-               for (var i = 0; i < data.length; i++) {
-                   if (data[i].Result == 'success') {
-                       popupClose($('#dialogDeleteAccount').closest('.my-popup'));
-                       $('.UserData,.UserMenu,.MainMenu,.Goal,.DetailGoal,.footer,.UserPhoto').addClass('ui-hide');
-                       $('.login').removeClass('ui-hide');
-                       $('#userName,#userPass').val('');
-                   }
-               }
-           }
-       });
-   })
-//20240723 -- Edit Account
-   .on('click', '.btnAccountMenu.EditAccount', function (e, data) {
-       $.ajax({
-           type: 'POST',
-           url: '/weTest/SetEditUserMode',
-           success: function (data) {
-               for (var i = 0; i < data.length; i++) {
-                   if (data[i].dataType == 'success') {
-                       window.location = '/Wetest/Registration';
-                   }
-               }
-           }
-       });
-   })
 //20240731 -- ไปหน้าจอแพกเกจ
     .on('click', '.btnbuy, .btnGotoPackage', function (e, data) {
         window.location = '/Wetest/Registration';
@@ -178,26 +123,6 @@ $(document)
         } else {
             window.location = '/Wetest/Assignment';
         }
-    })
-//20240723 -- Setting
-//20240906 -- Get Setting Item
-   .on('click', '.btnAccountMenu.Setting', function (e, data) {
-       GetSettingItem();
-
-   })
-//20240816 -- RefillKey
-    .on('click', '.btnAccountMenu.RefillKey', function (e, data) {
-        $.ajax({
-            type: 'POST',
-            url: '/weTest/SetRefillKeyMode',
-            success: function (data) {
-                for (var i = 0; i < data.length; i++) {
-                    if (data[i].dataType == 'success') {
-                        window.location = '/Wetest/Registration';
-                    }
-                }
-            }
-        });
     })
 
 // ========================= Goal ============================= //
@@ -255,14 +180,14 @@ $(document)
     .on('click', '#ReadingTime', function (e, data) {
         return 0;
         GoalType = 'Reading';
-        SkillId = 'Reading';
+        SkillId = 'FB4B4A71-B777-4164-BA4D-5C1EA9522226';
         SkillGoaldate();
     })
 //20240716 -- Set Listening Goal
     .on('click', '#ListeningTime', function (e, data) {
         return 0;
         GoalType = 'Listening';
-        SkillId = 'Listening';
+        SkillId = '44502C7F-D3BE-4D46-9134-3FE40DA230E9';
         SkillGoaldate();
     })
 //20240716 -- Set Vocab Goal
@@ -281,7 +206,7 @@ $(document)
     .on('click', '#SituationTime', function (e, data) {
         return 0;
         GoalType = 'Situation';
-        SkillId = 'Situation';
+        SkillId = 'F6E25F3E-192B-4081-B141-74720066FB74';
         SkillGoaldate();
     })
     .on('click', 'a.toggler', function (e, data) {
@@ -321,6 +246,7 @@ function CheckUserLogin() {
                 popupOpen($('#dialogAlert'), 99999);
             } else {
                 SetUserData(data);
+                CheckNotEndQuiz();
             }
         }
     });
@@ -644,41 +570,38 @@ function CheckGoalNoti() {
         }
     });
 }
-//20240906 -- Get Setting Item
-function GetSettingItem() {
+//20240923 -- Check Quiz ที่ทำค้างไว้ปิดไปหรือ Session หลุดไป
+function CheckNotEndQuiz() {
     $.ajax({
         type: 'POST',
-        url: '/weTest/GetSettingItem',
+        url: '/weTest/CheckNotEndQuiz',
         success: function (data) {
             for (var i = 0; i < data.length; i++) {
-                if (data[i].Result == 'success') {
-                    $('#NotiItem').html(data[i].ResultTxt);
-                }
-            }
-            $('.UserMenu,.MainMenu,.Goal,.DetailGoal,.footerGoal,.Assignment').addClass('ui-hide');
-            $('.Noti,.footerSetting').removeClass('ui-hide');
-        }
-    });
-}
-//20240912 -- Update Noti IsChecked
-function UpdateNoti(IsCheck, NotiId) {
-    var post1 = 'IsCheck=' + IsCheck + '&NotiId=' + NotiId;
-    $.ajax({
-        type: 'POST',
-        url: '/weTest/UpdateNoti',
-        data: post1,
-        success: function (data) {
-            for (var i = 0; i < data.length; i++) {
-                if (data[i].Result == 'notsetgoal') {
-                    console.log('notsetgoal');
-                    $('#' + NotiId).attr('checked', false);
-                    $('#dialogAlert').attr('action', 'focus');
-                    $('#dialogAlert .ui-text').html("You don't set any goal");
-                    popupOpen($('#dialogAlert'), 99999);
+                if (data[i].dataType == 'havequiz') {
+                    $('#dialogBackToQuiz').attr('action', 'focus');
+                    popupOpen($('#dialogBackToQuiz'), 99999);
                 }
             }
         }
     });
 }
+//20240924 -- ดึงปุ่มเลือกสกิลที่จะ Random จาก DB
+function GetSkill() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/GetSkill',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].skillSet == 'error') {
+                    //console.log(data[i].skillTxtAll);
+                } else {
+                    console.log('.' + data[i].skillSet + 'Contain');
+                    $('.' + data[i].skillSet + 'Contain').removeClass('ui-hide');
+                }
+            }
+        }
+    });
+}
+
 
 
