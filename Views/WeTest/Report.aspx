@@ -8,7 +8,7 @@
     <link href="../content/Wetest/jquery-ui-1.8.18.custom.min" type="text/css" />
 
     <script src="/scripts/weTest/Report.js?ver=1.1.6" type="text/javascript"></script>
-    <script src="/scripts/weTest/User.js?ver=1.1.6" type="text/javascript"></script>
+    <script src="/scripts/weTest/UserMenu.js?ver=1.1.6" type="text/javascript"></script>
     <script src="../scripts/Wetest/jGlobal.js" type="text/javascript"></script>
     <script src="../scripts/Wetest/jquery-ui-1.8.10.offset.datepicker.min.js?ver=1.1.3" type="text/javascript"></script>
     <script src="../scripts/Wetest/jquery-ui-1.10.1.custom.min.js?ver=1.1.3" type="text/javascript"></script>
@@ -49,14 +49,16 @@
 
     <div class='wrapper'>
 
-        <div class="flexDiv">
+        <div class="SearchReport flexDiv">
             <div class="Filter firstflexdiv">
-                <div id="PracticeType" class="flexDiv"> Practice from
+                <div id="PracticeType" class="flexDiv">
+                    Practice from
                     <div class="btn firstflexdiv" id="btnLesson">Lesson</div>
                     <div class="btn " id="btnRandom">Random</div>
-                   
+
                 </div>
-                <div id="ChooseLevel" class="flexDiv ui-hide"> choose Level
+                <div id="ChooseLevel" class="flexDiv ui-hide">
+                    choose Level
                         <div id="SelectLevel"></div>
                 </div>
                 <div id="TimeData" class="flexDiv">
@@ -83,19 +85,17 @@
             <div>
                 <div class="Imagebtn unActive" id="btnSearch"></div>
             </div>
-        </div>
-
-
         <h1></h1>
+        </div>
 
         <div id="skillRandom">
             <div class="flexDiv">
                 <div class="btn btnSelected firstflexdiv" id="btnRandomAll">All</div>
-                <div class="btnSkill Selected btnReading" id="FB4B4A71-B777-4164-BA4D-5C1EA9522226"></div>
-                <div class="btnSkill Selected btnListen" id="44502C7F-D3BE-4D46-9134-3FE40DA230E9"></div>
-                <div class="btnSkill Selected btnVocab" id="31667BAB-89FF-43B3-806F-174774C8DFBF"></div>
-                <div class="btnSkill Selected btnGrammar" id="5BBD801D-610F-40EB-89CB-5957D05C4A0B"></div>
-                <div class="btnSkill Selected btnSituation"></div>
+                <div class="btnSkill Selected btnReading ui-hide" id="FB4B4A71-B777-4164-BA4D-5C1EA9522226"></div>
+                <div class="btnSkill Selected btnListening ui-hide" id="44502C7F-D3BE-4D46-9134-3FE40DA230E9"></div>
+                <div class="btnSkill Selected btnVocabulary ui-hide" id="31667BAB-89FF-43B3-806F-174774C8DFBF"></div>
+                <div class="btnSkill Selected btnGrammar ui-hide" id="5BBD801D-610F-40EB-89CB-5957D05C4A0B"></div>
+                <div class="btnSkill Selected btnSituation ui-hide" id="F6E25F3E-192B-4081-B141-74720066FB74"></div>
             </div>
         </div>
 
@@ -113,12 +113,21 @@
                 <div class="detailData"></div>
             </div>
         </div>
+
+        <div class="Noti ui-hide">
+            Notification<br />
+            <br />
+            <div id="NotiItem"></div>
+        </div>
     </div>
 
     <div class="footer">
         <div class='footerButton footerAlldiv'>
             <div class="Imagebtn btnBack"></div>
             <div class="Imagebtn btnStart ui-hide"></div>
+        </div>
+        <div class='footerButton footerSetting ui-hide'>
+            <div class="Imagebtn btnBack fistflexdiv"></div>
         </div>
     </div>
 
@@ -146,6 +155,44 @@
                 <div class='btn btnCancel'>No</div>
                 <div class='btn btnSelected'>Yes</div>
             </div>
+        </div>
+    </div>
+
+       <div name='select' id="dialogSelect" class='my-popup confirm ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon done'></div>
+            <div class='ui-text'></div>
+            <div class="ui-twoButton">
+                <div class='btn btnCancel'>No</div>
+                <div class='btn btnSelected'>Yes</div>
+            </div>
+        </div>
+    </div>
+    <div name='select' id="dialogLogout" class='my-popup confirm ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon done'></div>
+            <div class='ui-text'>Do you want to Logout ?</div>
+            <div class="ui-twoButton">
+                <div class='btn btnCancel'>No</div>
+                <div class='btn btnConfirmLogout'>Yes</div>
+            </div>
+        </div>
+    </div>
+    <div name='select' id="dialogDeleteAccount" class='my-popup confirm ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon done'></div>
+            <div class='ui-text'>Do you want to Delete your account ?</div>
+            <div class="ui-twoButton">
+                <div class='btn btnCancel'>No</div>
+                <div class='btn btnConfirmDelete'>Yes</div>
+            </div>
+        </div>
+    </div>
+    <div name='alert' id="dialogAlert" class='my-popup alert ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon wrong'></div>
+            <div class='ui-text'></div>
+            <div class='btn btnOK btnSelected'>OK</div>
         </div>
     </div>
 
