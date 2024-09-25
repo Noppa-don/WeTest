@@ -2,6 +2,7 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server"></asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
+    <link href="../content/Wetest/weTest.css?ver=1.1.6" rel="stylesheet" type="text/css" />
     <link href="../content/Wetest/weTestCashier.css?ver=1.1.6" rel="stylesheet" type="text/css" />
     <link href="../content/Wetest/Admin.css?ver=1.1.6" rel="stylesheet" type="text/css" />
     <script src="../scripts/Wetest/Admin.js?ver=1.1.6" type="text/javascript"></script>
