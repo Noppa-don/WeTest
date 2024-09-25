@@ -2,6 +2,7 @@
 // ========================= Page Load ======================== //
 $(function () { $('div[data-role=page]').page({ theme: 'c', }); });
 CheckLoginStatus();
+GetSkill();
 // ============================================================ //
 // ======================= Object Event ======================= //
 $(document)
@@ -344,6 +345,22 @@ function GetLevel() {
                     $('#SelectLevel').html(selectHTML);
                     $('#ChooseLevel').removeClass('ui-hide');
                 } else { $('#ChooseLevel').addClass('ui-hide'); }
+            }
+        }
+    });
+}
+//20240924 -- ดึงปุ่มเลือกสกิลที่จะ Random จาก DB
+function GetSkill() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/GetSkill',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].skillSet == 'error') {
+                    //console.log(data[i].skillTxtAll);
+                } else {
+                    $('.btn' + data[i].skillSet).removeClass('ui-hide');
+                }
             }
         }
     });
