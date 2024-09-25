@@ -7,6 +7,7 @@
     <link href="../content/Wetest/jquery-ui-1.8.18.custom.min" type="text/css" />
 
     <script src="../scripts/Wetest/User.js?ver=1.1.6" type="text/javascript"></script>
+    <script src="../scripts/Wetest/UserMenu.js?ver=1.1.6" type="text/javascript"></script>
     <script src="../scripts/Wetest/jGlobal.js" type="text/javascript"></script>
     <script src="../scripts/Wetest/jquery-ui-1.8.10.offset.datepicker.min.js?ver=1.1.3" type="text/javascript"></script>
     <script src="../scripts/Wetest/jquery-ui-1.10.1.custom.min.js?ver=1.1.3" type="text/javascript"></script>
@@ -122,7 +123,6 @@
             <span id="lastestBigGOAL" class="fistflexdiv"></span>
             <div class="btn btnClear btnOrange">Clear</div>
         </div>
-
         <br />
         <br />
         <br />
@@ -132,31 +132,31 @@
                 <div id="TU">Time Used</div>
                 <div id="TPC">Total Practice Score</div>
             </div>
-            <div class="divPercentContain">
+            <div class="divPercentContain ReadingContain ui-hide">
                 <div id="ReadingIcon"></div>
                 <div id="ReadingTime" class="ReadingPercent">0%</div>
                 <div class="TimeResult"><span id="ReadingTimeResult" class="smalltxt ui-hide"></span></div>
                 <div id="ReadingPS" class="ReadingPercent PS">0%</div>
             </div>
-            <div class="divPercentContain">
+            <div class="divPercentContain ListeningContain ui-hide">
                 <div id="ListeningIcon"></div>
                 <div id="ListeningTime" class="ListeningPercent">0%</div>
                 <div class="TimeResult"><span id="ListeningTimeResult" class="smalltxt ui-hide"></span></div>
                 <div id="ListeningPS" class="ListeningPercent PS">0%</div>
             </div>
-            <div class="divPercentContain">
+            <div class="divPercentContain VocabularyContain ui-hide">
                 <div id="VocabIcon"></div>
                 <div id="VocabTime" class="VocabPercent">0%</div>
                 <div class="TimeResult"><span id="VocabularyTimeResult" class="smalltxt ui-hide"></span></div>
                 <div id="VocabularyPS" class="VocabPercent PS">0%</div>
             </div>
-            <div class="divPercentContain">
+            <div class="divPercentContain GrammarContain ui-hide">
                 <div id="GrammarIcon"></div>
                 <div id="GrammarTime" class="GrammarPercent">0%</div>
                 <div class="TimeResult"><span id="GrammarTimeResult" class="smalltxt ui-hide"></span></div>
                 <div id="GrammarPS" class="GrammarPercent PS">0%</div>
             </div>
-            <div class="divPercentContain">
+            <div class="divPercentContain SituationContain ui-hide">
                 <div id="SituationIcon"></div>
                 <div id="SituationTime" class="SituationPercent">0%</div>
                 <div class="TimeResult"><span id="SituationTimeResult" class="smalltxt ui-hide"></span></div>
@@ -287,6 +287,18 @@
             <div class='ui-icon wrong'></div>
             <div class='ui-text'>Your slip was not allowed Please contact us @Italt</div>
             <div id="btnOKReject" class='btn btnSelected'>OK</div>
+        </div>
+    </div>
+    <div name='alert' id="dialogBackToQuiz" class='my-popup alert ui-popup-container ui-popup-hidden'>
+        <div class='ui-content ui-body-c ui-corner-all ui-shadow'>
+            <div class='ui-icon wrong'></div>
+            <div class='ui-text'>
+                You have a practice that you haven't finished. Want to continue?
+            </div>
+            <div class="ui-twoButton">
+                <div class='btn btnNo'>No</div>
+                <div class='btn btnContinue'>Continue</div>
+            </div>
         </div>
     </div>
 </asp:Content>
