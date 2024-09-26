@@ -75,8 +75,8 @@
     <div class="PaymentList flexDiv ui-hide">
         <div class="JobMenu firstflexdiv">
             <div class="jobdiv Active" id="doingJob" jval="1">งานที่ต้องทำ</div>
-            <div class="jobdiv" id="problemPayment" jval="2">การชำระเงินที่มีปัญหา</div>
-            <div class="jobdiv" id="successPayment" jval="3">ชำระเงินสำเร็จ</div>
+            <div class="jobdiv" id="problemPayment" jval="3">การชำระเงินที่มีปัญหา</div>
+            <div class="jobdiv" id="successPayment" jval="2">ชำระเงินสำเร็จ</div>
         </div>
         <div class="JobDetailContainer">
             <div class="FilterJob flexDiv">
