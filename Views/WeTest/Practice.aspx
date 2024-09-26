@@ -63,13 +63,13 @@
                     <div id="ReadingOther" class="otherButton"></div>
                 </div>
                 <div id="skillListening" class="flexDiv skilldiv ui-hide">
-                    <div class="iconListen"></div>
+                    <div class="iconListening"></div>
                     <div id="ListeningLesson" class="flexDiv">
                     </div>
                     <div id="ListeningOther" class="otherButton"></div>
                 </div>
                 <div id="skillVocabulary" class="flexDiv skilldiv ui-hide">
-                    <div class="iconVocab"></div>
+                    <div class="iconVocabulary"></div>
                     <div id="VocabularyLesson" class="flexDiv">
                     </div>
                     <div id="VocabularyOther" class="otherButton"></div>
@@ -106,11 +106,11 @@
             <div class="flexDiv">
                 skills
              <div class="btn btnSkill firstflexdiv" id="btnRandomAll">All</div>
-                <div class="btnSkill btnReading" id="FB4B4A71-B777-4164-BA4D-5C1EA9522226"></div>
-                <div class="btnSkill btnListening" id="44502C7F-D3BE-4D46-9134-3FE40DA230E9"></div>
-                <div class="btnSkill btnVocabulary" id="31667BAB-89FF-43B3-806F-174774C8DFBF"></div>
-                <div class="btnSkill btnGrammar" id="5BBD801D-610F-40EB-89CB-5957D05C4A0B"></div>
-                <div class="btnSkill btnSituation" id="F6E25F3E-192B-4081-B141-74720066FB74"></div>
+                <div class="btnSkill btnReading ui-hide" id="FB4B4A71-B777-4164-BA4D-5C1EA9522226"></div>
+                <div class="btnSkill btnListening ui-hide" id="44502C7F-D3BE-4D46-9134-3FE40DA230E9"></div>
+                <div class="btnSkill btnVocabulary ui-hide" id="31667BAB-89FF-43B3-806F-174774C8DFBF"></div>
+                <div class="btnSkill btnGrammar ui-hide" id="5BBD801D-610F-40EB-89CB-5957D05C4A0B"></div>
+                <div class="btnSkill btnSituation ui-hide" id="F6E25F3E-192B-4081-B141-74720066FB74"></div>
             </div>
         </div>
 
