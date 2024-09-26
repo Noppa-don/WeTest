@@ -307,7 +307,7 @@ function GetSkill() {
                 if (data[i].skillSet == 'error') {
                     //console.log(data[i].skillTxtAll);
                 } else {
-                    $('#btn' + data[i].skillSet).removeClass('ui-hide');
+                    $('.btn' + data[i].skillSet).removeClass('ui-hide');
                 }
             }
         }
