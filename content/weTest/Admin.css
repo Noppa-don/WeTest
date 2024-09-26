@@ -44,6 +44,14 @@
 .slipPhoto {width: 350px; height: 390px;background-size: cover;float: inline-start;margin-left: 80px;}
 .btnReject {background: url(/images/Wetest/reject.png);background-repeat: no-repeat;background-size: contain;background-position: center;}
 .btnConfirmSlip,.btnUploadNewSlip {background: url(/images/Wetest/confirm.png);background-repeat: no-repeat;background-size: contain;background-position: center;}
-.btnCancelConfirmSlip {background: url(/images/Wetest/cancel.png);background-repeat: no-repeat;background-size: contain;background-position: center;float: inline-end;}
+.btnCancelConfirmSlip {background: url(/images/Wetest/cancel.png);background-repeat: no-repeat;background-size: contain;
+                       background-position: center;float: inline-end;position: fixed; top: 150px; right: 0; padding-right: 30em;}
 .btnPhoto,.btnSlipPhoto {background: url(/images/Wetest/Photo.png); margin:auto;}
 .btnSlipPhoto {margin-left: 5px;}
+
+/*ปรับ btnCancelConfirmSlip*/
+.btnCancelConfirmSlip { position: fixed; top: 150px; 
+    right: 0;
+    padding-right: 30em;
+}
+.slipPhoto {margin-left:400px;}
