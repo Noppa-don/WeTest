@@ -362,7 +362,7 @@ $(document)
  .on('click', '.LeapchoiceItem', function (e, data) {
      var QuestionNo = $(this).attr('qno');
      GetQuestionAndAnswer('select', QuestionNo);
-     console.log(QuestionNo);
+
      if (QuestionNo == 1) {
          $('.btnNext').removeClass("UnActive");
          $('.btnBack').addClass("UnActive");
@@ -439,7 +439,6 @@ function GetQuestionAndAnswer(ActionType, QuestionNo) {
         url: '/weTest/GetQuestionAndAnswer',
         data: post1,
         success: function (data) {
-
             for (var i = 0; i < data.length; i++) {
 
                 if (data[i].ItemStatus == 'sessionExpired') {
@@ -479,6 +478,7 @@ function GetQuestionAndAnswer(ActionType, QuestionNo) {
 
                     $('#divAnswer').html(data[i].Itemtxt);
                     if (data[i].multiAnsname != null) {
+                   
                         $('.AName' + data[i].ItemId).append("<div class='multiAfileIcon' id='MA" + data[i].ItemId + "' MID='" + data[i].ItemId + "' PlayCount='1'></div><div id='multiAnswer" + data[i].ItemId + "' class='ui-hide'></div>");
                         setbuttonAudioPlayer('multiAnswer' + data[i].ItemId, data[i].multiAnspath);
                     }
@@ -555,6 +555,7 @@ function GetLeapChoicePanel(ChoiceMode) {
 }
 //20240726 -- เพิ่มการตั้งค่าไม่ให้เล่นไฟล์ซ้ำ
 function setbuttonAudioPlayer(divname, FilePath) {
+
     $('#' + divname).buttonAudioPlayer({
         type: 'default',
         loop: false,
@@ -649,7 +650,7 @@ function GetQuizConfigVal() {
                 if (data[i].Result == 'success') {
                     MultiFileAmount = data[i].MultiAmount;
                     MultiFileSlowAmount = data[i].MultiSlowAmount;
-                    console.log(data[i].IsTest);
+                
                     if (data[i].IsTest == 0) {
                         $('#divShowExplain').addClass('ui-hide');
                     }
