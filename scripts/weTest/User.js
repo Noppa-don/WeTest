@@ -178,14 +178,12 @@ $(document)
     })
 //20240716 -- Set Reading Goal
     .on('click', '#ReadingTime', function (e, data) {
-        return 0;
         GoalType = 'Reading';
         SkillId = 'FB4B4A71-B777-4164-BA4D-5C1EA9522226';
         SkillGoaldate();
     })
 //20240716 -- Set Listening Goal
     .on('click', '#ListeningTime', function (e, data) {
-        return 0;
         GoalType = 'Listening';
         SkillId = '44502C7F-D3BE-4D46-9134-3FE40DA230E9';
         SkillGoaldate();
@@ -204,7 +202,6 @@ $(document)
     })
 //20240716 -- Set Situation Goal
     .on('click', '#SituationTime', function (e, data) {
-        return 0;
         GoalType = 'Situation';
         SkillId = 'F6E25F3E-192B-4081-B141-74720066FB74';
         SkillGoaldate();
