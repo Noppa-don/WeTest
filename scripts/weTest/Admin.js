@@ -233,9 +233,3 @@ function SaveConfirmSlip(RHId, RegisterStatus, RejectReason) {
         }
     });
 }
-
-
-
-
-
-
