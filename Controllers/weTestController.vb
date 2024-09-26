@@ -676,8 +676,8 @@ Namespace Controllers
                     DiscountId = Request.Form("DiscountCode").ToString()
                 End If
 
-                cmdMsSql = cmdSQL(cn, "update tblStudent set ExpiredDate =  (select getdate() + packagetime/24 
-                                        from tblpackage where PackageId = @PackageId) where StudentId = @stdId;
+                cmdMsSql = cmdSQL(cn, "update tblStudent set ExpiredDate =  case when ExpiredDate < getdate() then getdate() + packagetime/24 else ExpiredDate  + packagetime/24 end
+                                       from tblpackage where PackageId = @PackageId and StudentId = @stdId;
                                        insert into tblregister select newid(),@stdId,@PackageId ,null,1 ,1,@DiscountId,'500',null,1,getdate(),@Verifycode;")
 
                 With cmdMsSql
@@ -2376,27 +2376,12 @@ Namespace Controllers
                         cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set isActive = 0 ,LastUpdate = getdate() where StudentId = @StdId and GoalType = 1;
                                        Insert into tblstudentGoal(StudentId,GoalType,StartDate,EndDate)values(@StdId,1,getdate(),@GoalDate);
                                        select datediff(day,getdate(),@GoalDate);")
-                    'Case "reading"
-                    '    cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set isActive = 0 ,LastUpdate = getdate() where StudentId = @StdId
-                    '                            and skillIKd = ;
-                    '                   Insert into tblstudentGoal(StudentId,GoalType,StartDate,EndDate)values(@StdId,1,getdate(),@GoalDate);
-                    '                   select datediff(day,getdate(),@GoalDate);")
-                    'Case "listening"
-                    '    cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set ListeningGoal = @GoalDate ,LastUpdate = getdate() where StudentId = @StdId and isActive = 1;
-                    '                        select datediff(day,getdate(),@GoalDate);")
-                    Case "vocabulary"
+
+                    Case Else
                         cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set isActive = 0 ,LastUpdate = getdate() where StudentId = @StdId and GoalType = 2 and skillId = @SkillId;
                                                 Insert into tblstudentGoal(StudentId,GoalType,StartDate,EndDate,skillId)
                                                 values(@StdId,2,getdate(),@GoalDate,@SkillId);
                                                 select datediff(day,getdate(),@GoalDate);")
-                    Case "grammar"
-                        cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set isActive = 0 ,LastUpdate = getdate() where StudentId = @StdId and GoalType = 2 and skillId = @SkillId;
-                                                Insert into tblstudentGoal(StudentId,GoalType,StartDate,EndDate,skillId)
-                                                values(@StdId,2,getdate(),@GoalDate,@SkillId);
-                                                select datediff(day,getdate(),@GoalDate);")
-                        'Case "situation"
-                        '    cmdMsSql = cmdSQL(cn, "Update tblstudentGoal set SituationGoal = @GoalDate ,LastUpdate = getdate() where StudentId = @StdId and isActive = 1;
-                        '                        select datediff(day,getdate(),@GoalDate);")
                 End Select
 
                 With cmdMsSql
@@ -2733,6 +2718,11 @@ Namespace Controllers
                             Case "2"
                                 'Wait For Edit เพิ่ม Skill ที่ยังไม่มี
                                 Select Case dtSkill(i)("SkillId").ToString.ToLower
+                                    Case "FB4B4A71-B777-4164-BA4D-5C1EA9522226".ToLower
+                                        objList.ReadingGoal = dtSkill(i)("GoalDate").ToString
+                                        objList.ReadingGoalAmount = dtSkill(i)("GoalAmount").ToString
+                                        objList.ReadingDatePercent = dtSkill.Rows(i)("DatePercent").ToString & "%"
+                                        objList.ReadingScorePercent = GetskillScorePercent("FB4B4A71-B777-4164-BA4D-5C1EA9522226", cn)
                                     Case "31667BAB-89FF-43B3-806F-174774C8DFBF".ToLower
                                         objList.VocabGoal = dtSkill(i)("GoalDate").ToString
                                         objList.VocabGoalAmount = dtSkill(i)("GoalAmount").ToString
@@ -2743,6 +2733,16 @@ Namespace Controllers
                                         objList.GrammarGoalAmount = dtSkill(i)("GoalAmount").ToString
                                         objList.GrammarDatePercent = dtSkill.Rows(i)("DatePercent").ToString & "%"
                                         objList.GrammarScorePercent = GetskillScorePercent("5BBD801D-610F-40EB-89CB-5957D05C4A0B", cn)
+                                    Case "44502C7F-D3BE-4D46-9134-3FE40DA230E9".ToLower
+                                        objList.ListeningGoal = dtSkill(i)("GoalDate").ToString
+                                        objList.ListeningGoalAmount = dtSkill(i)("GoalAmount").ToString
+                                        objList.ListeningDatePercent = dtSkill.Rows(i)("DatePercent").ToString & "%"
+                                        objList.ListeningScorePercent = GetskillScorePercent("44502C7F-D3BE-4D46-9134-3FE40DA230E9", cn)
+                                    Case "F6E25F3E-192B-4081-B141-74720066FB74".ToLower
+                                        objList.SituationGoal = dtSkill(i)("GoalDate").ToString
+                                        objList.SituationGoalAmount = dtSkill(i)("GoalAmount").ToString
+                                        objList.SituationDatePercent = dtSkill.Rows(i)("DatePercent").ToString & "%"
+                                        objList.SituationScorePercent = GetskillScorePercent("F6E25F3E-192B-4081-B141-74720066FB74", cn)
                                 End Select
                         End Select
                     Next
@@ -2761,20 +2761,27 @@ Namespace Controllers
                         objList.GrammarScorePercent = "0%"
                     End If
 
-                    objList.ReadingGoal = ""
-                    objList.ReadingGoalAmount = ""
-                    objList.ReadingDatePercent = "0%"
-                    objList.ReadingScorePercent = "0%"
+                    If objList.ReadingGoal Is Nothing Then
+                        objList.ReadingGoal = ""
+                        objList.ReadingGoalAmount = ""
+                        objList.ReadingDatePercent = "0%"
+                        objList.ReadingScorePercent = "0%"
+                    End If
 
-                    objList.SituationGoal = ""
-                    objList.SituationGoalAmount = ""
-                    objList.SituationDatePercent = "0%"
-                    objList.SituationScorePercent = "0%"
+                    If objList.SituationGoal Is Nothing Then
+                        objList.SituationGoal = ""
+                        objList.SituationGoalAmount = ""
+                        objList.SituationDatePercent = "0%"
+                        objList.SituationScorePercent = "0%"
+                    End If
 
-                    objList.ListeningGoal = ""
-                    objList.ListeningGoalAmount = ""
-                    objList.ListeningDatePercent = "0%"
-                    objList.ListeningScorePercent = "0%"
+                    If objList.ListeningGoal Is Nothing Then
+                        objList.ListeningGoal = ""
+                        objList.ListeningGoalAmount = ""
+                        objList.ListeningDatePercent = "0%"
+                        objList.ListeningScorePercent = "0%"
+                    End If
+
                 Else
 
                     objList.TotalGoal = ""
