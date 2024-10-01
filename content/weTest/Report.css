@@ -33,7 +33,7 @@ h1 {border-bottom-style:solid;border-bottom-width: 1px;}
 
 .reportData {margin-top: 10px; border-style: solid; border-width: 2px; border-radius: 8px; min-height: 400px;text-align:center;}
 .nodata {text-align: center;  margin-top: 50px; color: #b9b9b9; text-shadow: none;}
-.reportDetail{overflow-y: scroll;}
+.reportDetail{overflow-y: scroll;height:400px;}
 .reportItem{margin: 10px; padding: 15px; border-radius: 6px;}
 
 .vocabItem{background-color: #6ac28b;}
@@ -45,7 +45,7 @@ h1 {border-bottom-style:solid;border-bottom-width: 1px;}
 .random{background-color: #f3ddcf;}
 .headerItem{margin: 5px 10px 5px 10px;  padding: 15px;}
 .divDate{width:10%}
-.divStartTime, .divEndTime{width:10%}
+.divStartTime, .divEndTime{width:20%}
 .divTestsetName,.divEI{width:30%}
 .divScore{width:6%}
 .divRightSpace{width:70px;}
@@ -56,10 +56,7 @@ h1 {border-bottom-style:solid;border-bottom-width: 1px;}
 .Logogrammar{background: url(/images/Wetest/gramma.png);float: left;background-repeat: no-repeat;background-size: contain;background-position: left;width: 30px;height:30px;margin-left: 5px;cursor:pointer;}
 #ChooseLevel{margin-top: 25px;}
 #SelectLevel {margin-left: 45px;}
-select {border-style: solid;
-    border-radius: 1em;
-    line-height: 30px;
-    padding: 10px;
+select {border-style: solid; border-radius: 1em; line-height: 30px; padding: 10px;
     height:  56px;
     color: #0a3820;
     border-color: #0a3820;
