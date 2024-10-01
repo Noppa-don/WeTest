@@ -33,7 +33,9 @@ $(document)
     .on('click', '.registerlink', function (e, data) {
         window.location = '/Wetest/Registration';
     })
+ //20240927 -- เมื่อไม่ทำ Quiz ต่อให้ Update EndTime เป็นเวลาที่ปิด Dialog นี้ด้วย
     .on('click', '#dialogBackToQuiz .btnNo', function (e, data) {
+        UpdateEndQuiz();
         popupClose($(this).closest('.my-popup'));
     })
     .on('click', '#dialogBackToQuiz .btnContinue', function (e, data) {
@@ -599,6 +601,16 @@ function GetSkill() {
         }
     });
 }
-
+//20240927 -- Update End Quiz
+function UpdateEndQuiz() {
+    $.ajax({
+        type: 'POST',
+        url: '/weTest/EndQuiz',
+        success: function (data) {
+            for (var i = 0; i < data.length; i++) {
+            }
+        }
+    });
+}
 
 
