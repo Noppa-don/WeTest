@@ -476,16 +476,18 @@ function GetQuestionAndAnswer(ActionType, QuestionNo) {
                     if (data[i].ItemStatus == 'beforelast') { $('.btnNext,.btnNext').removeClass("UnActive"); }
                 } else {
 
-                    $('#divAnswer').html(data[i].Itemtxt);
+                    if (i == 1) {
+                        $('#divAnswer').html(data[data.length - 1].Itemtxt);
+                    }
+
                     if (data[i].multiAnsname != null) {
-                   
                         $('.AName' + data[i].ItemId).append("<div class='multiAfileIcon' id='MA" + data[i].ItemId + "' MID='" + data[i].ItemId + "' PlayCount='1'></div><div id='multiAnswer" + data[i].ItemId + "' class='ui-hide'></div>");
                         setbuttonAudioPlayer('multiAnswer' + data[i].ItemId, data[i].multiAnspath);
                     }
 
                     if (data[i].multiAnsSlowname != null) {
                         $('.AName' + data[i].ItemId).append("<div class='multiAfileSlowIcon ui-hide' id='MAS" + data[i].ItemId + "' MID='" + data[i].ItemId + "' PlayCount='1'></div><div id='multiAnswerSlow" + data[i].ItemId + "' class='ui-hide'></div>");
-                        setbuttonAudioPlayer('multiAnsSlowQuestion', data[i].multiAnsSlowpath);
+                        setbuttonAudioPlayer('multiAnswerSlow', data[i].multiAnsSlowpath);
                     }
                     if (data[i].multiAnstxt != null) {
                         $('.AName' + data[i].ItemId).append("<div class='multiAtxtIcon ui-hide' id='MATIcon" + data[i].ItemId + "'><div id='MAT" + data[i].ItemId + "'  class='ui-hide'>" + data[i].multiAnstxt + "</div>");
@@ -650,7 +652,7 @@ function GetQuizConfigVal() {
                 if (data[i].Result == 'success') {
                     MultiFileAmount = data[i].MultiAmount;
                     MultiFileSlowAmount = data[i].MultiSlowAmount;
-                
+
                     if (data[i].IsTest == 0) {
                         $('#divShowExplain').addClass('ui-hide');
                     }
