@@ -11,6 +11,7 @@ $(document)
  .on('click', '#btnLesson', function (e, data) {
      $('#btnLesson').addClass('btnSelected');
      $('#btnRandom').removeClass('btnSelected');
+     $('#skillRandom').removeClass('ui-hide');
      IsLesson = '1'
      console.log(selectedStartDate);
      if (typeof selectedStartDate != 'undefined') {
@@ -28,7 +29,7 @@ $(document)
  })
  .on('click', '#btnRandom', function (e, data) {
      $('#btnLesson').removeClass('btnSelected');
-     $('#ChooseLevel').addClass('ui-hide');
+     $('#ChooseLevel,#skillRandom').addClass('ui-hide');
      $('#btnRandom').addClass('btnSelected');
      IsLesson = '0'
      if (typeof selectedStartDate != 'undefined') {
