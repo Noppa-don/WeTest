@@ -103,8 +103,8 @@
             <div class="nodata">- No data -</div>
             <div class="reportDetail ui-hide">
                 <div class="dataHeader flexDiv">
-                    <div class="headerItem divDate firstflexdiv">Date</div>
-                    <div class="headerItem divStartTime">Start</div>
+                    <div class="headerItem divDate firstflexdiv ui-hide">Date</div>
+                    <div class="headerItem divStartTime firstflexdiv ">Start</div>
                     <div class="headerItem divEndTime">End</div>
                     <div class="headerItem divTestsetName">Book Number</div>
                     <div class="headerItem divScore">Score</div>
