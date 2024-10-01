@@ -125,7 +125,9 @@ $(document)
          arrSkill.push('All');
      } else {
          $('.Selected').each(function (i, obj) {
-             arrSkill.push($(this).attr('id'));
+             if ($(this).attr('id') !== 'btnRandomAll') {
+                 arrSkill.push("'" + $(this).attr('id') + "'");
+             }
          });
      }
 
