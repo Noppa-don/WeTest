@@ -1871,21 +1871,21 @@ Namespace Controllers
                     objListAnswer.ItemType = "2"
                     objListAnswer.Itemtxt = AnsHtml
                     objListAnswer.ItemId = dtAnswer(i)("AnswerId").ToString
-                    cmdMsSql = cmdSQL(cn, "select MultimediaObjId,MfileName from tblMultimediaObject where ReferenceId = @AnswerId and ReferenceType = 1 and isactive = 1;")
+                    'cmdMsSql = cmdSQL(cn, "select MultimediaObjId,MfileName from tblMultimediaObject where ReferenceId = @AnswerId and ReferenceType = 1 and isactive = 1;")
 
-                    With cmdMsSql
-                        .Parameters.Add("@AnswerId", SqlDbType.VarChar).Value = dtAnswer(i)("AnswerId").ToString
-                    End With
+                    'With cmdMsSql
+                    '    .Parameters.Add("@AnswerId", SqlDbType.VarChar).Value = dtAnswer(i)("AnswerId").ToString
+                    'End With
 
-                    Dim dtAmulti As DataTable = getDataTable(cmdMsSql)
+                    'Dim dtAmulti As DataTable = getDataTable(cmdMsSql)
 
-                    If dtAmulti.Rows.Count <> 0 Then
+                    'If dtAmulti.Rows.Count <> 0 Then
 
-                        Dim FPath As String = "../file" & FullPath & "/" & dtAmulti(0)("MfileName").ToString
+                    '    Dim FPath As String = "../file" & FullPath & "/" & dtAmulti(0)("MfileName").ToString
 
-                        objListAnswer.multiname = dtAmulti(0)("MultimediaObjId").ToString
-                        objListAnswer.multipath = FPath
-                    End If
+                    '    objListAnswer.multiname = dtAmulti(0)("MultimediaObjId").ToString
+                    '    objListAnswer.multipath = FPath
+                    'End If
                     L1.Add(objListAnswer)
                     objListAnswer = Nothing
                 Next
@@ -3109,7 +3109,6 @@ Namespace Controllers
             End Try
             Return Json(L1, JsonRequestBehavior.AllowGet)
         End Function
-
         '20240923 -- Function Check Quiz ที่ทำค้างไว้ปิดไปหรือ Session หลุดไป
         <AcceptVerbs(HttpVerbs.Post)>
         Function CheckNotEndQuiz()
@@ -3302,7 +3301,6 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
                 ' ==================================================
-                'Insert tblTestset tblTestsetQuestionSet tblTestsetQuestionDetail แล้ว return Testset Id ไปส่งให้ทำข้อสอบ practice
 
                 cmdMsSql1 = cmdSQL(cn, "Insert Into tbltestset Select @testsetid,'RandomExam',sl.LevelId,0,1,0,0,0,@stdId,1,getdate() 
                                         from tblstudent s inner join tblStudentLevel sl on s.studentId = sl.StudentId where s.studentId = @stdId 
@@ -3313,46 +3311,25 @@ Namespace Controllers
                     .ExecuteNonQuery()
                 End With
 
-                cmdMsSql2 = cmdSQL(cn, "insert into tblTestSetQuestionSet select @tsqsId,@TestsetId,1,newid(),null,1,getdate();")
+                cmdMsSql2 = cmdSQL(cn, "Insert Into tblTestSetQuestionSet select @tsqsId,@TestsetId,1,newid(),null,1,getdate();")
                 With cmdMsSql2
                     .Parameters.Add("@TestsetId", SqlDbType.VarChar).Value = TestsetId
                     .Parameters.Add("@tsqsId", SqlDbType.VarChar).Value = tsqsId
                     .ExecuteNonQuery()
                 End With
 
+                Dim dtSkill As DataTable
+
                 If Request.Form("arrSkill") = "All" Then
-                    cmdMsSql2 = cmdSQL(cn, "insert into tblTestSetQuestionDetail 
-                                            Select newid(),@tsqsId,row_number() over (order by questionId),QuestionId,1,getdate() from (
-                                            select top (@ExamAmount) q.questionId from tblquestion q 
-                                            inner join tblQuestionset qs on q.qsetid = qs.QSetId 
-                                            inner join tblQuestionCategory qc on qs.QCategoryId  = qc.QCategoryId
-                                            inner join tblbook b on qc.BookGroupId = b.BookGroupId
-                                            inner join tblstudentLevel sl on b.LevelId = sl.LevelId 
-                                            inner join tblQuestionEvaluationIndexItem qei on q.QuestionId = qei.Question_Id
-                                            inner join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id
-                                            inner join tblSkill sk on sk.EI_Id = ei.Parent_Id where b.BookSyllabus = '51'
-                                            and q.isactive = 1 and qs.isactive = 1 and qc.isactive = 1 and b.IsActive = 1 and qei.IsActive = 1 and sk.IsActive = 1 and ei.IsActive = 1 
-                                            and sl.IsActive = 1 and q.QuestionId not in (
-                                            select questionId from tblquizquestion qq inner join tblQuizSession qs 
-                                            on qq.QuizId = qs.quizid where qs.studentId = @stdId) order by newid())a;")
-                    With cmdMsSql2
-                        .Parameters.Add("@ExamAmount", SqlDbType.TinyInt).Value = CInt(Request.Form("ExamAmount"))
-                        .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
-                        .Parameters.Add("@tsqsId", SqlDbType.VarChar).Value = tsqsId
-                        .ExecuteNonQuery()
-                    End With
+                    cmdMsSql2 = cmdSQL(cn, "select ei_id from tblSkill where isActive = 1;")
                 Else
-
-                    Dim skilltxt() As String = Request.Form("arrSkill").Split(",")
-                    Dim skt As String = ""
-                    For Each i In skilltxt
-                        skt &= ",'" & i & "'"
-                    Next
-
-                    skt = skt.Substring(1, skt.Length - 1)
-
-                    InsertRandomQuestion(Session("StudentId"), skt, Request.Form("ExamAmount"), tsqsId)
+                    Dim sql As String = "select ei_id from tblSkill where isActive = 1 and ei_Id in(" & Request.Form("arrSkill").ToString & ");"
+                    cmdMsSql2 = cmdSQL(cn, sql)
                 End If
+
+                dtSkill = getDataTable(cmdMsSql2)
+
+                InsertRandomQuestion(dtSkill, Request.Form("ExamAmount"), tsqsId)
 
                 Dim objList As New clsMain()
                 objList.dataType = "success"
@@ -3455,51 +3432,72 @@ Namespace Controllers
         End Function
 
         '20240909 -- สุ่มข้อสอบ และบันทึก
-        Function InsertRandomQuestion(StudentId As String, skt As String, QuestionAmount As String, tsqsId As String) As DataTable
+        '20240926 -- ปรับวิธีการคำนวนการดึงข้อสอบ
+        '20240930 -- ปรับวิธีการดึงข้อสอบแต่ลละสกิล โดยการคำนวนหาจำนวนข้อเป็น %
+        Function InsertRandomQuestion(dtSkill As DataTable, QuestionAmount As String, tsqsId As String) As DataTable
             Dim cn As SqlConnection, cmdMsSql1 As SqlCommand, cmdMsSql2 As SqlCommand, cmdMsSql3 As SqlCommand
             Dim sqlBuilder As StringBuilder = New StringBuilder()
             Dim sqlBuilder2 As StringBuilder = New StringBuilder()
             Dim sqlBuilder3 As StringBuilder = New StringBuilder()
-            Dim dtRandomQuestion As DataTable
 
+            '% Skill เช่น 1 skill = 100/จำนวน Skill
+            Dim PercentSkill As Integer = Math.Ceiling(100 / dtSkill.Rows.Count())
+            'จำนวนข้อที่ต้องทำแต่ละรอบ (ยกเว้นรอบสุดท้าย)
+            Dim PercentQuestion As Integer = Math.Ceiling((QuestionAmount * PercentSkill) / 100)
+            'จำนวนข้อสอบที่ทำแล้ว 
+            Dim QAm As Integer = 0
+            For i = 0 To dtSkill.Rows.Count - 2
+                InsertTempQuestionFromSkill(dtSkill.Rows(i)("ei_id").ToString, PercentQuestion, tsqsId)
+                QAm += PercentQuestion
+            Next
+
+            PercentQuestion = QuestionAmount - QAm
+            InsertTempQuestionFromSkill(dtSkill.Rows(dtSkill.Rows.Count - 1)("ei_id").ToString, PercentQuestion, tsqsId)
+
+        End Function
+
+        Function InsertTempQuestionFromSkill(skt As String, QuestionAmount As String, tsqsId As String)
+            Dim L1 As New List(Of clsMain)
+            Dim cn As SqlConnection, cmdMsSql1 As SqlCommand, cmdMsSql2 As SqlCommand, cmdMsSql3 As SqlCommand
+            Dim StdId As String = Session("StudentId")
             Try
                 ' ================ Check Permission ================
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
 
                 'Get NewQuestion
-                Dim dtNewQuestion As DataTable = GetNewRandomQuestion(skt, StudentId, QuestionAmount)
+                Dim dtNewQuestion As DataTable = GetNewRandomQuestion(skt, QuestionAmount, tsqsId)
                 Dim NewQuestionAmount As Integer = dtNewQuestion.Rows.Count()
 
-                If NewQuestionAmount <> 0 Then
-                    InsertQuestionTestset(dtNewQuestion, tsqsId)
+                If NewQuestionAmount < QuestionAmount Then
+                    If NewQuestionAmount <> 0 Then
+                        InsertQuestionTestset(dtNewQuestion, tsqsId)
+                    End If
+                    'Get WrongQuestion
+                    Dim dtWrongQuestion = GetWrongRandomQuestion(skt, StdId, QuestionAmount - NewQuestionAmount, tsqsId)
+                    Dim WrongQuestionAmount As Integer = dtWrongQuestion.Rows.Count()
 
-                    If NewQuestionAmount < QuestionAmount Then
-                        'Get WrongQuestion
-                        Dim dtWrongQuestion = GetWrongRandomQuestion(skt, StudentId, QuestionAmount - NewQuestionAmount, tsqsId)
-                        Dim WrongQuestionAmount As Integer = dtWrongQuestion.Rows.Count()
-
-                        If WrongQuestionAmount <> 0 Then
-                            InsertQuestionTestset(dtWrongQuestion, tsqsId)
-
-                            If WrongQuestionAmount + NewQuestionAmount < QuestionAmount Then
-                                'GetAllQuestion
-                                Dim dtAllQuestion = GetRigthRandomQuestion(skt, StudentId, QuestionAmount - (NewQuestionAmount + WrongQuestionAmount), tsqsId)
-                                InsertQuestionTestset(dtAllQuestion, tsqsId)
-                            End If
-                        End If
+                    If WrongQuestionAmount <> 0 Then
+                        InsertQuestionTestset(dtWrongQuestion, tsqsId)
                     End If
 
+                    If NewQuestionAmount + WrongQuestionAmount < QuestionAmount Then
+                        'GetAllQuestion
+                        Dim dtAllQuestion = GetRigthRandomQuestion(skt, StdId, QuestionAmount - (NewQuestionAmount + WrongQuestionAmount), tsqsId)
+                        InsertQuestionTestset(dtAllQuestion, tsqsId)
+                    End If
+                Else
+                    InsertQuestionTestset(dtNewQuestion, tsqsId)
                 End If
 
             Catch ex As Exception
 
             End Try
-
         End Function
         '20240909 -- ดึงข้อสอบที่ยังไม่เคยทำ
         '20240923 -- ปรับ Query แก้ปัญหาข้อสอบซ้ำ
-        Function GetNewRandomQuestion(skt As String, StudentId As String, questionAmount As String) As DataTable
+        '20240930 -- ปรับ Query ตรววจสอบปัญหาข้อสอบ 1 ข้อมีหลาย skill
+        Function GetNewRandomQuestion(skt As String, questionAmount As String, tsqsId As String) As DataTable
             Dim cn As SqlConnection, cmdMsSql As SqlCommand
             Dim sqlBuilder As StringBuilder = New StringBuilder()
             Dim dt As DataTable
@@ -3508,27 +3506,21 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
 
-                sqlBuilder.Append("select top (")
-                sqlBuilder.Append(questionAmount)
-                sqlBuilder.Append(") a.QuestionId from(select distinct QuestionId 
-                                from tblQuestionEvaluationIndexItem qei
-                                inner join tblQuestion q on qei.Question_Id = q.QuestionId
-                                inner join tblQuestionset qs on qs.QSetId = q.QSetId
-                                inner join tblQuestionCategory qc on qs.QCategoryId = qc.QCategoryId
-                                inner join tblbook b on b.bookgroupId = qc.bookGroupId
-                                inner join tblstudentLevel sl on sl.LevelId = b.LevelId and sl.IsActive = 1
-                                inner join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id 
-                                where ei.Parent_Id in(")
-
-                sqlBuilder.Append(skt)
-
-                sqlBuilder.Append(") and sl.studentId = '")
-                sqlBuilder.Append(StudentId)
-                sqlBuilder.Append("' and q.IsActive = 1 and qs.IsActive = 1 and qc.IsActive = 1 and b.IsActive = 1 
-                                and qei.IsActive = 1)a order by newid();")
-
-                cmdMsSql = cmdSQL(cn, sqlBuilder.ToString())
-
+                cmdMsSql = cmdSQL(cn, "select top (@questionAmount) a.Question_Id,EI_Id from(
+                                        select distinct question_id,qei.ei_Id,ROW_NUMBER()OVER(Partition By question_Id Order By newid())As eiIndex
+                                        from tblQuestionEvaluationIndexItem qei inner join tblEvaluationIndex ein on qei.EI_Id = ein.EI_Id 
+                                        and ein.parent_id = @skt where qei.isactive = 1 and Question_Id not in(
+                                        select QuestionId from tblTestSetQuestionDetail where tsqsId = @tsqsId) 
+                                        and question_Id not in (select QuestionId from tblquizquestion qq 
+                                        inner join tblQuizSession qss on qq.quizId = qss.QuizId 
+                                        where qss.StudentId = @stdId))a where eiindex = 1 order by newid();")
+                With cmdMsSql
+                    .Parameters.Add("@questionAmount", SqlDbType.Int).Value = questionAmount
+                    .Parameters.Add("@skt", SqlDbType.VarChar).Value = skt
+                    .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
+                    .Parameters.Add("@tsqsId", SqlDbType.VarChar).Value = tsqsId
+                    .ExecuteNonQuery()
+                End With
                 dt = getDataTable(cmdMsSql)
                 Return dt
             Catch ex As Exception
@@ -3537,6 +3529,7 @@ Namespace Controllers
 
         End Function
         '20240909 -- ดึงข้อสอบที่เคยทำผิด
+        '20240930 -- ปรับ Query ตรววจสอบปัญหาข้อสอบ 1 ข้อมีหลาย skill
         Function GetWrongRandomQuestion(skt As String, StudentId As String, questionAmount As String, tsqsId As String) As DataTable
             Dim cn As SqlConnection, cmdMsSql As SqlCommand
             Dim sqlBuilder As StringBuilder = New StringBuilder()
@@ -3546,33 +3539,21 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
 
-                sqlBuilder.Append("select top (")
-                sqlBuilder.Append(questionAmount)
-                sqlBuilder.Append(") QuestionId
-                                from tblQuestionEvaluationIndexItem qei
-                                inner join tblQuestion q on qei.Question_Id = q.QuestionId
-                                inner join tblQuestionset qs on qs.QSetId = q.QSetId
-                                inner join tblQuestionCategory qc on qs.QCategoryId = qc.QCategoryId
-                                inner join tblbook b on b.bookgroupId = qc.bookGroupId
-                                inner join tblstudentLevel sl on sl.LevelId = b.LevelId and sl.IsActive = 1
-                                inner join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id 
-                                where ei.Parent_Id in(")
-
-                sqlBuilder.Append(skt)
-
-                sqlBuilder.Append(") and sl.studentId = '")
-                sqlBuilder.Append(StudentId)
-                sqlBuilder.Append("' and q.IsActive = 1 and qs.IsActive = 1 and qc.IsActive = 1 and b.IsActive = 1 
-                                and qei.IsActive = 1 and q.QuestionId in (select questionId  from tblQuizScore qso 
-                                inner join tblQuizSession qs on qso.QuizId = qs.QuizId where qs.StudentId = '")
-                sqlBuilder.Append(StudentId)
-                sqlBuilder.Append("' and qso.Score <= 0) and q.QuestionId not in(select QuestionId 
-                                     from tbltestsetQuestionDetail where tsqsId = '")
-                sqlBuilder.Append(tsqsId)
-                sqlBuilder.Append("') order by newid();")
-
-                cmdMsSql = cmdSQL(cn, sqlBuilder.ToString())
-
+                cmdMsSql = cmdSQL(cn, "select top (@questionAmount) a.Question_Id,EI_Id from(
+                                        select distinct question_id,qei.ei_Id,ROW_NUMBER()OVER(Partition By question_Id Order By newid())As eiIndex
+                                        from tblQuestionEvaluationIndexItem qei inner join tblEvaluationIndex ein on qei.EI_Id = ein.EI_Id 
+                                        and ein.parent_id = @skt where qei.isactive = 1 and Question_Id not in(
+                                        select QuestionId from tblTestSetQuestionDetail where tsqsId = @tsqsId) 
+                                        and question_Id not in (select QuestionId from tblQuizScore qq inner join tblQuizSession qss 
+                                        on qq.quizId = qss.QuizId where qss.StudentId = @stdId and qq.Score = 0 
+                                        and qq.ResponseAmount <> 0))a where eiindex = 1 order by newid();")
+                With cmdMsSql
+                    .Parameters.Add("@questionAmount", SqlDbType.Int).Value = questionAmount
+                    .Parameters.Add("@skt", SqlDbType.VarChar).Value = skt
+                    .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
+                    .Parameters.Add("@tsqsId", SqlDbType.VarChar).Value = tsqsId
+                    .ExecuteNonQuery()
+                End With
                 dt = getDataTable(cmdMsSql)
                 Return dt
             Catch ex As Exception
@@ -3580,6 +3561,7 @@ Namespace Controllers
             End Try
         End Function
         '20240909 -- ดึงข้อสอบที่เคยทำถูก
+        '20240930 -- ปรับ Query ตรววจสอบปัญหาข้อสอบ 1 ข้อมีหลาย skill
         Function GetRigthRandomQuestion(skt As String, StudentId As String, questionAmount As String, tsqsId As String) As DataTable
             Dim cn As SqlConnection, cmdMsSql As SqlCommand
             Dim sqlBuilder As StringBuilder = New StringBuilder()
@@ -3589,33 +3571,20 @@ Namespace Controllers
                 cn = New SqlConnection(sqlCon("Wetest"))
                 If cn.State = 0 Then cn.Open()
 
-                sqlBuilder.Append("select top (")
-                sqlBuilder.Append(questionAmount)
-                sqlBuilder.Append(") QuestionId
-                                from tblQuestionEvaluationIndexItem qei
-                                inner join tblQuestion q on qei.Question_Id = q.QuestionId
-                                inner join tblQuestionset qs on qs.QSetId = q.QSetId
-                                inner join tblQuestionCategory qc on qs.QCategoryId = qc.QCategoryId
-                                inner join tblbook b on b.bookgroupId = qc.bookGroupId
-                                inner join tblstudentLevel sl on sl.LevelId = b.LevelId and sl.IsActive = 1
-                                inner join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id 
-                                where ei.Parent_Id in(")
-
-                sqlBuilder.Append(skt)
-
-                sqlBuilder.Append(") and sl.studentId = '")
-                sqlBuilder.Append(StudentId)
-                sqlBuilder.Append("' and q.IsActive = 1 and qs.IsActive = 1 and qc.IsActive = 1 and b.IsActive = 1 
-                                and qei.IsActive = 1 and q.QuestionId in (select questionId  from tblQuizScore qso 
-                                inner join tblQuizSession qs on qso.QuizId = qs.QuizId where qs.StudentId = '")
-                sqlBuilder.Append(StudentId)
-                sqlBuilder.Append("' and qso.Score > 0) and q.QuestionId not in(select QuestionId 
-                                     from tbltestsetQuestionDetail where tsqsId = '")
-                sqlBuilder.Append(tsqsId)
-                sqlBuilder.Append("') order by newid();")
-
-                cmdMsSql = cmdSQL(cn, sqlBuilder.ToString())
-
+                cmdMsSql = cmdSQL(cn, "select top (@questionAmount) a.Question_Id,EI_Id from(
+                                        select distinct question_id,qei.ei_Id,ROW_NUMBER()OVER(Partition By question_Id Order By newid())As eiIndex
+                                        from tblQuestionEvaluationIndexItem qei inner join tblEvaluationIndex ein on qei.EI_Id = ein.EI_Id 
+                                        and ein.parent_id = @skt where qei.isactive = 1 and Question_Id not in(
+                                        select QuestionId from tblTestSetQuestionDetail where tsqsId = @tsqsId) 
+                                        and question_Id not in (select QuestionId from tblQuizScore qq inner join tblQuizSession qss 
+                                        on qq.quizId = qss.QuizId where qss.StudentId = @stdId and qq.Score <> 0))a where eiindex = 1 order by newid();")
+                With cmdMsSql
+                    .Parameters.Add("@questionAmount", SqlDbType.Int).Value = questionAmount
+                    .Parameters.Add("@skt", SqlDbType.VarChar).Value = skt
+                    .Parameters.Add("@stdId", SqlDbType.VarChar).Value = Session("StudentId").ToString
+                    .Parameters.Add("@tsqsId", SqlDbType.VarChar).Value = tsqsId
+                    .ExecuteNonQuery()
+                End With
                 dt = getDataTable(cmdMsSql)
                 Return dt
             Catch ex As Exception
@@ -3623,6 +3592,7 @@ Namespace Controllers
             End Try
         End Function
         '20240909 -- บันทึกข้อสอบ
+        '20240930 -- ปรับ Query บันทึกข้อสอบ
         Function InsertQuestionTestset(dtQuestion As DataTable, tsqsId As String)
             Dim cn As SqlConnection, cmdMsSql As SqlCommand
             Dim sqlBuilder As StringBuilder = New StringBuilder()
@@ -3632,11 +3602,10 @@ Namespace Controllers
                 If cn.State = 0 Then cn.Open()
                 For i = 0 To dtQuestion.Rows.Count - 1
 
-                    sqlBuilder.Append("insert into tblTestSetQuestionDetail Select distinct newid(),@tsqsId,
-                                        case when max(tsqdNo) + 1 is null then 1 else max(tsqdNo) + 1 end,'")
-                    sqlBuilder.Append(dtQuestion.Rows(i)("QuestionId").ToString)
-                    sqlBuilder.Append("',1,getdate() from tbltestsetQuestionDetail where tsqsId = '")
-                    sqlBuilder.Append(tsqsId)
+                    sqlBuilder.Append("insert into tblTestSetQuestionDetail Select distinct newid(),@tsqsId,1,'")
+                    sqlBuilder.Append(dtQuestion.Rows(i)("Question_Id").ToString)
+                    sqlBuilder.Append("',1,getdate(),'")
+                    sqlBuilder.Append(dtQuestion.Rows(i)("EI_Id").ToString)
                     sqlBuilder.Append("';")
                 Next
 
@@ -3851,13 +3820,15 @@ Namespace Controllers
                 skt = skt.Substring(1, skt.Length - 1)
 
                 Dim sqlBuilder As StringBuilder = New StringBuilder()
-                sqlBuilder.Append("select distinct FORMAT (q.StartTime, 'dd/MM/yyyy') as Quizdate,FORMAT (q.StartTime, 'hh:mm tt') as starttime,
-                                        case when FORMAT (q.endtime, 'hh:mm tt') is null then 'none' else FORMAT (q.endtime, 'hh:mm tt') end as endtime ,
-                                        case when cast(cast(q.TotalScore as int) as varchar) + '/' + cast(cast(q.FullScore as int) as varchar) is null 
-                                        then '0/' + cast(cast(q.FullScore as int) as varchar) else cast(cast(q.TotalScore as int) as varchar) + '/' + cast(cast(q.FullScore as int) as varchar) end as Score,
-                                        q.testsetId,q.quizId,q.StartTime as orderTime from tblTestset t inner join tbltestsetquestionset tqs on t.TestsetId = tqs.TestSetId 
-                                        inner join tblTestSetQuestionDetail tqd on tqs.tsqsid = tqd.TSQSId inner join tblQuestionEvaluationIndexItem qei on tqd.questionId = qei.question_Id 
-                                        inner join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id inner join tblEvaluationIndex eiParent on eiParent.EI_Id = ei.parent_id")
+                sqlBuilder.Append("select distinct FORMAT (q.StartTime, 'dd/MM/yyyy') as QuizStartdate
+                                   ,case when FORMAT(q.EndTime, 'dd/MM/yyyy') is null then 'none' else FORMAT(q.EndTime, 'dd/MM/yyyy') end as QuizEnddate
+                                   ,FORMAT(q.StartTime, 'hh:mm tt') as starttime,
+                                   case when FORMAT (q.endtime, 'hh:mm tt') is null then 'none' else FORMAT (q.endtime, 'hh:mm tt') end as endtime ,
+                                   case when cast(cast(q.TotalScore as int) as varchar) + '/' + cast(cast(q.FullScore as int) as varchar) is null 
+                                   then '0/' + cast(cast(q.FullScore as int) as varchar) else cast(cast(q.TotalScore as int) as varchar) + '/' + cast(cast(q.FullScore as int) as varchar) end as Score,
+                                   q.testsetId,q.quizId,q.StartTime as orderTime from tblTestset t inner join tbltestsetquestionset tqs on t.TestsetId = tqs.TestSetId 
+                                   inner join tblTestSetQuestionDetail tqd on tqs.tsqsid = tqd.TSQSId inner join tblQuestionEvaluationIndexItem qei on tqd.questionId = qei.question_Id 
+                                   inner join tblEvaluationIndex ei on qei.EI_Id = ei.EI_Id inner join tblEvaluationIndex eiParent on eiParent.EI_Id = ei.parent_id")
                 If skt <> "'All'" Then
                     sqlBuilder.Append(" And eiParent.ei_id in(")
                     sqlBuilder.Append(skt)
@@ -3899,9 +3870,9 @@ Namespace Controllers
                     For Each i In dt.Rows
 
 
-                        ReportData &= "<div class='flexDiv'><div class='divDate reportItem random firstflexdiv'>" & i("Quizdate") &
-                                        "</div><div class='divStartTime reportItem random'>" & i("starttime") &
-                                        "</div><div class='divEndTime reportItem random'>" & i("endtime") & "</div>"
+                        ReportData &= "<div class='flexDiv'><div class='divDate reportItem random firstflexdiv ui-hide'>" & i("QuizStartDate") &
+                                        "</div><div class='divStartTime reportItem random'>" & i("QuizStartDate") & " " & i("starttime") &
+                                        "</div><div class='divEndTime reportItem random'>" & i("QuizEndDate") & " " & i("endtime") & "</div>"
 
                         If Request.Form("PracticeType").ToString = "0" Then
 
